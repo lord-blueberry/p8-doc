@@ -1,16 +1,21 @@
 \section{Challenges for imaging MeerKAT data} \label{meerkat}
 
-terabytes of measurements.
+There are several challenger for imaging meerkat data.
 
-Large image size 32k squared
+terabytes of measurements. Large image size 32k squared are the obvious problems to solve. Distributing the problem is not part of this work.
 
-Wide field of view imaging
+ In this work, it is focused on Wide field of view issue. 
 
-Calibration
 
-Full polarization imaging
+Calibration gets not explicitly called, but 
 
-Wide band imaging
+Further issues that do not get handled here
+\begin{itemize}
+	\item (Beam Pattern, A Projection)
+	\item Full polarization
+	\item Wide band imaging
+\end{itemize}
+
 
 
 \subsection{Wide Field of View Imaging} \label{wof}
@@ -23,7 +28,7 @@ V(u, v) = \int\int x(l, m) e^{2 \pi i (ux+vy)} dl dm
 
 For wide Field of View imaging, two effects break the two dimensional Fourier Transform relationship: Non-coplanar Baselines and the celestial sphere which lead to the measurement equation \eqref{radio:eq:ftSphere}. Note that for small Field of View $1 - x^2 -y ^2 \ll 1$, and \eqref{radio:eq:ftSphere} reduces to the 2d measurement equation \eqref{radio:eq:2dft}.
 
-\begin{equation}\label{radio:eq:ftSphere}
+\begin{equation}\label{meerkat:ftsphere}
 	V(u, v, w) = \int\int \frac{X(x, y)}{\sqrt{1 - x^2 - y ^2}} e^{2 \pi i (ux+vy+ w\sqrt{1 - x^2 - y ^2})}dx dy
 \end{equation}
 

@@ -3,20 +3,44 @@
 There are some ways of potentially eliminating the major cycle. 
 
 
-\subsection{Optimized non-uniform FFT}
+\subsection{Non-uniform FFT as Optimization Problem}
+The major cycle minimizes two errors simultaneously: The error introduced by the non-uniform FFT and the error introduced by incomplete measurements. The idea is to separate the two errors, and solve for each separately. First, we minimize the objective \eqref{killmajor:nufft}, which searches for the optimal image $x$ given the non-uniformly sampled measurements and then remove the effects of incomplete measurements.
 
-\begin{equation}
-\underset{x}{minimize} \: y - Ax
+\begin{equation}\label{killmajor:nufft}
+\underset{x}{minimize} \: \left \| V - Ax \right \|_2^2
 \end{equation}
 
+Two possible upsides. A specialized optimization algorithm can be used for each sub-problem, hopefully converging faster than the major cycle. and because the image $x$ is magnitudes smaller than the measurements, it is easier to handle downstream, throwing away the measurements.
+
+However, the problem is that the imaging algorithm should also be able to calibrate. With this approach, there is a strict one way flow from measurements to image. For calibration, a backwards flow from image to measurements is necessary.
+
+For calibrated data, this approach may be potentially faster. but since MeerKAT will be difficult to calibrate correctly, this is unlikely.
+
+
 \subsection{Spherical Harmonics}
-fourier expands into spherical harmonics
+The signal naturally lives on the celestial sphere. The wide field of View measurement equation \eqref{meerkat:ftsphere} can be factorized into spherical harmonics. This means spherical harmonics are equivalent, calculating an image from the measurements with the three dimensional fourier transform is the same as using the spherical harmonics transform.
 
-Fast spherical harmonics transform exists, but is not faster out of the box
+There exist fast Spherical harmonics transforms, but replacing the nuFFT with W-Correction does not gain a speed advantage out of the box. It uses a non-uniform FFT as part of the algorithm.
 
-solving everything on the sphere, "spherical haar wavelets"
+Spherical harmonics were researched in the context of Compressed Sensing image reconstructions (cite wiaux). They improved the quality of the image reconstruction, but no speed advantage.
+
+The push on solving on the sphere directly. Using spherical haar wavelets, (cite) was able to speed up the simulation problem. Simulation tries to solve to problem of finding the measurements corresponding to a given image $x$. However, this has so far not been used for imaging.
+
 
 \subsection{UV-Smooth}
 
+
+
 \subsection{Coordinate Descent}
-$x = \Psi\alpha$
+Coordinate descent is an optimization algorithm, which can be interesting on LASSO synthesis objectives \eqref{killmajor:lasso}. The image $x = D\alpha$ and $F^{-1}$ stands for the three dimensional inverse Fourier transform. It is interesting because it does not need a major cycle, and can handle the $w$ term without any extra operation.
+
+
+\begin{equation}\label{killmajor:lasso}
+\underset{\alpha}{minimize} \: \left \| V - F^{-1}D \alpha \right \|_2^2 + \lambda \left \| \alpha \right \|_1 \\
+\end{equation}
+
+Coordinate descent minimizes the objective by descending one coordinate at a time. At a given point, all $\alpha$ are fixed except for one, which gets minimized. If the problem has the LASSO form, it forms a parabola which can be minimized analytically.
+
+The Matrix Product $F^{-1}*D$ has the dimensionality $M*S$, where $M$ is the number of measurements and $S$ is the number of components in the dictionary. Since compressed sensing gets used with over-complete dictionaries, $S$ is larger than the number of pixels $N$. For MeerKAT scale data, the matrix product is too big to calculate explicitly.  The good news is that only small number of $\alpha$ are non-zero, so if there is a heuristic to find candidate $\alpha$'s we only need to calculate a subset of $F^{-1}*D$. It turns out, with the Starlet Basis one such heuristic exists.
+
+

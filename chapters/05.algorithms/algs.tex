@@ -1,6 +1,11 @@
 \section{Coordinate Descent}
+The basic algorithm
+
+bunch of heuristics, 
 
 \subsection{The Starlet Regularization}
+multiple levels
+
 
 \subsection{Active set Heuristic with Starlets}
 
@@ -10,4 +15,27 @@
 
 \subsubsection{Gaussian and Point Sources}
 
-\subsection{Estimate on MeerKAT size data}
+\subsection{Scalability estimates with ideal heuristics}
+Bunch of heuristics. There are a lot of little ways to optimize this algorithm. The question is, is it worth going further and try to improve the algorithm further. So we want to estimate the lower bound of the algorithm.
+
+Convergence is hard to determine in general. Following simplified assumptions were made: We have a heuristic with oracle performance. It returns only the locations of $\alpha$ in constant time. Furthermore, we assume all axes are independent from each other, only one descent per non-zero axis is necessary.
+
+$S$
+
+
+$res * starlet = M$
+descent:
+$gen fcol = 3*M$
+$a = 3 * M$
+$b = 4 * M$
+$residuals, fcol*diff =  M$
+
+$total_mit_gencol = 11M$
+
+total CD = $s * 11M$
+
+(New W-stacking approach)
+Nufft: $M + 2N log 2N$
+W-stacking = $M + W*(2N log 2N + 2N) + N log N$
+Deconvolution = ??
+
