@@ -1,13 +1,28 @@
-\section{Coordinate Descent}
+\section{Coordinate Descent for MeerKAT Data}
 The basic algorithm
+
+Full algorithm with starlets
 
 bunch of heuristics, 
 
 \subsection{The Starlet Regularization}
-multiple levels
+Starlet is a multi-scale wavelet representation which were specifically developed for astronomy.
 
+Over-complete representation. More starlets than there are pixels. Sparse representation, the number of non-zero starlets is smaller than the number of pixels
 
-\subsection{Active set Heuristic with Starlets}
+Starlets as a series of convolutions.
+
+Forward transform, from image to starlets
+
+From Starlets to image
+
+\subsection{Active set heuristic with Starlets}
+Even though the starlets are an over-complete dictionary, they have an approximate transform from image to starlet space. For Coordinate Descent, this can be used as a active set heuristic: We try to find the coefficients which are likely to be non-zero. This helps us so we do not need to calculate the whole matrix product $F^{-1}D$. We only use columns that are likely to be not zero.
+
+(Image of the starlet level zero)
+The higher the number, the more likely this component is to be non-zero. It is essentially a probability distribution for which starlet components are non-zero.
+
+Stupid approach with line search. Could be done more efficiently by using the histogram of the starlet level.
 
 \subsection{Results on Simulated Data}
 
@@ -32,10 +47,20 @@ $residuals, fcol*diff =  M$
 
 $total_mit_gencol = 11M$
 
-total CD = $s * 11M$
+total CD = $S * 11M + 2M * starlets$
 
-(New W-stacking approach)
+$S$ depends on the image content directly. For example if the image contains 15 point sources and five Gaussian extended emissions, then $S$ equals 20 non-zero components (if we assume the Gaussian sources require only one starlet for representation). Coordinate Descent therefore is independent of the image size $N$. It solely depends on the size of the measurements $M$, and the number of non-zero components in the dictionary $S$. 
+
+It does not use any approximation for the fourier transform.
+
+
+
+(Cite New W-stacking approach)
 Nufft: $M + 2N log 2N$
 W-stacking = $M + W*(2N log 2N + 2N) + N log N$
 Deconvolution = ??
+
+The major cycle algorithm depends on more parameters. Assumptions were made in favor of Coordinate Descent.
+
+the number of w-stacks $W$. If this is the case
 

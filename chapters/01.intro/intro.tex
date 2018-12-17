@@ -1,6 +1,8 @@
 \section{Large Scale Image Reconstruction for the MeerKAT Telescope} \label{intro}
 Image reconstruction on the large scale
 
+Compressed Sensing reconstruction for incomplete measurements.
+
 Large scale image reconstruction applied to data from the MeerKAT Telescope.
 
 \begin{equation}\label{intro:measurement}
@@ -18,6 +20,15 @@ sampling pattern is defined by the instrument, in MeerKAT's case the sampling Vi
 Algorithms in Radio Astronomy employ the major cycle architecture. The figure shows the major cycle framework. In a major cycle consists of two parts: The non-uniform FFT and an optimization algorithm. 
 
 The non-uniform FFT is responsible for approximating a regularly spaced image from the measurements, and for approximating the measurements corresponding to an image. Non-uniform FFT's are fast approximation algorithms, but by being approximation algorithms, they introduce errors. 
+
+\begin{wrapfigure}{r}{0.6\textwidth}
+	\centering
+	\vspace{-10pt}
+	\includegraphics[width=1.0\linewidth]{./chapters/01.intro/Major-Minor.png}
+	\caption{The Major Cycle Framework}
+	\label{intro:major}
+	\vspace{-10pt}
+\end{wrapfigure}
 
 A optimization algorithm uses the image and removes the effect of incomplete samples. In the past, CLEAN algorithms were used to remove the effects. For the future, algorithms based on the theory of compressed sensing show promises in image quality.
 
