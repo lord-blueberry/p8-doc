@@ -1,25 +1,39 @@
 \section{Large Scale Image Reconstruction for the MeerKAT Telescope} \label{intro}
-Image reconstruction on the large scale
+Image reconstruction
 
-Compressed Sensing reconstruction for incomplete measurements.
+Applying the theory of compressed sensing to certain reconstruction problems, because they are we have theoretical guarantees with them.
 
-Large scale image reconstruction applied to data from the MeerKAT Telescope.
+Compressed Sensing reconstructions useful for incomplete measurements
 
+Applied to the radio interferometer MeerKAT, which has the following measurement equation \eqref{intro:measurement}.
 \begin{equation}\label{intro:measurement}
-V(u, v) = \int\int x(x, y) e^{2 \pi i (ux+vy)} \: dx \: dy 
+V(u, v) = \int\int X(x, y) e^{2 \pi i (ux+vy)} \: dx \: dy 
 \end{equation}
 
-sampling pattern is defined by the instrument, in MeerKAT's case the sampling Visibilities are:
+Radio interferometers observe the image $X$, but they do not measure pixel locations, they measure Fourier Components $V$ of the sky at continuous locations $u, v$. The image reconstruction wants to find the observed image $X$ from the measured Visibilities $V$. Calculating the image would be calculating the two dimensional inverse Fourier Transform of $V$, but two properties make the problem harder:
+
 \begin{enumerate}
-	\item Not Uniform: Pockets of dense samples.
-	\item Incomplete: Information for the Image Reconstruction was not measured by the instrument
+	\item Non-uniform sampling pattern in Visibility space
+	\item Incomplete Visibilities
 \end{enumerate}
+
+We are interested in an image $X$ with uniformly sized pixels. The instrument measures areas in Visibility space more densely than others. This property keeps us away from the Fast Fourier Transform. The inverse Fourier Transform can still be calculated, but it results in an algorithm with quadratic runtime. It is not practical.
+
+Incomplete measurements create wrong artefacts in the image. Reconstructing the image is finding out which structures are plausible and which are not.
+
+Reconstructing the image $X$ requires therefore solving two problems:
+\begin{enumerate}
+	\item Creating a fast image with uniform pixels from non-uniform Visibilities.
+	\item Deciding which image structures are plausible.
+\end{enumerate}
+
+Current algorithms solve these two problems all the same way. They use the major cycle architecture.
 
 
 \subsection{The Major Cycle Architecture}
-Algorithms in Radio Astronomy employ the major cycle architecture. The figure shows the major cycle framework. In a major cycle consists of two parts: The non-uniform FFT and an optimization algorithm. 
+The major cycle architecture was conceived for the CLEAN class of algorithm. Compressed sensing approaches use essentially the same architecture. The figure \ref{intro:major} shows the major cycle framework. In a major cycle consists of two parts: The non-uniform FFT and an optimization algorithm.
 
-The non-uniform FFT is responsible for approximating a regularly spaced image from the measurements, and for approximating the measurements corresponding to an image. Non-uniform FFT's are fast approximation algorithms, but by being approximation algorithms, they introduce errors. 
+Together, they form the major cycle which solves the two problems over several iterations. 
 
 \begin{wrapfigure}{r}{0.6\textwidth}
 	\centering
@@ -29,6 +43,8 @@ The non-uniform FFT is responsible for approximating a regularly spaced image fr
 	\label{intro:major}
 	\vspace{-10pt}
 \end{wrapfigure}
+
+The non-uniform FFT is responsible for approximating a regularly spaced image from the measurements, and for approximating the measurements corresponding to an image. Non-uniform FFT's are fast approximation algorithms, but by being approximation algorithms, they introduce errors. 
 
 A optimization algorithm uses the image and removes the effect of incomplete samples. In the past, CLEAN algorithms were used to remove the effects. For the future, algorithms based on the theory of compressed sensing show promises in image quality.
 
@@ -49,8 +65,11 @@ For the optimization algorithm, the CLEAN class of algorithms get used. But algo
 
 Current Compressed Sensing reconstructions reduce the number of major cycles. However, the question is if Compressed Sensing can use a different architecture, and scale better to problems of the size of MeerKAT.
 
-There are ways to get rid of the major cycle, but overall the complexity could not be reduced.
+Furthermore on the new MeerKAT instruments, we have a big data problem. We want to create a large image from a large amount of Visibilities. 32k*32k pixels and terabytes of raw Visibility data. 
 
+Scalability is a big problem.
+
+There are ways to get rid of the major cycle, but overall the complexity could not be reduced.
 
 
 
