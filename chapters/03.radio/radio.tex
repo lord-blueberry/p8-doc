@@ -19,6 +19,25 @@ Further issues that do not get handled here
 
 
 \subsection{Wide Field of View Imaging} \label{wof}
+W-Projection images 
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.45\linewidth}
+		\includegraphics[width=\linewidth]{./chapters/03.radio/w-no-correction.png}
+		\caption{Fourier Transform.}
+		\label{results:g55:nrao:rec}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\linewidth}
+		\includegraphics[width=\linewidth]{./chapters/03.radio/w-correction.png}
+		\caption{Fourier Transform with w correction.}
+		\label{results:g55:nrao:dirty}
+	\end{subfigure}
+	\caption{Effects of the w term on simulated data. Source: \cite{cornwell2008noncoplanar}}
+	\label{results:g55:nrao}
+\end{figure}
+
+
 
 So far the small Field of View inverse problem has been introduced where each antenna pair measures a Visibility of the sky brightness distribution. This leads to the small Field of View measurement equation \eqref{radio:eq:2dft}. It is identical to the two dimensional Fourier Transform. In practice the Fast Fourier Transform (FFT) is used, since it scales with $~n\:log(n)$ instead of $~n^2$ pixels.
 
@@ -45,7 +64,7 @@ Non-coplanar Baselines lead to a third component $w$ for each Visibility. Figure
 
 \subsection{State of the Art: Distributing the W-Term with WSCLEAN} 
 
-
+\cite{offringa2014wsclean} WSCLEAN
 
 
 
