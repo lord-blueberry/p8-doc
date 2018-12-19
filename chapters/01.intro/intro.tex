@@ -33,7 +33,7 @@ Current algorithms solve these two problems all the same way. They use the major
 \subsection{The Major Cycle Architecture}
 The major cycle architecture was conceived for the CLEAN class of algorithm. Compressed sensing approaches use essentially the same architecture. The figure \ref{intro:major} shows the major cycle framework. In a major cycle consists of two parts: The non-uniform FFT and an optimization algorithm.
 
-Together, they form the major cycle which solves the two problems over several iterations. 
+Together, they form the major cycle which solves the two problems over several iterations. In the end, we have an estimate over which part of the visibilities is noise.
 
 \begin{wrapfigure}{r}{0.6\textwidth}
 	\centering
@@ -62,6 +62,8 @@ For the optimization algorithm, the CLEAN class of algorithms get used. But algo
 
 \subsection{Compressed Sensing Reconstructions}
  However, compressed Sensing algorithms come with the drawback of requiring more major cycles.
+
+MeerKAT due to wide field of view introduces even more troubles
 
 Current Compressed Sensing reconstructions reduce the number of major cycles. However, the question is if Compressed Sensing can use a different architecture, and scale better to problems of the size of MeerKAT.
 

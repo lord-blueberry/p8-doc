@@ -1,6 +1,6 @@
 \section{Eliminating the Major Cycle}\label{killmajor}
 
-There are some ways of potentially eliminating the major cycle. 
+There are some ways of potentially eliminating the major cycle. Problem: we need to handle the w term of the measurement equation somehow. Also, the architecture should be able to facilitate self-calibration somehow.
 
 
 \subsection{Non-uniform FFT as Optimization Problem}
@@ -18,7 +18,7 @@ For calibrated data, this approach may be potentially faster. but since MeerKAT 
 
 
 \subsection{Spherical Harmonics}
-The signal naturally lives on the celestial sphere. The wide field of View measurement equation \eqref{meerkat:ftsphere} can be factorized into spherical harmonics. This means spherical harmonics are equivalent, calculating an image from the measurements with the three dimensional fourier transform is the same as using the spherical harmonics transform.
+The signal naturally lives on the celestial sphere. The wide field of view measurement equation \eqref{meerkat:ftsphere} can be factorized into spherical harmonics. This means spherical harmonics are equivalent, calculating an image from the measurements with the three dimensional fourier transform is the same as using the spherical harmonics transform.
 
 There exist fast Spherical harmonics transforms, but replacing the nuFFT with W-Correction does not gain a speed advantage out of the box. It uses a non-uniform FFT as part of the algorithm.
 
@@ -27,14 +27,15 @@ Spherical harmonics were researched in the context of Compressed Sensing image r
 The push on solving on the sphere directly. Using spherical haar wavelets, (cite) was able to speed up the simulation problem. Simulation tries to solve to problem of finding the measurements corresponding to a given image $x$. However, this has so far not been used for imaging.
 
 
-\subsection{UV-Smooth}
-
-
-
 \subsection{Coordinate Descent}
-Coordinate descent is an optimization algorithm, which can be interesting on LASSO synthesis objectives \eqref{killmajor:lasso}. The image $x = D\alpha$ and $F^{-1}$ stands for the three dimensional inverse Fourier transform. It is interesting because it does not need a major cycle, and can handle the $w$ term without any extra operation.
+Coordinate descent is an optimization algorithm, which can be interesting on LASSO objectives \eqref{killmajor:lasso}. The image $x = D\alpha$ and $F^{-1}$ stands for the three dimensional inverse Fourier transform. It is interesting because it does not need a major cycle, and can handle the $w$ term without any extra operation.
+
 
 \begin{equation}\label{killmajor:lasso}
+\underset{X}{minimize} \: \left \| V - F^{-1}X \right \|_2^2 + \lambda \left \| X \right \|_1 \\
+\end{equation}
+
+\begin{equation}
 \underset{\alpha}{minimize} \: \left \| V - F^{-1}D \alpha \right \|_2^2 + \lambda \left \| \alpha \right \|_1 \\
 \end{equation}
 
