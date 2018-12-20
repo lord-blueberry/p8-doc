@@ -1,31 +1,32 @@
-\section{Large Scale Image Reconstruction for the MeerKAT Telescope} \label{intro}
-Image reconstruction
+\section{Image Reconstruction for MeerKAT} \label{intro}
+%Ill-posed Inverse Problems
 
-Applying the theory of compressed sensing to certain reconstruction problems, because they are we have theoretical guarantees with them.
+In Signal Processing, we have the problem of reconstructing the measured signal from noisy measurements. on topics like image reconstruction, we want to remove the instrumental effects of measurements and retrieve the truly observed image. 
 
-Compressed Sensing reconstructions useful for incomplete measurements
+Image reconstruction problem appear in astronomy, where we want to account for effects like atmosphere, or gravitational lensing. In Radio Interferometry, Image reconstruction is an active field of research. The new MeerKAT Interferometer poses new challenges for image reconstruction. 
 
-Applied to the radio interferometer MeerKAT, which has the following measurement equation \eqref{intro:measurement}.
+This project focuses on image reconstruction for radio interferometers by using compressed sensing. But the basic principles would also apply for different setups, like MRI scans.
+
+The basic measurement equation does not look threatening \eqref{intro:measurement}. 
+
 \begin{equation}\label{intro:measurement}
-V(u, v) = \int\int X(x, y) e^{2 \pi i (ux+vy)} \: dx \: dy 
+V(u, v) = \int\int I(x, y) e^{2 \pi i (ux+vy)} \: dx \: dy
 \end{equation}
 
-Radio interferometers observe the image $X$, but they do not measure pixel locations, they measure Fourier Components $V$ of the sky at continuous locations $u, v$. The image reconstruction wants to find the observed image $X$ from the measured Visibilities $V$. Calculating the image would be calculating the two dimensional inverse Fourier Transform of $V$, but two properties make the problem harder:
-
+The Interferometer measures Fourier Components $V$ of the sky image $I$ (called Visibilities in Radio Astronomy). The task is to reconstruct the actual image of the sky $I$. On first glance, this problem can be solved by using the two dimensional Fourier Transform. But two properties of the measurements make this harder:
 \begin{enumerate}
 	\item Non-uniform sampling pattern in Visibility space
-	\item Incomplete Visibilities
+	\item Incomplete Measurements. 
 \end{enumerate}
 
-We are interested in an image $X$ with uniformly sized pixels. The instrument measures areas in Visibility space more densely than others. This property keeps us away from the Fast Fourier Transform. The inverse Fourier Transform can still be calculated, but it results in an algorithm with quadratic runtime. It is not practical.
 
-Incomplete measurements create wrong artefacts in the image. Reconstructing the image is finding out which structures are plausible and which are not.
+Problems of non uniform samples is that we cannot use the Fast Fourier Transform. We can still use the naiive fourier transform, but the data We are interested in an image $X$ with uniformly sized pixels. The instrument measures areas in Visibility space more densely than others. This property keeps us away from the Fast Fourier Transform. The inverse Fourier Transform can still be calculated, but it results in an algorithm with quadratic runtime. It is not practical
 
-Reconstructing the image $X$ requires therefore solving two problems:
-\begin{enumerate}
-	\item Creating a fast image with uniform pixels from non-uniform Visibilities.
-	\item Deciding which image structures are plausible.
-\end{enumerate}
+Incomplete measurements create wrong artefacts in the image. Reconstructing the image is finding out which structures are plausible and which are not. Generally an ill-posed inverse problem, meaning: It may not have a unique solution, small changes in measurements lead to large changes in the image.  CLEAN class of Algorithms that approximate a solution. The standard implementation.
+
+Applying the theory of compressed sensing to certain reconstruction problems, because they are we have theoretical guarantees with them. 
+Compressed Sensing\cite{candes2006robust}\cite{donoho2006compressed} reconstructions useful for incomplete measurements. It has been successfully applied to image reconstruction for radio interferometers with algorithms like SASIR \cite{starck2015starlet} or more recently reconstructions using SARA \cite{dabbech2018cygnus} \cite{birdi2018sparse}
+
 
 Current algorithms solve these two problems all the same way. They use the major cycle architecture.
 

@@ -10,7 +10,18 @@ The major cycle minimizes two errors simultaneously: The error introduced by the
 \underset{x}{minimize} \: \left \| V - Ax \right \|_2^2
 \end{equation}
 
-Two possible upsides. A specialized optimization algorithm can be used for each sub-problem, hopefully converging faster than the major cycle. and because the image $x$ is magnitudes smaller than the measurements, it is easier to handle downstream, throwing away the measurements.
+Two possible upsides. A specialized optimization algorithm can be used for each sub-problem, hopefully converging faster than the major cycle. and because the image $x$ is magnitudes smaller than the measurements, it is easier to handle downstream, throwing away the measurements. 
+
+Equivalent minimization problems that reduces the effect of incomplete measurements:\eqref{killmajor:ft}, \eqref{killmajor:deconv}
+
+\begin{alignat}{2}
+FT:\: \underset{X}{minimize} \:& \left \|  V - F^{-1}X \right \|_2^2 &&+  \lambda \left \| X \right \|_1 \label{killmajor:ft}\\
+deconvolution:\: \underset{X}{minimize} \:& \left \| I_{dirty} - X \star PSF \right \|_2^2 &&+ \lambda \left \| X \right \|_1 \label{killmajor:deconv}
+\end{alignat}
+
+Throw away the visibilities
+
+But $PSF$ is not constant. One of the errors that several major cycles solve.
 
 However, the problem is that the imaging algorithm should also be able to calibrate. With this approach, there is a strict one way flow from measurements to image. For calibration, a backwards flow from image to measurements is necessary.
 

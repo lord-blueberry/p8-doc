@@ -52,7 +52,13 @@ From Starlets to image
 \subsection{Active set heuristic with Starlets}\label{cd:heuristic}
 Even though the starlets are an over-complete dictionary, they have an approximate transform from image to starlet space. For Coordinate Descent, this can be used as a active set heuristic: We try to find the coefficients which are likely to be non-zero. This helps us so we do not need to calculate the whole matrix product $F^{-1}D$. We only use columns that are likely to be not zero.
 
-(Image of the starlet level zero)
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\linewidth]{./chapters/05.algorithms/sim02/starlets0.png}
+	\caption{Starlet Level 0}
+	\label{alg:heuristic:starlet}
+\end{figure}
+
 The higher the number, the more likely this component is to be non-zero. It is essentially a probability distribution for which starlet components are non-zero.
 
 Stupid approach with line search. Could be done more efficiently by using the histogram of the starlet level.
@@ -63,7 +69,38 @@ coordinate descent with active set heuristic
 
 \subsection{Results on Simulated Data}
 
+MeerKAT simulation with Simkat64 Simulation suite. Not a lot of noise, fairly simple data to test the algorithm.
+
+Two simulations, one of point sources and one of mixed sources. 
+
+Super resolution. The reconstruction should be able to locate the point sources below the accuracy of the instrument.
+
 \subsubsection{Point Sources}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\linewidth]{./chapters/05.algorithms/sim02/sim02_point_dirty.png}
+	\caption{Dirty Image of two point sources}
+	\label{alg:point:dirty}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.45\linewidth}
+		\includegraphics[width=\linewidth]{./chapters/05.algorithms/sim02/image.png}
+		\caption{Reconstruction after one full iteration}
+		\label{results:g55:nrao:rec}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\linewidth}
+		\includegraphics[width=\linewidth]{./chapters/05.algorithms/sim02/image4.png}
+		\caption{Reconstruction after 4 Full iterations}
+		\label{results:g55:nrao:dirty}
+	\end{subfigure}
+	\caption{}
+	\label{results:g55:nrao}
+\end{figure}
+
+faint source is spread more widely. Not good, The paper \cite{starck2015starlet} used different $\lambda$ values for different starlet levels. Maybe with this it can be forced to do more precise results, but it was not tried in this work.
 
 \subsubsection{Gaussian and Point Sources}
 
@@ -123,4 +160,6 @@ Deconvolution = ??
 The major cycle algorithm depends on more parameters. Assumptions were made in favor of Coordinate Descent.
 
 the number of w-stacks $W$. If this is the case
+
+\cite{pratley2018fast} fast w-stacking w-projection
 
