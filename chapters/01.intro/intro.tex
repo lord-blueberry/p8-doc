@@ -50,9 +50,13 @@ An image reconstruction for radio interferometers consists of two different step
 
 The first major cycle uses the non-uniform inverse FFT to approximate the 'dirty' image from the Visibilities. The image constraint/Deconvolution algorithm decides parts which parts belong to the observed image and which are due to instrumental effects and other noise sources. It then returns the noise part, which get transformed back into residual Visibilities. The next major cycle iteration continues with the residual Visibilities. The residual Visibilities get minimized until they contain only the instrumental effects and noise.
 
-After several major cycles the algorithm converges on a regularly spaced image which has a small error from non-uniform samples, and a small error from incomplete measurements.
+After several major cycles the residual  on a regularly spaced image which has a small error from non-uniform samples, and a small error from incomplete measurements.
 
-For the optimization algorithm, the CLEAN class of algorithms get used. But algorithms based on the theory of compressed sensing have been shown to produce superior images.
+A single major cycle is expensive. MeerKAT needs several cycles to have a good image result with a CLEAN algorithm.
+
+Compressed Sensing algorithms use essentially the same architecture. But in turn uses more major cylces, on top of being more expensive to compute inside a cycle. Even though it was shown to produce better reconstructions on different datasets, the added runtime is a big reason what keeps it from wide-spread adoption. 
+
+The question thefore is, can the overall complexity of the comporessed sensing reconstruction be reduced, if a different architecture is used.
 
 
 \subsection{Compressed Sensing Reconstructions}
