@@ -34,19 +34,9 @@ V(u, v, w) = \int\int \frac{I(x, y)}{\sqrt{1 - x^2 - y ^2}} e^{2 \pi i [ux+vy+ w
 
 For small field of view observations, the term $\sqrt{1 - x^2 - y ^2} \approx 1$, and we arrive at the basic measurement equation \eqref{intro:basic}. For small field of view, the $w$ term can be ignored, and the image can be calculated with the inverse two dimensional non-uniform FFT. For wide field of view measurements, the $w$ term breaks the two dimensional Fourier relationship. The measurement equation \eqref{meerkat:ftsphere} can still be inverted, but the resulting algorithm has a quadratic runtime and is not feasible in practice.
 
-Note that the image $I(x,y)$ of the wide field of view the measurement equation \eqref{meerkat:ftsphere} is still two dimensional, even though the Visibilities $V(u, v, w)$ have three. The relationship between Visibilities and image is neither the two, nor the three dimensional Fourier transform. The Visibilities represents an image on the celestial sphere. This means the image $I(x,y)$ is naturally curved, and the $w$ component represents the distortion introduced by the curvature.
+Note that the image $I(x,y)$ of the wide field of view the measurement equation \eqref{meerkat:ftsphere} is still two dimensional, even though the Visibilities $V(u, v, w)$ have three. The relationship between Visibilities and image is neither the two, nor the three dimensional Fourier transform. The Visibilities represents an image on the celestial sphere. This means the image is naturally curved, and the $w$ component represents the distortion introduced by the curvature.
 
-The curve distortion is negligible close to the image center (where $\sqrt{1 - x^2 - y ^2} \approx 1$), but gets more severe the the the image edges. The image \ref{meerkat:wdistortion} s
-
-On the sphere
-
-W-Projection images 
-
-Small field of view
-
-
-
-
+One can simply ignore the $w$ component, ignore the curvature and use the two dimensional Fourier Transform. The image then does not lie on a sphere, but on a tangent plane. At the tangent point (where $\sqrt{1 - x^2 - y ^2} \approx 1$, typically the image center in radio astronomy) the two reconstructions are identical. But the distortion gets more severe away from the tangent point. The image \ref{meerkat:2dfft} shows a tangent plane reconstruction over a large field of view, while \ref{meerkat:wcorrection} shows the same reconstruction but $w$ corrected. Close to the tangent point, the image center, the reconstructions both locate the point sources. At the image edges, the distortion gets severe enough to decorrelate the Visibilities and the point sources get 'torn' apart.
 
 \begin{figure}[h]
 	\centering
@@ -64,6 +54,11 @@ Small field of view
 	\label{meerkat:wdistortion}
 \end{figure}
 
+Image facetting
+
+W-projection
+
+W-stacking
 
 So far the small Field of View inverse problem has been introduced where each antenna pair measures a Visibility of the sky brightness distribution. This leads to the small Field of View measurement equation \eqref{radio:eq:2dft}. It is identical to the two dimensional Fourier Transform. In practice the Fast Fourier Transform (FFT) is used, since it scales with $~n\:log(n)$ instead of $~n^2$ pixels.
 
