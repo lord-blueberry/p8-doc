@@ -1,10 +1,14 @@
 \section{Challenges for imaging MeerKAT data} \label{meerkat}
 New interferometers like MeerKAT put additional challenges on the image reconstruction problem. First, the new instrument produce a new magnitude of data, forcing reconstruction algorithms to be highly scalable and distributable. Second, the more sensitive instruments with large field of view amplify effects which were negligible in older instruments, like non-coplanar baselines or the ionosphere.
 
+Compressed sensing has to be able to work with these issues somehow. Solutions all in the context of the major cycle, a new architecture may need to handle effects differently. Hopefully in a manner that is at least as efficient.
+
 In this work, the effects of non-coplanar baselines gets handled in more detail. The effect has a neat mathematical notation, it adds a third fourier component to the measurement equation, but breaks the two dimensional fourier relationship introduced in section \ref{intro:basic}. 
 
+Calibration used to be a task before image reconstruction.
+Calibration gets not explicitly handled here, but it is important to keep in mind. For older interferometers, the data was calibrated before image reconstruction. With the advent of self-calibration, the image reconstruction is also used to improve calibration. MeerKAT requires more calibration parameters, so an image reconstruction algorithm has to be able to calibrate, or it is not interesting.
 
-Self calibration Calibration gets not explicitly called, but 
+
 
 Further issues that do not get handled here
 \begin{itemize}
@@ -47,44 +51,56 @@ One can simply ignore the $w$ component, ignore the curvature and use the two di
 	\end{subfigure}
 	\begin{subfigure}[b]{0.45\linewidth}
 		\includegraphics[width=\linewidth]{./chapters/03.challenges/w-correction.png}
-		\caption{Fourier Transform with w correction.}
+		\caption{Fourier Transform with $w$-correction.}
 		\label{meerkat:wcorrection}
 	\end{subfigure}
 	\caption{Celestial sphere distortion on simulated data. Source: \cite{cornwell2008noncoplanar}}
 	\label{meerkat:wdistortion}
 \end{figure}
 
-Image facetting
-
-W-projection
-
-W-stacking
-
-So far the small Field of View inverse problem has been introduced where each antenna pair measures a Visibility of the sky brightness distribution. This leads to the small Field of View measurement equation \eqref{radio:eq:2dft}. It is identical to the two dimensional Fourier Transform. In practice the Fast Fourier Transform (FFT) is used, since it scales with $~n\:log(n)$ instead of $~n^2$ pixels.
+Image reconstructions for MeerKAT need to account for the $w$ component efficiently. In the Major Cycle framework, this is part of the non-uniform FFT. The first approach was to image facets, creating several tangent planes for the celestial sphere. A more efficient approach came in the form of the $w$-projection algorithm\cite{cornwell2008noncoplanar}. It uses convolution on the Visibilities during the non-uniform FFT. MeerKAT currently uses the $w$-stacking algorithm, which more efficient than $w$-projection on MeerKAT's data volume and is simple to distribute.
 
 
+This is still an active field of research. The latest work as of time of writing is a hybrid approach\cite{pratley2018fast} with both $w$-stacking and $w$-projection. As of time of writing, it was not yet adapted.
 
-For wide Field of View imaging, two effects break the two dimensional Fourier Transform relationship: Non-coplanar Baselines and the celestial sphere which lead to the measurement equation \eqref{radio:eq:ftSphere}. Note that for small Field of View $1 - x^2 -y ^2 \ll 1$, and \eqref{radio:eq:ftSphere} reduces to the 2d measurement equation \eqref{radio:eq:2dft}.
+
+\subsubsection{State of the art: $w$-stacking algorithm}
+Here a short explanation of the w-stacking algorithm is provided. It is a surprisingly simple algorithm that seems to be here to stay. It is a modification of the nuFFT operation displayed in figure \ref{intro:major}. 
+
+
+\textit{Inverse nuFFT with w-stacking}:
+Visibilities get grouped into stacks by their $w$-term. Every visibility inside a stack has a similar $w$-term. The more stacks, the more accurately you can handle the $w$ component. The figure displays the relation
+
+The nuFFT gets called on each stack separately, and a constant $w$ correction factor applied. Since $w$-term is constant, we can use the two dimensional nuFFT again. At the end, all the stacks are summed together to form the dirty image. 
+
+\textit{nuFFT with w-stacking}:
+The inverse is done in a similar fashion. The sum cannot be re-separated, so the image gets copied into each stack. The constant $w$ factor gets divided out. The nuFFT gets applied.
+
+the runtime
+
+(talking about more recent hybrid approach, limiting the total number of ?w-stacks?)
 
 
 
 \subsection{Self-Calibration}
-Why self calibration
+Complex gain term. Corrects amplitude and phase. 
 
-Self calibration with clean
+Traditional Calibration
+
+A calibration source close by, with a known brightness. Phase and amplitude calibration was done before image reconstruction. For older interferometers, there was a very limited number of calibration terms to solve.
 
 
+but again effects of wide field of view also increase the number of necessary calibration terms. The advent of self calibration, in which the image reconstruction was used to solve for both, the observed image and the calibration of the instrument.
 
+Self calibration with the major cycle algorithm and a CLEAN deconvolution.
 
-\subsection{State of the Art: WSCLEAN and the third Fourier Component} 
-
-\cite{offringa2014wsclean} WSCLEAN
-
-Essentially distributing the non-uniform FFT of the Major Cycle.
-
-Architecture of W-Stacking
-
-(talking about more recent hybrid approach, limiting the total number of ?w-stacks?)
+Initial phase calibration
+Shallow clean
+phase calibration
+deep clean
+phase and amplitude calibration
+deep clean
+reconstruction
 
 
 
