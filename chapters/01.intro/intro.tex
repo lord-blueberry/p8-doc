@@ -1,7 +1,7 @@
 \section{Image Reconstruction for MeerKAT} \label{intro}
 In the real world, measurements are corrupted by noise. Noise is introduced by the measurement instrument itself, but additional interference sources may be present. For example in Audio Recording, the microphone measures a noisy signal from the real world tone, and a passing car introduces additional interference. In a controlled environment like a recording studio, sound proofing handles the interference and only the noisy measurements have to be dealt with. Controlled environments are not always possible, that's why in Signal Processing the fields of de-noising and reconstruction exists. With those, we want to reconstruct the truly observed signal without the noise or external interference.
 
-Image de-noising and reconstruction problems appear in different fields. In Astronomy, Radio Interferometers pose a challenging image reconstruction problem. The Interferometer measures a noisy image of the sky, corrupted by various sources like the ionosphere, passing satellites and the Interferometer itself. In the past, reconstruction algorithms used simple approximations to correct the image. For new interferometers like MeerKAT the approximations of the past do not hold. Furthermore, the larger MeerKAT instrument poses the reconstruction problem on a new data volume. 
+Image de-noising and reconstruction problems appear in different fields. In Astronomy, Radio Interferometers pose a challenging image reconstruction problem. The Interferometer measures a noisy image of the sky, corrupted by various sources like the ionosphere, passing satellites and the Interferometer itself. In the past, reconstruction algorithms used simple approximations to correct the image. For new interferometers like MeerKAT the approximations of the past do not hold. Furthermore, the larger MeerKAT instrument poses the reconstruction problem on a new data volume.
 
 CLEAN algorithm\cite{rich2008multi}\cite{rau2011multi}
 
@@ -33,10 +33,9 @@ The CLEAN algorithms approximate the observed image with a deconvolution: The in
 
 A CLEAN image reconstruction uses two different approximation algorithms: The nuFFT, which approximates the inverse Fourier Transform, and the CLEAN deconvolution, which approximately removes instrumental effects. In real world reconstructions, these two approximations are used in the major cycle architecture to further increase its accuracies.
 
-Major cycle was created with CLEAN in mind, but the CS approaches use essentially the same architecture
-
-
 \subsection{The Major Cycle Architecture}
+Major cycle was created with CLEAN in mind, but the CS approaches use a similar architecture
+
 An image reconstruction for radio interferometers consists of two different steps: A nuFFT, which approximates the inverse Fourier Transform efficiently and an image constraint/deconvolution algorithm, which approximates the instrumental effects on the image (for example CLEAN). These two approximations are an error source of the reconstruction. The major cycle architecture \ref{intro:major} therefore tries to iteratively minimize the errors of the nuFFT and the deconvolution.
 
 \begin{wrapfigure}{r}{0.6\textwidth}
@@ -53,6 +52,11 @@ The first major cycle uses the non-uniform inverse FFT to approximate the 'dirty
 After several major cycles the residual  on a regularly spaced image which has a small error from non-uniform samples, and a small error from incomplete measurements.
 
 A single major cycle is expensive. MeerKAT needs several cycles to have a good image result with a CLEAN algorithm.
+
+
+Compressed Sensing as a deconvolution.
+
+Slightly different implementation in Compressed Sensing approaches, does not neatly fit in the figure \ref{intro:major}, but still gains the same advantages and disadvantages as the standard major cycle. 
 
 Compressed Sensing algorithms use essentially the same architecture. But in turn uses more major cylces, on top of being more expensive to compute inside a cycle. Even though it was shown to produce better reconstructions on different datasets, the added runtime is a big reason what keeps it from wide-spread adoption. 
 

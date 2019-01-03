@@ -1,35 +1,34 @@
 \section{Eliminating the Major Cycle}\label{killmajor}
+There is little research in exploring a different architecture for Compressed Sensing. The closest to this work was done by Pratley et al\cite{pratley2017robust}, which optimizes the non-uniform FFT in the context of compressed sensing. The Major cycle is still used. On the upside, progress in w-term accuracy and runtime. 
 
-There are some ways of potentially eliminating the major cycle. Problem: we need to handle the w term of the measurement equation somehow. Also, the architecture should be able to facilitate self-calibration somehow.
+There are ways to form a different architecture. However, the advent of self-calibration pushes a forward-backward kind of architecture on the reconstruction. 
 
 
-\subsection{Non-uniform FFT as Optimization Problem}
-The major cycle minimizes two errors simultaneously: The error introduced by the non-uniform FFT and the error introduced by incomplete measurements. The idea is to separate the two errors, and solve for each separately. First, we minimize the objective \eqref{killmajor:nufft}, which searches for the optimal image $x$ given the non-uniformly sampled measurements and then remove the effects of incomplete measurements.
+\subsection{Separating the Major Cycle into two Optimization Problems}
+The major cycle reduces two errors simultaneously. The error introduced by the non-uniform FFT approximation, and the error introduced by the deconvolution approximation. In a sense, the major cycle is a simple optimization algorithm: It iteratively calls the non-uniform FFT and deconvolution approximations with the error from the last iteration, until the error is below a certain threshold.
 
-\begin{equation}\label{killmajor:nufft}
-\underset{x}{minimize} \: \left \| V - Ax \right \|_2^2
-\end{equation}
-
-Two possible upsides. A specialized optimization algorithm can be used for each sub-problem, hopefully converging faster than the major cycle. and because the image $x$ is magnitudes smaller than the measurements, it is easier to handle downstream, throwing away the measurements. 
-
-Equivalent minimization problems that reduces the effect of incomplete measurements:\eqref{killmajor:ft}, \eqref{killmajor:deconv}
-
-\begin{alignat}{2}
-FT:\: \underset{X}{minimize} \:& \left \|  V - F^{-1}X \right \|_2^2 &&+  \lambda \left \| X \right \|_1 \label{killmajor:ft}\\
-deconvolution:\: \underset{X}{minimize} \:& \left \| I_{dirty} - X \star PSF \right \|_2^2 &&+ \lambda \left \| X \right \|_1 \label{killmajor:deconv}
+\begin{alignat}{1}
+FT:\: \underset{I_{dirty}}{minimize} \:& \left \|  V - A^{-1}I_{dirty} \right \|_2^2\label{killmajor:sep:major}\\
+deconvolution:\: \underset{x}{minimize} \:& \left \| I_{dirty} - x \star PSF \right \|_2^2 + \lambda \left \| P(x) \right \|_1 \label{killmajor:sep:deconv}
 \end{alignat}
 
-Throw away the visibilities
+The major cycle can also be separated into two objectives \eqref{killmajor:sep:major} and \eqref{killmajor:sep:deconv}, and solved in sequence. The first objective \eqref{killmajor:sep:major} tries to find the best uniformly spaced image $I_{dirty}$ matching the observation. $A^{-1}$ represents the non-uniform inverse FFT approximation ($A^{-1}I_{dirty} \approx F^{-1}I_{dirty}$). When this is solved, the original Visibility measurements are not needed any more. Then, the second objective \eqref{killmajor:sep:deconv} searches for the deconvolved image $x$ regularized by some prior $P()$.
 
-But $PSF$ is not constant. One of the errors that several major cycles solve.
+By separating the two objectives, the hope is we can use specialized optimization algorithms that overall converge faster than several major cycles. Also, after the first objective was minimized, we can drop the Visibilities, which can be magnitudes larger than the image. 
+
+At first glance, this is a sensible idea, but the devil is in the objective \eqref{killmajor:sep:deconv}. Namely in the $PSF$ is not constant, it varies over the image. In the Major Cycle Architecture, a constant $PSF$\footnote{CLEAN implementations in Radio Astronomy typically use a constant $PSF$. This is not strictly necessary, one can also implement CLEAN with a varying $PSF$.} is sufficient: It only needs to approximate the deconvolution. The error introduced by a constant $PSF$ can be reduced in the next Major Cycle. By eliminating the Major Cycle, we also eliminated the chance to approximate the deconvolution with a constant $PSF$. In the worst case, we would need to estimate the $PSF$ for each pixel in the image.
+
+In the worst case, these many $PSF$s may stop us from using this approach. It is plausible that can use fewer $PSF$s and be close enough. No known work done in the radio astronomy. The Major Cycle is ubiquitous. But it is plausible.
 
 However, the problem is that the imaging algorithm should also be able to calibrate. With this approach, there is a strict one way flow from measurements to image. For calibration, a backwards flow from image to measurements is necessary.
 
 For calibrated data, this approach may be potentially faster. but since MeerKAT will be difficult to calibrate correctly, this is unlikely.
 
 
-\subsection{Spherical Harmonics}
-The signal naturally lives on the celestial sphere. The wide field of view measurement equation \eqref{meerkat:ftsphere} can be factorized into spherical harmonics. This means spherical harmonics are equivalent, calculating an image from the measurements with the three dimensional fourier transform is the same as using the spherical harmonics transform.
+\subsection{Reconstruction on the Sphere}
+The signal naturally lives on the celestial sphere. The wide field of view measurement equation \eqref{meerkat:ftsphere} can be factorized into spherical harmonics. This means spherical harmonics are equivalent, calculating an image from the measurements with the three dimensional fourier transform is the same as using the spherical harmonics transform. \cite{shaw2014all}
+
+\cite{mcewen2013sparse}sampling theorem on a sphere
 
 There exist fast Spherical harmonics transforms, but replacing the nuFFT with W-Correction does not gain a speed advantage out of the box. It uses a non-uniform FFT as part of the algorithm.
 
@@ -39,6 +38,9 @@ The push on solving on the sphere directly. Using spherical haar wavelets, (cite
 
 
 \subsection{Coordinate Descent}
+
+cite : Direct deconvolution of radio synthesis images using L1 minimisation
+
 Coordinate descent is an optimization algorithm, which can be interesting on LASSO objectives \eqref{killmajor:lasso}. The image $x = D\alpha$ and $F^{-1}$ stands for the three dimensional inverse Fourier transform. It is interesting because it does not need a major cycle, and can handle the $w$ term without any extra operation.
 
 
