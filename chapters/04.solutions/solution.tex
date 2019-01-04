@@ -26,11 +26,29 @@ For calibrated data, this approach may be potentially faster. but since MeerKAT 
 
 
 \subsection{Reconstruction on the Sphere}
-The signal naturally lives on the celestial sphere. The wide field of view measurement equation \eqref{meerkat:ftsphere} can be factorized into spherical harmonics. This means spherical harmonics are equivalent, calculating an image from the measurements with the three dimensional fourier transform is the same as using the spherical harmonics transform. \cite{shaw2014all}
+The signal naturally lives on the celestial sphere.
+
+Not that much used in Radio Astronomy reconstructions. Work that uses to project on the sphere and looks at the reconstruction quality \cite{mcewen2011compressed}.
+
+The wide field of view measurement equation \eqref{meerkat:ftsphere} can be expanded into spherical harmonics.
+
+\cite{carozzi2015imaging} measurement equation with spherical harmonics. Essentially replaces the non-uniform FFT from the Major cycle with a new approach based on the fact that it has a solution to the Helmholtz equation.
+, see \cite{carozzi2015imaging} for further detail. It can be used as a different way to arrive at a dirty image from wide field of view interferometers. It is useful in full sky image, because it fulfills the (property from paper) and the full sky dirty image does not have artifacts. It does not gain any complexity advantage, quite the contrary.
+
+Even if the spherical harmonics transform would gain a speed advantage, used in the way of \cite{carozzi2015imaging} it would still be the same major cycle architecture, just with spherical harmonics transform.
+
+However there is the possibility to just do everything on the sphere.
+
+Spherical haar wavelets used for simulating visibilities from a known image, essentially the opposite operation from imaging. \cite{mcewen2008simulating}
+
+based on the spherical harmonic transform. Doing a Spherical harmonic transform efficiently is still an active field of research \cite{schaeffer2013efficient}
+
+transform
+. The wide field of view measurement equation \eqref{meerkat:ftsphere} can be factorized into spherical harmonics. This means spherical harmonics are equivalent, calculating an image from the measurements with the three dimensional fourier transform is the same as using the spherical harmonics transform. \cite{shaw2014all}
 
 \cite{mcewen2013sparse}sampling theorem on a sphere
 
-There exist fast Spherical harmonics transforms, but replacing the nuFFT with W-Correction does not gain a speed advantage out of the box. It uses a non-uniform FFT as part of the algorithm.
+
 
 Spherical harmonics were researched in the context of Compressed Sensing image reconstructions (cite wiaux). They improved the quality of the image reconstruction, but no speed advantage.
 
