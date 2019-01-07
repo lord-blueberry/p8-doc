@@ -3,7 +3,7 @@ Image reconstruction and ill-posed inverse problems
 
 Heuristics
 
-Compressed sensing, super resolution
+Compressed sensing, theory how to solve the ill posed inverse problem. super resolution
 
 Radio Astronomy and the image reconstruction problem. Of interferometers.
 
@@ -23,7 +23,7 @@ CLEAN algorithm\cite{rich2008multi}\cite{rau2011multi}
 
 Reconstruction algorithms for MeerKAT should handle the more complex effects of ionosphere and the like, while scaling even more on larger problem instances. Reconstruction algorithms using the theory of compressed sensing\cite{candes2006robust}\cite{donoho2006compressed} showed higher reconstruction accuracy than state of the art algorithms. However, they currently do require more computing hardware. This project searches for a way to make CS Algorithm scale on MeerKAT data size.
 
-SASIR\cite{starck2015starlet} or more recently reconstructions using SARA \cite{dabbech2018cygnus} \cite{birdi2018sparse}
+SASIR\cite{girard2015sparse} or more recently reconstructions using SARA \cite{dabbech2018cygnus} \cite{birdi2018sparse}
 
 
 
@@ -72,7 +72,7 @@ After several major cycles the residual  on a regularly spaced image which has a
 A single major cycle is expensive. MeerKAT needs several cycles to have a good image result with a CLEAN algorithm.
 
 
-Compressed Sensing as a deconvolution.
+Compressed Sensing reconstructions essentially use the same architecture. They do not use an explicit deconvolution anymore, but 
 
 Slightly different implementation in Compressed Sensing approaches, does not neatly fit in the figure \ref{intro:major}, but still gains the same advantages and disadvantages as the standard major cycle. 
 
@@ -82,7 +82,7 @@ The question thefore is, can the overall complexity of the comporessed sensing r
 
 
 \subsection{Compressed Sensing Reconstructions}
-Regularization?
+Compressed sening reconstructions use the 
  However, compressed Sensing algorithms come with the drawback of requiring more major cycles.
 
 MeerKAT due to wide field of view introduces even more troubles

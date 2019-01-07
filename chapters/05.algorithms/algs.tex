@@ -1,11 +1,15 @@
 \section{Compressed Sensing with Coordinate Descent}\label{cd}
-First, let us look at the Coordinate Descent algorithm in its simplest form, and discuss its properties. With compressed sensing reconstructions, we want to find an image which is close to the measured Visibilities, but also has the smallest regularization penalty. In essence, we want to minimize the objective \eqref{cd:clean}, where the L2 term $\left \| V - F^{-1}x \right \|_2^2$ forces the image to represent the Visibilities $V$, and the regularization term $\left \| x \right \|_1$ forces the image to have as few non-zero pixels as possible. The parameter $\lambda$ represents our trade-off between reconstruction accuracy and regularization. 
+The idea behind compressed sensing is we use prior information about the image, and find the most likely image $x$ from all possible solutions. In practice, we formulate a minimization problem with a data and regularization term. The data term forces the image to be as close to the measured Visibilities as possible, and the regularization term tells us how likely the image is to be true. 
+
+The regularization is responsible for an accurate reconstruction. In this work, two regularizations are used. The L1 pixel regularization is used to demonstrate a simple version of the coordinate descent algorithm. For the actual algorithm starlet regularization is used. Starlets have been used as regularization for the LOFAR interferometer\cite{girard2015sparse}, which has been shown to work.
+
+First, let us look at the coordinate descent algorithm in its simplest form, and discuss its properties. we want to minimize the objective \eqref{cd:clean}, where the data term $\left \| V - F^{-1}x \right \|_2^2$ forces the image to be close to the Visibilities $V$, and the regularization term $\left \| x \right \|_1$ forces the image to have as few non-zero pixels as possible. The parameter $\lambda$ represents our trade-off between reconstruction accuracy and regularization. 
  
 \begin{equation}\label{cd:clean}
 	\underset{x}{minimize} \: \left \| V - F^{-1}x \right \|_2^2 + \lambda \left \| x \right \|_1 \\
 \end{equation}
 
-The objective function \eqref{cd:clean} has a property, which we can exploit with Coordinate Descent: The optimum for a single pixel, if we keep all others fixed, turns out to be a parabola. The optimum for a single pixel of \eqref{cd:clean} is simply finding the apex of a parabola, followed by a shrink operation. Sadly, the pixels are not independent of each other, we need to iterate over each pixels several times until the solution converges. This leads to the following optimization algorithm, written in python code:
+The objective function \eqref{cd:clean} has a property, which we can exploit with Coordinate Descent: The optimum for a single pixel, if we keep all others fixed, turns out to be a parabola. The optimum for a single pixel of \eqref{cd:clean} is simply finding the apex of a parabola, followed by a shrink operation\footnote{The shrink operation reduces the magnitude of the pixel by $\lambda$. For example: Pixel $x = -12.4$, $\lambda = 0.6$. The new pixel value after shrinkage follows as $shrink(-12.4, 0.6) = -11.9$}. Sadly, the pixels are not independent of each other, and we need multiple iterations over all pixels to converge. This leads to the following reconstruction algorithm, written in python code:
 
 \begin{lstlisting} 
 def coordinate_descent(V_residual, x, lambda, max_iter):
@@ -29,9 +33,18 @@ def coordinate_descent(V_residual, x, lambda, max_iter):
 				V_residual = V_residual - fourier_column * (x_new - x_old)
 \end{lstlisting}\label{cd:basic}
 
+The simple version of coordinate descent converges to a solution which is similar to CLEAN. The convergence rate of coordinate descent is not well understood. Our image reconstruction problem falls in the class of quadratic programming, in coordinate descent converges at least linearly\cite{luo1992convergence}. In practice, the convergence rate can be sped up with heuristics like active set\cite{activeset} and $\lambda$\cite{lambda}. Furthermore, coordinate descent is robust, even when the residual vector is only approximated, which is useful for distributing the algorithm.
+
+The main drawback of the simple approach is the explicit calculation of the whole Fourier Transform Matrix $F^{-1}$.
+
+In practical applications it works well enough and is primed for a lot of heuristics. It is robust and primed for heuristics.
+
+The  the algorithm has been working well enough and is used for VIS-CS \cite{felix2017compressed} compressed sensing reconstruction. \ref 
+The simple version of coordinate descent simply runs through every column in sequence. The simple version of the algorithm simply calculates the column of the Fourier Transform Matrix  for each pixel.
+
 This algorithm calulates the whole Fourier Transform Matrix $F^{-1}$. But we do not need any approximation algorithms like the non-uniform FFT, and we can handle the $w$-term easily.
 
-We do not need to iterate over all pixels, only those that are likely to be non-zero. Convergence in general hard to prove, but in practice has been shown to work well enough. Turns out to be robust for paralellism
+
 
 Heuristic heaven
 
@@ -42,6 +55,10 @@ $x = D\alpha$
 \begin{equation}\label{cd:starlet}
 \underset{x}{minimize} \: \left \| V - F^{-1}D\alpha \right \|_2^2 + \lambda \left \| \alpha \right \|_1 \\
 \end{equation}
+
+parabola for each starlet.
+
+
 
 
 
