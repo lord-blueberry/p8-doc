@@ -55,25 +55,11 @@ Spherical harmonics were researched in the context of Compressed Sensing image r
 The push on solving on the sphere directly. Using spherical haar wavelets, (cite) was able to speed up the simulation problem. Simulation tries to solve to problem of finding the measurements corresponding to a given image $x$. However, this has so far not been used for imaging.
 
 
-\subsection{Coordinate Descent}
+\subsection{Explicit Fourier Transform Matrix}
+Hardy et al\cite{hardy2013direct} handled the whole inverse Fourier Transform as an explicit matrix $F^{-1}$ of size  $M*N$. They dropped the non-uniform FFT and $w$-stacking approximations. This is trivially to distribute later. The only problem is of Course that for MeerKAT data sizes $M*N$ is too large (4gb of visibilities times $1$ Billion Pixels).
 
-cite : Direct deconvolution of radio synthesis images using L1 minimisation
+However there is potential for improvement: Only a limited number of pixels in a reconstruction are not zero. We spent a lot of processing power on pixels which do not matter in the reconstruction. If we could predict which pixels are not zero, we would only need to calculate a subset of $F^{-1}$ columns to reconstruct the image. The starlet transform\cite{starck2015starlet} has a way to predict its non-zero components. We represent the image as a combination of starlets, and estimate which starlets are likely non-zero from the Visibilities directly.
 
-Coordinate descent is an optimization algorithm, which can be interesting on LASSO objectives \eqref{killmajor:lasso}. The image $x = D\alpha$ and $F^{-1}$ stands for the three dimensional inverse Fourier transform. It is interesting because it does not need a major cycle, and can handle the $w$ term without any extra operation.
+To my knowledge, such an algorithm has never been tried out.
 
-
-\begin{equation}\label{killmajor:lasso}
-\underset{X}{minimize} \: \left \| V - F^{-1}X \right \|_2^2 + \lambda \left \| X \right \|_1 \\
-\end{equation}
-
-\begin{equation}
-\underset{\alpha}{minimize} \: \left \| V - F^{-1}D \alpha \right \|_2^2 + \lambda \left \| \alpha \right \|_1 \\
-\end{equation}
-
-Coordinate descent minimizes the objective by descending one coordinate at a time. At a given point, all $\alpha$ are fixed except for one, which gets minimized. If the problem has the LASSO form, it forms a parabola which can be minimized analytically.
-
-The Matrix Product $F^{-1}*D$ has the dimensionality $M*S$, where $M$ is the number of measurements and $S$ is the number of components in the dictionary. Since compressed sensing gets used with over-complete dictionaries, $S$ is larger than the number of pixels $N$. For MeerKAT scale data, the matrix product is too big to calculate explicitly.  The good news is that only small number of $\alpha$ are non-zero, so if there is a heuristic to find candidate $\alpha$'s we only need to calculate a subset of $F^{-1}*D$. It turns out, with the Starlet Basis one such heuristic exists.
-
-The question is, can the Coordinate Descent with exact transformations out-perform the major cycle approaches, which uses approximations.
-
-
+A proof-of-concept algorithm was developed that shows the prediction actually works in practice. It uses Coordinate Descent with the starlet transform, and only needs to calculate a subset of the matrix $F^{-1}$ for a reconstruction. The question remains how many columns of $F^{-1}$ are needed, and is it more efficient than an algorithm using the major cycle architecture.
