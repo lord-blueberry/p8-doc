@@ -35,27 +35,18 @@ def coordinate_descent(V_residual, x, lambda, max_iter):
 
 The simple version of coordinate descent converges to a solution which is similar to CLEAN. The convergence rate of coordinate descent is not well understood. Our image reconstruction problem falls in the class of quadratic programming, in coordinate descent converges at least linearly\cite{luo1992convergence}. In practice, the convergence rate can be sped up with heuristics like active set\cite{activeset} and $\lambda$\cite{lambda}. Furthermore, coordinate descent is robust, even when the residual vector is only approximated, which is useful for distributing the algorithm.
 
-The main drawback of the simple approach is the explicit calculation of the whole Fourier Transform Matrix $F^{-1}$.
+The simple approach calculates the whole Fourier Transform Matrix $F^{-1}$ explicitly. The upside is that we do an exact $w$-term correction. The downside is $F^{-1}$ is too large to keep in memory, and too expensive to calculate on the fly for the scale of MeerKAT reconstructions. 
 
-In practical applications it works well enough and is primed for a lot of heuristics. It is robust and primed for heuristics.
-
-The  the algorithm has been working well enough and is used for VIS-CS \cite{felix2017compressed} compressed sensing reconstruction. \ref 
-The simple version of coordinate descent simply runs through every column in sequence. The simple version of the algorithm simply calculates the column of the Fourier Transform Matrix  for each pixel.
-
-This algorithm calulates the whole Fourier Transform Matrix $F^{-1}$. But we do not need any approximation algorithms like the non-uniform FFT, and we can handle the $w$-term easily.
+The starlet transform is used from here on. Instead of reconstructing the image directly, we represent the image as a combination of starlets $x = D\alpha$. Where $D$ is an over-complete dictionary of starlets is the starlet component vector. Since the dictionary $D$ is over-complete, it is a matrix with more columns than rows, and does generally not have an inverse  $D^{-1}x \neq \alpha$. However, the starlet transform does have an pseudo-inverse. In this work, the pseudo inverse is used to only look at a subset of starlets, which is likely to be non-zero.
 
 
-
-Heuristic heaven
-
-We use the starlet transform \eqref{cd:starlet}
-
-$x = D\alpha$
+The new objective \eqref{cd:starlet} tries to find th
 
 \begin{equation}\label{cd:starlet}
-\underset{x}{minimize} \: \left \| V - F^{-1}D\alpha \right \|_2^2 + \lambda \left \| \alpha \right \|_1 \\
+\underset{\alpha}{minimize} \: \left \| V - F^{-1}D\alpha \right \|_2^2 + \lambda \left \| \alpha \right \|_1 \\
 \end{equation}
 
+Starlet transform can be used to estimate the component vector
 parabola for each starlet.
 
 
