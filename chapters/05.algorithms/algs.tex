@@ -40,9 +40,11 @@ The simple approach calculates the whole Fourier Transform Matrix $F^{-1}$ expli
 The starlet transform is used from here on. Instead of reconstructing the image directly, we represent the image as a combination of starlets $x = D\alpha$. Where $D$ is an over-complete dictionary of starlets is the starlet component vector. Since the dictionary $D$ is over-complete, it is a matrix with more columns than rows, and does generally not have an inverse  $D^{-1}x \neq \alpha$. However, the starlet transform does have an pseudo-inverse. In this work, the pseudo inverse is used to only look at a subset of starlets, which is likely to be non-zero.
 
 
-The new objective \eqref{cd:starlet} tries to find th
 
-\begin{equation}\label{cd:starlet}
+
+The new objective \eqref{cd:starletobjective} tries to find th
+
+\begin{equation}\label{cd:starletobjective}
 \underset{\alpha}{minimize} \: \left \| V - F^{-1}D\alpha \right \|_2^2 + \lambda \left \| \alpha \right \|_1 \\
 \end{equation}
 
@@ -55,9 +57,30 @@ parabola for each starlet.
 
 
 \subsection{Starlet Transform} \label{cd:starlets}
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.4\linewidth}
+		\includegraphics[width=\linewidth]{./chapters/05.algorithms/starlets/scaling.png}
+		\caption{Scaling function}
+		\label{cd:starlets:scaling}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.4\linewidth}
+		\includegraphics[width=\linewidth]{./chapters/05.algorithms/starlets/wavelet.png}
+		\caption{Wavelet function}
+		\label{cd:starlets:wavelet}
+	\end{subfigure}
+	\caption{Scaling and wvelet function of the starlet wavelet. Source: \cite{starck2015starlet}}
+	\label{cd:starlets:figure}
+\end{figure}
+
+Starlet is a wavelet
+
+
 Starlet is a multi-scale wavelet representation which were specifically developed for astronomy.
 
 Over-complete representation. More starlets than there are pixels. Sparse representation, the number of non-zero starlets is smaller than the number of pixels
+
 
 Starlets as a series of convolutions.
 
@@ -80,5 +103,9 @@ The higher the number, the more likely this component is to be non-zero. It is e
 Stupid approach with line search. Could be done more efficiently by using the histogram of the starlet level.
 
 \subsection{Implementation}
+
+\begin{equation}\label{cd:starlet}
+\underset{\alpha}{minimize} \: \left \| V - F^{-1}D\alpha \right \|_2^2 + \lambda \left \| \alpha \right \|_1 \\
+\end{equation}
 coordinate descent with active set heuristic
 
