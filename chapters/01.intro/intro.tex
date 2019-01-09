@@ -3,32 +3,16 @@ An instrument in the real world measures noisy data. Measurements are corrupted 
 
 In the past, image reconstructions applied simple heuristics and approximated a likely image. How close the approximation was to the observed image was in general not known. The theory of compressed sensing\cite{candes2006robust}\cite{donoho2006compressed} introduced a new theoretical framework under which image reconstructions can be analysed. This has lead to new algorithms which apply the theory of compressed sensing. Under the right conditions, the compressed sensing reconstructions are guaranteed to find the observed image. Furthermore they have the potential to super-resolve the observed image, creating a reconstruction above the accuracy limit of the instrument.
 
-Image reconstruction problems appear in different fields, from MRI scans in medicine to X-Ray reconstructions in Astronomy. 
+This work applies compressed sensing image reconstruction to the field of radio astronomy. The new MeerKAT radio interferometer poses a reconstruction problem on a new scale of data volume, the raw measurements easily take up several terabytes of disk space. The focus of this work is creating a scalable compressed sensing image reconstruction algorithm.
 
-CLEAN, and its own architecture. Lots of approximations.
+The current state of the art reconstruction algorithm is based on CLEAN\cite{rich2008multi}\cite{rau2011multi}. It is based on a simple heuristic and was developed before the theory of compressed sensing was known.   reconstruction algorithm is still the state of the art. It is based on heuristics before the theory of compressed sensing was known. In recent years, compressed sensing reconstruction algorithms were developed\cite{girard2015sparse}\cite{dabbech2018cygnus}\cite{birdi2018sparse}. They beat CLEAN in terms of reconstruction quality, producing super-resolved reconstructions. However, CLEAN has the upper hand in runtime complexity. Therefore, an efficient implementation of CLEAN is still the go to reconstruction algorithm for MeerKAT data.
 
-Compressed Sensing reconstructions were able to super-resolve images, but were more complex to solve
+The efficient implementation use CLEAN in the Major Cycle Architecture, which was developed with CLEAN in mind. Current compressed sensing algorithms use a similar architecture. So far, little research has gone into different architectures for compressed sensing reconstructions in radio astronomy. This work explores different architectures for compressed sensing reconstructions with the hope of reducing the computational complexity. 
 
-A different architecture if CS reconstructions could scale better. In this project, a proof of concept reconstruction algorithm was developed. It gets rid of the approximations of CLEAN. The simple structure lends itself to distribution. However, the overall complexity of the new algorithm mainly depends on the number of Visibilities. For MeerKAT reconstructions, the Visibilities is the largest number. Even for the theoretical ideal algorithm, it cannot improve on the current Compressed Sensing Reconstructions in terms of complexity. 
+A new proof-of-concept reconstruction algorithm was developed with a simplified architecture. It was tested on simulated MeerKAT data and the lower-bound asymptotic complexity was evaluated. The new algorithm scales independently of the image size, but scales worse with the number of input measurements compared to CLEAN. For the MeerKAT image reconstruction, the number of input measurements tends to be the largest of all numbers in the problem. Even though the algorithm could be improved further, it is unlikely to beat CLEAN reconstructions in terms of runtime complexity on MeerKAT data.
 
-
-
-In the real world, measurements are corrupted by noise. Noise is introduced by the measurement instrument itself, but additional interference sources may be present. For example in Audio Recording, the microphone measures a noisy signal from the real world tone, and a passing car introduces additional interference. In a controlled environment like a recording studio, sound proofing handles the interference and only the noisy measurements have to be dealt with. Controlled environments are not always possible, that's why in Signal Processing the fields of de-noising and reconstruction exists. With those, we want to reconstruct the truly observed signal without the noise or external interference.
-
-Image de-noising and reconstruction problems appear in different fields. In Astronomy, Radio Interferometers pose a challenging image reconstruction problem. The Interferometer measures a noisy image of the sky, corrupted by various sources like the ionosphere, passing satellites and the Interferometer itself. In the past, reconstruction algorithms used simple approximations to correct the image. For new interferometers like MeerKAT the approximations of the past do not hold. Furthermore, the larger MeerKAT instrument poses the reconstruction problem on a new data volume.
-
-CLEAN algorithm\cite{rich2008multi}\cite{rau2011multi}
-
-Reconstruction algorithms for MeerKAT should handle the more complex effects of ionosphere and the like, while scaling even more on larger problem instances. Reconstruction algorithms using the theory of compressed sensing\cite{candes2006robust}\cite{donoho2006compressed} showed higher reconstruction accuracy than state of the art algorithms. However, they currently do require more computing hardware. This project searches for a way to make CS Algorithm scale on MeerKAT data size.
-
-SASIR\cite{girard2015sparse} or more recently reconstructions using SARA \cite{dabbech2018cygnus} \cite{birdi2018sparse}
-
-
-
-A different reconstruction algorithm
-
-\subsection{The basic Measurement Equation of a radio interferometer}\label{intro:basic}
-Real world radio interferometers have complicated measurement equations. They become even more complicated for large interferometers like MeerKAT. These problems get addressed in section \ref{meerkat}. This section looks at the basic measurement equation of a radio interferometer \eqref{intro:measurement} and discusses the two fundamental challenges for image reconstruction. 
+\subsection{The basic Measurement Equation of a radio interferometry}\label{intro:basic}
+Real world radio interferometers have complicated measurement equations. They become even more complicated for large interferometers like MeerKAT. These problems get addressed in section \ref{meerkat}. This section looks at the basic measurement equation of a radio interferometer \eqref{intro:measurement} and discusses the two fundamental challenges for radio interferometry image reconstruction. 
 
 \begin{equation}\label{intro:measurement}
 V(u, v) = \int\int I(x, y) e^{2 \pi i (ux+vy)} \: dx \: dy
@@ -41,18 +25,19 @@ An interferometer measures Fourier Components $V$ (called Visibilities in Radio 
 	\item Incomplete Visibility coverage. 
 \end{enumerate} 
 
-\textit{Property 1:} We want to reconstruct an image with uniformly spaced pixels. The instrument defines the sampling pattern in Visibility space and does not correspond to the exact pixels of the reconstructed image. This property keeps us from using the Fast Fourier Transform. The naive inverse Fourier Transform can still be calculated, but it has a quadratic runtime and does not scale to the data volume of interferometers. Current reconstruction algorithms use the non-uniform Fast Fourier Transform (nuFFT). The nuFFT approximates the non-uniform Fourier Transform. 
+\textit{Property 1:} We want to reconstruct an image with uniformly spaced pixels. The instrument defines the sampling pattern in Visibility space and does not correspond to the exact pixels of the reconstructed image. This property keeps us from using the Fast Fourier Transform. The naive inverse Fourier Transform can still be calculated, but it has a quadratic runtime and does not scale to the data volume of interferometers. Current reconstruction algorithms use the non-uniform Fast Fourier Transform. The non-uniform FFT approximates the non-uniform Fourier Transform. 
 
-\textit{Property 2:} Interferometers sample only a limited set of Visibilities. It does not have the whole information for reconstruction. This has the effect that the instrument introduces fake structures into the image. With only knowing the incomplete set of Visibilities, a reconstruction algorithm has to decide which image structures were truly measured, and which are due to the instrument. This forms an ill-posed inverse problem. There are many images that fit the measurements, and a small change in the Visibilities can lead to a very different reconstruction. 
+\textit{Property 2:} Interferometers sample only a limited set of Visibilities. It does not have all information for reconstruction. When the inverse Fourier Transform is applied on the Visibilities, the resulting image is corrupted by the incomplete Visibilities. It contains structures which where introduced by the interferometer and were not observed. With only knowing the incomplete set of Visibilities a reconstruction algorithm has to decide which image structures were truly measured, and which are due to the instrument. This forms an ill-posed inverse problem. There are many images that fit the measurements, and a small change in the Visibilities can lead to a very different reconstruction. 
 
-The CLEAN algorithms approximate the observed image with a deconvolution: The inverse Fourier Transform produces a corrupted image. The observed image was convolved with a known Point Spread Function (PSF), which represents the instrument. Finding a deconvolution reconstructs the observed image. The deconvolution is still an ill-posed problem, there are potentially many possible deconvolutions, and a small change in the input can lead to a very different output. Furthermore the CLEAN algorithms produce a greedy approximation of the deconvolution. 
+CLEAN represents the instrumental effect with a Point Spread Function (PSF). After the non-uniform FFT produced the 'dirty' image, CLEAN tries to reconstruct observed image with a deconvolving the 'dirty' image with the PSF. Note however that both CLEAN nor the non-uniform FFT are approximations. In real world reconstructions, these two approximations are used in the major cycle architecture to increase the reconstruction accuracy. 
 
-A CLEAN image reconstruction uses two different approximation algorithms: The nuFFT, which approximates the inverse Fourier Transform, and the CLEAN deconvolution, which approximately removes instrumental effects. In real world reconstructions, these two approximations are used in the major cycle architecture to further increase its accuracies.
+%The CLEAN algorithms approximate the observed image with a deconvolution: The inverse Fourier Transform produces a corrupted image. The observed image was convolved with a known Point Spread Function (PSF), which represents the instrument corruption. Finding a deconvolution reconstructs the observed image. The deconvolution is still an ill-posed problem, there are potentially many possible deconvolutions, and a small change in the input can lead to a very different output. Furthermore the CLEAN algorithms produce a greedy approximation of the deconvolution. 
+
 
 \subsection{The Major Cycle Architecture}
-Major cycle was created with CLEAN in mind, but the CS approaches use a similar architecture
+Major cycle was created with CLEAN in mind. Compressed sensing reconstructions use essentially the same architecture with minor modifications. 
 
-An image reconstruction for radio interferometers consists of two different steps: A nuFFT, which approximates the inverse Fourier Transform efficiently and an image constraint/deconvolution algorithm, which approximates the instrumental effects on the image (for example CLEAN). These two approximations are an error source of the reconstruction. The major cycle architecture \ref{intro:major} therefore tries to iteratively minimize the errors of the nuFFT and the deconvolution.
+A CLEAN image reconstruction for radio interferometers consists of two different steps: A non-uniform FFT, which approximates the inverse Fourier Transform efficiently and an deconvolution algorithm, which approximates the instrumental effects on the image (typically based on CLEAN). These two approximations are an error source of the reconstruction. The major cycle architecture \ref{intro:major} therefore tries to iteratively minimize the errors of the non-uniform FFT and the deconvolution over several iterations.
 
 \begin{wrapfigure}{r}{0.6\textwidth}
 	\centering
@@ -63,9 +48,11 @@ An image reconstruction for radio interferometers consists of two different step
 	\vspace{-10pt}
 \end{wrapfigure}
 
-The first major cycle uses the non-uniform inverse FFT to approximate the 'dirty' image from the Visibilities. The image constraint/Deconvolution algorithm decides parts which parts belong to the observed image and which are due to instrumental effects and other noise sources. It then returns the noise part, which get transformed back into residual Visibilities. The next major cycle iteration continues with the residual Visibilities. The residual Visibilities get minimized until they contain only the instrumental effects and noise.
+The first major cycle uses the non-uniform inverse FFT to approximate the 'dirty' image from the Visibilities. The deconvolution algorithm decides parts which parts belong to the observed image and which are due to instrumental and other noise effects. It returns the noise part of the image, which gets transformed back into residual Visibilities. The next major cycle iteration continues with the residual Visibilities. The residual Visibilities get minimized until they contain only the instrumental effects and noise.
 
 After several major cycles the residual  on a regularly spaced image which has a small error from non-uniform samples, and a small error from incomplete measurements.
+
+
 
 A single major cycle is expensive. MeerKAT needs several cycles to have a good image result with a CLEAN algorithm.
 
