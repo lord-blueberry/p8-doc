@@ -1,11 +1,9 @@
 \section{Compressed Sensing Image Reconstruction for MeerKAT} \label{intro}
-Image reconstruction and ill-posed inverse problems
+An instrument in the real world measures noisy data. Measurements are corrupted by noise, interference sources or the measurement instrument itself. Image reconstruction problems appear when one tries to find the observed image of the instrument, removing the corruption from the data. This forms an ill-posed inverse problem: A small change in the measurements may create very different reconstructions, and many possible images match the measurements. An image reconstruction algorithm therefore has to find the observed image from a potentially large set of possible images.
 
-Heuristics
+In the past, image reconstructions applied simple heuristics and approximated a likely image. How close the approximation was to the observed image was in general not known. The theory of compressed sensing\cite{candes2006robust}\cite{donoho2006compressed} introduced a new theoretical framework under which image reconstructions can be analysed. This has lead to new algorithms which apply the theory of compressed sensing. Under the right conditions, the compressed sensing reconstructions are guaranteed to find the observed image. Furthermore they have the potential to super-resolve the observed image, creating a reconstruction above the accuracy limit of the instrument.
 
-Compressed sensing, theory how to solve the ill posed inverse problem. super resolution
-
-Radio Astronomy and the image reconstruction problem. Of interferometers.
+Image reconstruction problems appear in different fields, from MRI scans in medicine to X-Ray reconstructions in Astronomy. 
 
 CLEAN, and its own architecture. Lots of approximations.
 
