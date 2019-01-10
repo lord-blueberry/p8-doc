@@ -37,8 +37,7 @@ The simple version of coordinate descent converges to a solution which is simila
 
 The simple approach calculates the whole Fourier Transform Matrix $F^{-1}$ explicitly. The upside is that we do an exact $w$-term correction. The downside is $F^{-1}$ is too large to keep in memory, and too expensive to calculate on the fly for the scale of MeerKAT reconstructions. 
 
-The starlet transform is used from here on. Instead of reconstructing the image directly, we represent the image as a combination of starlets $x = D\alpha$. Where $D$ is an over-complete dictionary of starlets is the starlet component vector. Since the dictionary $D$ is over-complete, it is a matrix with more columns than rows, and does generally not have an inverse  $D^{-1}x \neq \alpha$. However, the starlet transform does have an pseudo-inverse. In this work, the pseudo inverse is used to only look at a subset of starlets, which is likely to be non-zero.
-
+The starlet transform is used from here on. Instead of reconstructing the image directly, we represent the image as a combination of starlets $x = D\alpha$. Where $D$ is an over-complete dictionary of starlets, and $\alpha$ is the starlet component vector. Since the dictionary $D$ is over-complete, it is a matrix with more columns than rows, and does generally not have an inverse (more formally:$D^{-1}x \neq \alpha$). However, the starlet transform does have an pseudo-inverse. In this work, the pseudo inverse is used to only look at a subset of starlet components which are likely to be non-zero, and only evaluate a subset of columns of $F^{-1}$ .
 
 \subsection{Starlet Transform} \label{cd:starlets}
 
@@ -58,23 +57,23 @@ The starlet transform is used from here on. Instead of reconstructing the image 
 	\label{cd:starlets:figure}
 \end{figure}
 
-The starlet transform is based on the starlet wavelet shown in figure \ref{cd:starlets:figure}. It decomposes an image into multiple layers, each representing parts of the image at different scales. The lower layers contain small structures like point sources, while the higher layers contain extended emissions like hydrogen clouds. The transformation from starlet space back into image space is a simple addition: All layers added together result in the original image. The transformation from image to starlet space is done with a multi-scale wavelet decomposition, which is explained in more detail.
+The starlet transform is an Isotropic Undecimated Wavelet Transform (IUWT) based on the starlet wavelet shown in figure \ref{cd:starlets:figure}. The IUWT decomposes an image into multiple layers, each representing parts of the image at different scales. The lower layers contain small structures like point sources, while the higher layers contain extended emissions like hydrogen clouds. The two transforms are shown in equation \eqref{cd:starlet:backwards} and \eqref{cd:starlet:decomposition}. The transformation from starlets to image $x$, shown in \eqref{cd:starlet:backwards}, is a simple addition of all $J$ layers. The transformation from image $x$ to starlet space, shown in \eqref{cd:starlet:decomposition} is done with a multi-scale wavelet decomposition.
+
+\begin{equation} \label{cd:starlet:backwards}
+\bm{x} = \bm{w_0} + \bm{w_1} + \ldots + \bm{w_{J-1}} + \bm{c_J}
+\end{equation}
 
 \begin{equation}\label{cd:starlet:decomposition}
 	\begin{split}
-		c_0 &= x
+		c_0 &= \bm{x} \star S_0 \\
+		\bm{w_0} &= \bm{x} - c_0
 	\end{split}
 	\qquad
 	\begin{split}
 		c_1 &= c_0 \star S_1 \\
 		\bm{w_1} &= c_0 - c_1
 	\end{split}
-	\qquad
-	\begin{split}
-		c_2 &= c_1 \star S_2 \\
-		\bm{w_2} &= c_1 - c_2
-	\end{split}
-	\quad \ldots \quad
+	\qquad \ldots \qquad
 	\begin{split}
 		c_{J-1} &= c_{J-2} \star S_{J-1} \\
 		\bm{w_{J-1}} &= c_{J-2} - c_{J-1}
@@ -85,33 +84,35 @@ The starlet transform is based on the starlet wavelet shown in figure \ref{cd:st
 	\end{split}
 \end{equation}
 
+Let us look at the multi-scale wavelet decomposition in more detail. $w_i$ represents the starlet components at layer $i$, where $w_0$ contains the smallest structures in the image, and $w_{J-1}$ contains the largest structures. Note that the starlets $w_i$, $c_i$ and the image $x$ all have the same dimensions. $c_i$ contains an ever increasingly blurred version of the image $x$. $c_i$ represents the image convolved with all the scaling functions $S_0, S_1, \ldots, S_i$, where $S_i$ is the scaling function shown in figure \ref{cd:starlets:scaling} of the layer $i$. The scaling function increases in size for each successive layer. 
+
+The decomposition starts iteratively, blurrs the image $x$ with the smallest scaling function $S_0$. 
+
+
+The last, heavily blurred $c_J$ contains the structures which were too big to represent with the largest starlets, and is the last layer of the decomposition.
+
+This is an over-complete representation. Many different components can explain the same pixel.
 
 
 
-The different layers are calculated with a multi-scale wavelet decomposition and 
-
- It separates small structures like point sources from extended emissions like hydrogen clouds into separate images.  which uses the starlet wavelet shown in figure \ref{cd:starlets:figure}. The multi-scale decomposition keeps 
-
-
-Starlet is a multi-scale wavelet representation which were specifically developed for astronomy.
-
-Over-complete representation. More starlets than there are pixels. Sparse representation, the number of non-zero starlets is smaller than the number of pixels
-
-
-Starlets as a series of convolutions.
-
-Forward transform, from image to starlets
-
-From Starlets to image
 
 \subsection{Active set heuristic with Starlets}\label{cd:heuristic}
 Even though the starlets are an over-complete dictionary, they have an approximate transform from image to starlet space. For Coordinate Descent, this can be used as a active set heuristic: We try to find the coefficients which are likely to be non-zero. This helps us so we do not need to calculate the whole matrix product $F^{-1}D$. We only use columns that are likely to be not zero.
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=0.5\linewidth]{./chapters/05.algorithms/sim02/starlets0.png}
-	\caption{Starlet Level 0}
-	\label{alg:heuristic:starlet}
+	\begin{subfigure}[b]{0.45\linewidth}
+		\includegraphics[width=\linewidth]{./chapters/05.algorithms/sim02/sim02_point_dirty.png}
+		\caption{Dirty Image.}
+		\label{cd:heuristic:dirty}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.45\linewidth}
+		\includegraphics[width=\linewidth]{./chapters/05.algorithms/sim02/starlets0.png}
+		\caption{Layer $w_0$ of the starlet transform.}
+		\label{cd:heuristic:starlet}
+	\end{subfigure}
+	\caption{Dirty map and $w_0$ starlet layer. The right image shows the probability distribution for point sources in the dirty image.}
+	\label{cd:heuristic:figure}
 \end{figure}
 
 The higher the number, the more likely this component is to be non-zero. It is essentially a probability distribution for which starlet components are non-zero.
