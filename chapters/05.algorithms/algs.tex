@@ -1,7 +1,7 @@
 \section{Compressed Sensing with Coordinate Descent}\label{cd}
 The idea behind compressed sensing is we use prior information about the image, and find the most likely image $x$ from all possible solutions. In practice, we formulate a minimization problem with a data and regularization term. The data term forces the image to be as close to the measured Visibilities as possible, and the regularization term tells us how likely the image is to be true. 
 
-The regularization is responsible for an accurate reconstruction. In this work, two regularizations are used. The L1 pixel regularization is used to demonstrate a simple version of the coordinate descent algorithm. For the actual algorithm starlet regularization is used. Starlets have been used as regularization for the LOFAR interferometer\cite{girard2015sparse}, which has been shown to work.
+The regularization is responsible for an accurate reconstruction. In this work, two regularizations are used. The L1 pixel regularization is used to demonstrate a simple version of the coordinate descent algorithm. For the actual algorithm starlet regularization is used. Starlets have been used as regularization for the LOFAR interferometer\cite{girard2015sparse}, which was able to produce super-resolved reconstructions.
 
 First, let us look at the coordinate descent algorithm in its simplest form, and discuss its properties. we want to minimize the objective \eqref{cd:clean}, where the data term $\left \| V - F^{-1}x \right \|_2^2$ forces the image to be close to the Visibilities $V$, and the regularization term $\left \| x \right \|_1$ forces the image to have as few non-zero pixels as possible. The parameter $\lambda$ represents our trade-off between reconstruction accuracy and regularization. 
  
@@ -37,9 +37,10 @@ The simple version of coordinate descent converges to a solution which is simila
 
 The simple approach calculates the whole Fourier Transform Matrix $F^{-1}$ explicitly. The upside is that we do an exact $w$-term correction. The downside is $F^{-1}$ is too large to keep in memory, and too expensive to calculate on the fly for the scale of MeerKAT reconstructions. 
 
-The starlet transform is used from here on. Instead of reconstructing the image directly, we represent the image as a combination of starlets $x = D\alpha$. Where $D$ is an over-complete dictionary of starlets, and $\alpha$ is the starlet component vector. Since the dictionary $D$ is over-complete, it is a matrix with more columns than rows, and does generally not have an inverse (more formally:$D^{-1}x \neq \alpha$). However, the starlet transform does have an pseudo-inverse. In this work, the pseudo inverse is used to only look at a subset of starlet components which are likely to be non-zero, and only evaluate a subset of columns of $F^{-1}$ .
+The starlet transform is used from here on. Instead of reconstructing the image directly, we represent the image as a combination of starlets $x = D\alpha$. Where $D$ is an over-complete dictionary of starlets, and $\alpha$ is the starlet component vector. Since the dictionary $D$ is over-complete, it is a matrix with more columns than rows, and does generally not have an inverse (more formally: $D^{-1}x \neq \alpha$). However, the starlet transform does have an pseudo-inverse. In this work, the pseudo inverse is used to only look at a subset of starlet components which are likely to be non-zero, and only evaluate a subset of columns of $F^{-1}$ .
 
 \subsection{Starlet Transform} \label{cd:starlets}
+First how the starlet transform works, and then we discuss how we can leverage the properties to only use
 
 \begin{figure}[h]
 	\centering
@@ -93,10 +94,10 @@ The last, heavily blurred $c_J$ contains the structures which were too big to re
 
 This is an over-complete representation. Many different components can explain the same pixel.
 
+A trous algorithm
 
 
-
-\subsection{Active set heuristic with Starlets}\label{cd:heuristic}
+\subsubsection{Active set heuristic with Starlets}\label{cd:heuristic}
 
 The multi-scale decomposition can be used to estimate the which starlet components $w_i$ are likely to be non-zero. The figure \ref{cd:heuristic:figure} shows an example of the process. Each "pixel" in \ref{cd:heuristic:starlet} represents a starlet at scale 0, i.e. point sources. We can apply the shrink operator on the $w_0$ map, is essentially a parameter estimation. This property is used in the SASIR\cite{girard2015sparse} reconstruction, which uses the Fast Iterative Shrinkage-Thresholding Algorithm (FISTA) for optimization.
 
@@ -133,20 +134,13 @@ The objective function \eqref{cd:starlet} minimizes the starlet components $\alp
 \end{equation}
 
 There are still a few problems to solve, like how to handle the matrix product $F^{-1}D$, 
-
-How to iterate over the image in detail.
-
-
-
-\subsubsection{Handling the Matrix Product $F^{-1}D$}
-With the active set heuristic, we iterate over a limited number of starlet components at a time. The question remains, how the matrix product $F^{-1}D$ can be calculated efficiently. Since starlet transform is just made up of a couple of deconvolutions, we do not have to calculate the product $F^{-1}D$ explicitly. 
-
-$w_2 = (F^{-2}V \star S_0 \star S_1) - (F^{-2}V \star S_0 \star S_1 \star S_2)$.
-
-Convolution in image space is a multiplication in Visibility space. This means if we replace $x$ with the Visibilities $V$ and Fourier transform the kernel $FS_i = \hat{S_i}$ the rest, we $w_2 = F^{-1}V(\hat{S_0}\hat{S_1} - \hat{S_0}\hat{S_1}\hat{S_2}) $ which simplifies into 
-We can pre-calculate the convolutions for each layer $C_{w_2} = (\hat{S_0}\hat{S_1} - \hat{S_0}\hat{S_1}\hat{S_2})$
+With the active set heuristic, we iterate over a limited number of starlet components at a time. The question remains, how the matrix product $F^{-1}D$ can be calculated efficiently. Since starlet transform is just made up of a couple of convolutions, we do not have to calculate the product $F^{-1}D$ explicitly. Convolutions in image space are multiplications in Fourier space. 
+So for any starlet layer $w_i$ or $c_J$, we can pre-calculate a transform vector. 
+$w_2 = F^{-1}V * (\hat{S_0}\hat{S_1} - \hat{S_0}\hat{S_1}\hat{S_2})$
 
 How many layers are needed. starlets rise in pixels with $2^J$. Meaning if we want starlets over the whole image, the number of starlets rise logarithmically to the image dimensions.
+
+How to iterate over the image in detail.
 
 \subsubsection{Iteration scheme}
 Many ways to iterate over the image
