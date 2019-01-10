@@ -1,11 +1,11 @@
 \section{Compressed Sensing Image Reconstruction for MeerKAT} \label{intro}
-An instrument in the real world measures noisy data. Measurements are corrupted by noise, interference sources or the measurement instrument itself. Image reconstruction problems appear when one tries to find the observed image of the instrument, removing the corruption from the data. This forms an ill-posed inverse problem: A small change in the measurements may create very different reconstructions, and many possible images match the measurements. An image reconstruction algorithm therefore has to find the observed image from a potentially large set of possible images.
+An instrument in the real world measures noisy data. Measurements are corrupted by noise, interference sources or the measurement instrument itself. Image reconstruction problems appear when one tries to remove the corruption from the measurements and tries to find the observed image of the instrument. This leads to an ill-posed inverse problem: A small change in the measurements may create very different image reconstructions, and many possible images match the measurements. An image reconstruction algorithm therefore has to find the observed image from a potentially large set of possible images.
 
-In the past, image reconstructions applied simple heuristics and approximated a likely image. How close the approximation was to the observed image was in general not known. The theory of compressed sensing\cite{candes2006robust}\cite{donoho2006compressed} introduced a new theoretical framework under which image reconstructions can be analysed. This has lead to new algorithms which apply the theory of compressed sensing. Under the right conditions, the compressed sensing reconstructions are guaranteed to find the observed image. Furthermore they have the potential to super-resolve the observed image, creating a reconstruction above the accuracy limit of the instrument.
+In the past, image reconstructions applied simple heuristics and approximated a likely image. How close the approximation was to the observed image was in general not known. The theory of compressed sensing\cite{candes2006robust}\cite{donoho2006compressed} introduced a new theoretical framework under which image reconstructions can be analysed. This has lead rise to new reconstruction algorithms which apply the theory of compressed sensing. Under the right conditions, the compressed sensing reconstructions are guaranteed to find the observed image, and were able to produce super-resolved images in practical applications, creating reconstructions above the accuracy limit of the instrument.
 
-This work applies compressed sensing image reconstruction to the field of radio astronomy. The new MeerKAT radio interferometer poses a reconstruction problem on a new scale of data volume, the raw measurements easily take up several terabytes of disk space. The focus of this work is creating a scalable compressed sensing image reconstruction algorithm.
+This work applies compressed sensing image reconstruction to the field of radio astronomy. The new MeerKAT radio interferometer poses a reconstruction problem on a new scale of data volume. The raw measurements easily take up several terabytes of disk space. The focus of this work is creating a scalable compressed sensing image reconstruction algorithm.
 
-The current state of the art reconstruction algorithm is based on CLEAN\cite{rich2008multi}\cite{rau2011multi}. It is based on a simple heuristic and was developed before the theory of compressed sensing was known.   reconstruction algorithm is still the state of the art. It is based on heuristics before the theory of compressed sensing was known. In recent years, compressed sensing reconstruction algorithms were developed\cite{girard2015sparse}\cite{dabbech2018cygnus}\cite{birdi2018sparse}. They beat CLEAN in terms of reconstruction quality, producing super-resolved reconstructions. However, CLEAN has the upper hand in runtime complexity. Therefore, an efficient implementation of CLEAN is still the go to reconstruction algorithm for MeerKAT data.
+The current state of the art reconstruction algorithm for MeerKAT is based on CLEAN\cite{rich2008multi}\cite{rau2011multi}. It is a reconstruction using a simple heuristic and was developed before the theory of compressed sensing was known. In recent years, compressed sensing reconstruction algorithms were developed for radio interferometers\cite{girard2015sparse}\cite{dabbech2018cygnus}\cite{birdi2018sparse}. They beat CLEAN in terms of reconstruction quality, producing super-resolved reconstructions. However, CLEAN has the upper hand in runtime complexity. Therefore, an efficient implementation of CLEAN is still the go to reconstruction algorithm for MeerKAT data.
 
 The efficient implementation use CLEAN in the Major Cycle Architecture, which was developed with CLEAN in mind. Current compressed sensing algorithms use a similar architecture. So far, little research has gone into different architectures for compressed sensing reconstructions in radio astronomy. This work explores different architectures for compressed sensing reconstructions with the hope of reducing the computational complexity. 
 
@@ -52,33 +52,11 @@ The first major cycle uses the non-uniform inverse FFT to approximate the 'dirty
 
 After several major cycles the residual  on a regularly spaced image which has a small error from non-uniform samples, and a small error from incomplete measurements.
 
+Compressed sensing reconstructions essentially use the same architecture, although with minor alterations. In general, they keep a similar scheme of forward/backward non-uniform FFT, but do not use a deconvolution in image pace. Instead, they analyse constraints defined on the image (For example all pixels should be non-negative), and try to find the Visibilities that minimize the constraint violations.
 
+For CLEAN reconstructions, the forward/backward non-uniform FFT are the most expensive operations, while the deconvolution is negligible. The compressed sensing algorithms tend to require more major cycle iterations to converge and the image constraint analysis tends to be more expensive than CLEAN deconvolutions. Current research into compressed sensing reconstructions is focussed on reducing the number of major cycles\cite{dabbech2018cygnus}. 
 
-A single major cycle is expensive. MeerKAT needs several cycles to have a good image result with a CLEAN algorithm.
-
-
-Compressed Sensing reconstructions essentially use the same architecture. They do not use an explicit deconvolution anymore, but 
-
-Slightly different implementation in Compressed Sensing approaches, does not neatly fit in the figure \ref{intro:major}, but still gains the same advantages and disadvantages as the standard major cycle. 
-
-Compressed Sensing algorithms use essentially the same architecture. But in turn uses more major cylces, on top of being more expensive to compute inside a cycle. Even though it was shown to produce better reconstructions on different datasets, the added runtime is a big reason what keeps it from wide-spread adoption. 
-
-The question thefore is, can the overall complexity of the comporessed sensing reconstruction be reduced, if a different architecture is used.
-
-
-\subsection{Compressed Sensing Reconstructions}
-Compressed sening reconstructions use the 
- However, compressed Sensing algorithms come with the drawback of requiring more major cycles.
-
-MeerKAT due to wide field of view introduces even more troubles
-
-Current Compressed Sensing reconstructions reduce the number of major cycles. However, the question is if Compressed Sensing can use a different architecture, and scale better to problems of the size of MeerKAT.
-
-Furthermore on the new MeerKAT instruments, we have a big data problem. We want to create a large image from a large amount of Visibilities. 32k*32k pixels and terabytes of raw Visibility data. 
-
-Scalability is a big problem.
-
-There are ways to get rid of the major cycle, but overall the complexity could not be reduced.
+%Different architecture, but has to somehow handle all the difficulties that arise from imaging meerkat data.
 
 
 
