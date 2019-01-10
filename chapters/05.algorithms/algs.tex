@@ -97,35 +97,87 @@ This is an over-complete representation. Many different components can explain t
 
 
 \subsection{Active set heuristic with Starlets}\label{cd:heuristic}
-Even though the starlets are an over-complete dictionary, they have an approximate transform from image to starlet space. For Coordinate Descent, this can be used as a active set heuristic: We try to find the coefficients which are likely to be non-zero. This helps us so we do not need to calculate the whole matrix product $F^{-1}D$. We only use columns that are likely to be not zero.
+
+The multi-scale decomposition can be used to estimate the which starlet components $w_i$ are likely to be non-zero. The figure \ref{cd:heuristic:figure} shows an example of the process. Each "pixel" in \ref{cd:heuristic:starlet} represents a starlet at scale 0, i.e. point sources. We can apply the shrink operator on the $w_0$ map, is essentially a parameter estimation. This property is used in the SASIR\cite{girard2015sparse} reconstruction, which uses the Fast Iterative Shrinkage-Thresholding Algorithm (FISTA) for optimization.
 
 \begin{figure}[h]
 	\centering
 	\begin{subfigure}[b]{0.45\linewidth}
 		\includegraphics[width=\linewidth]{./chapters/05.algorithms/sim02/sim02_point_dirty.png}
-		\caption{Dirty Image.}
+		\caption{Dirty Image with two point sources.}
 		\label{cd:heuristic:dirty}
 	\end{subfigure}
 	\begin{subfigure}[b]{0.45\linewidth}
 		\includegraphics[width=\linewidth]{./chapters/05.algorithms/sim02/starlets0.png}
-		\caption{Layer $w_0$ of the starlet transform.}
+		\caption{Layer $w_0$ of the multi-scale decomposition.}
 		\label{cd:heuristic:starlet}
 	\end{subfigure}
 	\caption{Dirty map and $w_0$ starlet layer. The right image shows the probability distribution for point sources in the dirty image.}
 	\label{cd:heuristic:figure}
 \end{figure}
 
-The higher the number, the more likely this component is to be non-zero. It is essentially a probability distribution for which starlet components are non-zero.
+For our purposes, we use the result of the decomposition as a probability distribution. The higher the values of the decomposed $w_i$, the more likely it is to be non-zero.
 
-Stupid approach with line search. Could be done more efficiently by using the histogram of the starlet level.
+the X highest values of the $w_i$ decomposition are put into the active set. Only components in the active set get optimized.
 
-\subsection{Implementation}
+Note however that the different locations are dependent on each other. The image \ref{cd:heuristic:starlet} shows two areas for the two point sources. From the $w_0$ map alone it is hard to know if the center blob is due to a single point source, or multiple point sources in a small area.
+
+
+\subsection{Coordinate Descent Implementation}
+Proof of concept implementation. There are many ways to improve the efficiency and the convergence speed. It is here to show  the general if it is possible of the approach and if we can truly only calculate a subset of $F^{-1}$ columns.
+
+The objective function \eqref{cd:starlet} minimizes the starlet components $\alpha$. This objective leads again to a parabola in the one dimensional case, and we can analytically find the optimum for a single component when all others are fixed. 
 
 \begin{equation}\label{cd:starlet}
 \underset{\alpha}{minimize} \: \left \| V - F^{-1}D\alpha \right \|_2^2 + \lambda \left \| \alpha \right \|_1 \\
 \end{equation}
+
+There are still a few problems to solve, like how to handle the matrix product $F^{-1}D$, 
+
+How to iterate over the image in detail.
+
+
+
+\subsubsection{Handling the Matrix Product $F^{-1}D$}
+With the active set heuristic, we iterate over a limited number of starlet components at a time. The question remains, how the matrix product $F^{-1}D$ can be calculated efficiently. Since starlet transform is just made up of a couple of deconvolutions, we do not have to calculate the product $F^{-1}D$ explicitly. 
+
+$w_2 = (F^{-2}V \star S_0 \star S_1) - (F^{-2}V \star S_0 \star S_1 \star S_2)$.
+
+Convolution in image space is a multiplication in Visibility space. This means if we replace $x$ with the Visibilities $V$ and Fourier transform the kernel $FS_i = \hat{S_i}$ the rest, we $w_2 = F^{-1}V(\hat{S_0}\hat{S_1} - \hat{S_0}\hat{S_1}\hat{S_2}) $ which simplifies into 
+We can pre-calculate the convolutions for each layer $C_{w_2} = (\hat{S_0}\hat{S_1} - \hat{S_0}\hat{S_1}\hat{S_2})$
+
+How many layers are needed. starlets rise in pixels with $2^J$. Meaning if we want starlets over the whole image, the number of starlets rise logarithmically to the image dimensions.
+
+\subsubsection{Iteration scheme}
+Many ways to iterate over the image
+
+\begin{lstlisting} 
+def coordinate_descent(V_residual, x, lambda, max_iter):
+	for k in range(0, max_iter):
+		for i in pixels_row:
+			for j in pixels_column:
+				x_old = x[i, j]
+				fourier_column = calculate_fourier_transform(i, j)
+				fr = real(fourier_column)
+				fi = imag(fourier_column)
+				rr = real(V_residual)
+				ri = imag(V_residual)
+				
+				#find apex
+				a = sum(fr**2 + 2*fr*fi + fi**2)
+				b = sum(fr*rr + fr*ri + fi*rr + fi*ri)
+				x_new = b / a + x_old
+				
+				x_new = shrink(x_new, lambda)
+				x[i, j] = x_new
+				V_residual = V_residual - fourier_column * (x_new - x_old)
+\end{lstlisting}\label{cd:implementation}
+
 coordinate descent with active set heuristic
 
-
+\subsubsection{Non-uniform FFT approximations}
 Non uniform FFT to calculate the convolution KERNELS!!
+
+
+Stupid approach with line search. Could be done more efficiently by using the histogram of the starlet level.
 
