@@ -3,7 +3,6 @@ There is little research in exploring a different architecture for Compressed Se
 
 There are ways to form a different architecture. However, the advent of self-calibration pushes a forward-backward kind of architecture on the reconstruction. 
 
-
 \subsection{Separating the Major Cycle into two Optimization Problems}
 The major cycle reduces two errors simultaneously. The error introduced by the non-uniform FFT approximation, and the error introduced by the deconvolution approximation. In a sense, the major cycle is a simple optimization algorithm: It iteratively calls the non-uniform FFT and deconvolution approximations with the error from the last iteration, until the error is below a certain threshold.
 
@@ -24,6 +23,7 @@ However, the problem is that the imaging algorithm should also be able to calibr
 
 For calibrated data, this approach may be potentially faster. but since MeerKAT will be difficult to calibrate correctly, this is unlikely.
 
+Fourier Transform for PSF
 
 \subsection{Reconstruction on the Sphere}
 The signal naturally lives on the celestial sphere.
