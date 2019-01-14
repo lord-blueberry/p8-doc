@@ -1,5 +1,12 @@
 \section{Compressed Sensing with Coordinate Descent}\label{cd}
+The three components of a compressed sensing reconstruction. Using a combination so we do not need to calculate the whole Fourier Transform matrix. Regularization represents our previous knowledge of possible images. With it we find the most likely image which represents our data.
+
 Doing compressed Sensing with Coordinate Descent and starlet regularization.
+
+
+
+
+
 
 The idea behind compressed sensing is we use prior information about the image, and find the most likely image $x$ from all possible solutions. In practice, we formulate a minimization problem with a data and regularization term. The data term forces the image to be as close to the measured Visibilities as possible, and the regularization term tells us how likely the image is to be true. 
 

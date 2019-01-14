@@ -1,9 +1,10 @@
 \section{Results and Scalability of Coordinate Descent}
-Two Tasks: Show that coordinate descent works, and show its scalability. To show that it works, it was tested on two simulated MeerKAT data sets and compared to clean.
+%\textbf{Coordinate Descent comparison to CLEAN reconstruction}
+Show the imaging results on simulated meerkat data.
 
-Show that the proof-of concept algorithms 
+Show scalability on the numbers of real meerkat observations
 
-Scalability is harder to analyse for Coordinate Descent. As mentioned in previous chapters, it does not have fast convergence guarantees. But with the heuristics  but it is ripe for heuristics that work well for the special case. Therefore it was analysed what an ideal Coordinate Descent implementation would need in terms of complexity.
+Proof-of-concept algorithms was not possible to calculate on real observations. Data too big, reading the data alone is a challenge.
 
 
 
@@ -59,7 +60,7 @@ Not all point sources were detected in the 4 iterations of CD.
 
 
 
-\subsection{Scalability Comparison}
+\subsection{Scalability of CLEAN and Coordinate Descent}
 
 
 \begin{figure}[h]
@@ -78,11 +79,17 @@ Number of Visibilities $M$
 Number of Pixels $N$
 
 \subsubsection{Best Case for Coordinate Descent}
-
-Bunch of heuristics. There are a lot of little ways to optimize this algorithm. The question is, is it worth going further and try to improve the algorithm further. So we want to estimate the lower bound of the algorithm.
+Oracle performance of 
 
 Convergence is hard to determine in general. Following simplified assumptions were made: We have a heuristic with oracle performance. It returns only the locations of $\alpha$ in constant time. Furthermore, we assume all axes are independent from each other, only one descent per non-zero axis is necessary.
 $S$
+
+\begin{alignat*}{1}
+	\text{creating} \:S\: \text{columns of}\: F^{-1} &: S*3M\\
+	\text{locating} \:S\: \text{minima of} \:S\: \text{parabolas} &: S*8M\\
+	\text{calculating} \:J\: \text{Starlet layers} &: J * 2M
+\end{alignat*}
+
 
 $res * starlet = M$
 descent:
@@ -94,7 +101,7 @@ $residuals, fcol*diff =  M$
 $total_mit_gencol = 11M$
 
 \begin{equation}\label{results:cd:omega}
-	\Omega_{CD}(M, S, J) = S * 11M + J * 2M
+	\Omega_{CD}(M, S, J) = S*3M + S * 8M + J * 2M
 \end{equation}
 
 $S$ depends on the image content directly. For example if the image contains 15 point sources and five Gaussian extended emissions, then $S$ equals 20 non-zero components (if we assume the Gaussian sources require only one starlet for representation). Coordinate Descent therefore is independent of the image size $N$. It solely depends on the size of the measurements $M$, and the number of non-zero components in the dictionary $S$. 
@@ -107,8 +114,8 @@ Assumptions for $J$ = 10
 
 \begin{alignat*}{1}
 	\text{non-uniform FFT} &: M + 2N*ld(2N)\\
-	w \text{-stacking} &:M + W*(2N*ld(2N) + 2N) + N*ld(N)\\
-	\text{CLEAN deconvolution} &: D*2N
+	\text{non-uniform FFT with} \:w\text{-stacking} &:M + W*(2N*ld(2N) + 2N) + N*ld(N)\\
+	D\: \text{CLEAN deconvolution} &: D*2N
 \end{alignat*}
 
 (Cite New W-stacking approach)
@@ -129,9 +136,8 @@ W = $100$ depends on observation between 10, and hundreds. Depends on the observ
 D=35'000
 
 \subsubsection{Runtime Complexity on real MeerKAT data}
+In terms of $S$ for 
 Where the data comes from
-
-Too big to handle in a proof-of-concept implementation. 88GB of calibrated data
 
 Calibration: 
 Visibilities = 4060770
