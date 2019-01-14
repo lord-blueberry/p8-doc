@@ -1,14 +1,8 @@
 \section{Reconstruction and Scalability of Coordinate Descent}
 %\textbf{Coordinate Descent comparison to CLEAN reconstruction}
-In this section, we compare the Coordinate Descent reconstruction with CLEAN on simulated MeerKAT data, and compare the runtime complexity of the two approaches on a real-world MeerKAT observation. The real world observation was calibrated and averaged down to reduce its size to 88 Gigabytes. The raw, uncalibrated data ranges between 500 and 1000 Gigabytes. Data on this scale requires a mature pipeline for reading and image reconstruction. In this project, only a reconstruction with the WSCLEAN\cite{offringa2014wsclean} algorithm was feasible. and is later shown in figure \ref{results:wsclean}.
+In this section, we compare the Coordinate Descent reconstruction with CLEAN on simulated MeerKAT data, and compare the runtime complexity of the two approaches on a real-world MeerKAT observation. The real world observation was calibrated and averaged down to reduce its size to 88 Gigabytes. The raw, uncalibrated data ranges between 500 and 1000 Gigabytes. Data on this scale requires a mature pipeline for reading and image reconstruction. Within the time limit of this project, only a reconstruction with the WSCLEAN\cite{offringa2014wsclean} algorithm was possible and is shown in figure \ref{results:wsclean}.
 
- and on this 
-Show the imaging results on simulated meerkat data.
-
-Show scalability on the numbers of real meerkat observations
-
-Proof-of-concept algorithms was not possible to calculate on real observations. Data too big, reading the data alone is a challenge.
-
+On the simulated datasets, the Coordinate Descent algorithm was compared to the CASA tclean implementation.  Although WSCLEAN is the current state of the art pipeline for MeerKAT data, CASA tclean was chosen because it was already investigated in the previous project.  WSCLEAN and CASA tclean are both closely related CLEAN algorithms. They both produce similar reconstructions, but WSCLEAN implementations tend to scale better on large datasets.
 
 
 \subsection{Imaging on Simulated Data}
@@ -104,7 +98,7 @@ $residuals, fcol*diff =  M$
 $total_mit_gencol = 11M$
 
 \begin{equation}\label{results:cd:omega}
-	\Omega_{CD}(M, S, J) = S*3M + S * 8M + J * 2M
+	\Omega_{CD}(I_{CD}, M, S, J) = I_{CD} * [S * 8M + J * 2M] + S*3M
 \end{equation}
 
 $S$ depends on the image content directly. For example if the image contains 15 point sources and five Gaussian extended emissions, then $S$ equals 20 non-zero components (if we assume the Gaussian sources require only one starlet for representation). Coordinate Descent therefore is independent of the image size $N$. It solely depends on the size of the measurements $M$, and the number of non-zero components in the dictionary $S$. 
@@ -114,11 +108,11 @@ It does not use any approximation for the fourier transform.
 Assumptions for $J$ = 10
 
 \subsubsection{CLEAN worst case}
-
+What clean implementation
 \begin{alignat*}{1}
 	\text{non-uniform FFT} &: M + 2N*ld(2N)\\
 	\text{non-uniform FFT with} \:w\text{-stacking} &:M + W*(2N*ld(2N) + 2N) + N*ld(N)\\
-	D\: \text{CLEAN deconvolution} &: D*2N
+	I_{CLEAN}\: \text{deconvolutions} &: I_{CLEAN}*2N
 \end{alignat*}
 
 (Cite New W-stacking approach)
@@ -128,7 +122,7 @@ Deconvolution = $D*2N$
 
 
 \begin{equation}
-O_{CLEAN}(M_{Major}, M, N,  W, D) = M_{Major} * [M + [W*(2N log 2N + 2N) + N log N] + D*2N]
+O_{CLEAN}(I_{Major}, I_{CLEAN}, M, N,  W) = I_{Major} * [M + [W*(2N log 2N + 2N) + N log N] + I_{CLEAN}*2N]
 \end{equation}
 
 Complex formula. But for MeerKAT, the number of Visibilities $M$ is by far the largest. Simplifies to $M_{Major}*M$
@@ -159,7 +153,7 @@ Write one meerkat observation
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=0.5\linewidth]{./chapters/05.algorithms/sim00/full_cache_debug.png}
-	\caption{Pixels used to reconstruct the image}
+	\caption{WSCLEAN Reconstruction of a MeerKAT observation.}
 	\label{results:wsclean}
 \end{figure}
 The number of $S$ and then the lower bound of Coordinate Descent. (Put WSCLEAN image in here and Discuss $S$)
