@@ -1,5 +1,8 @@
-\section{Results and Scalability of Coordinate Descent}
+\section{Reconstruction and Scalability of Coordinate Descent}
 %\textbf{Coordinate Descent comparison to CLEAN reconstruction}
+In this section, we compare the Coordinate Descent reconstruction with CLEAN on simulated MeerKAT data, and compare the runtime complexity of the two approaches on a real-world MeerKAT observation. The real world observation was calibrated and averaged down to reduce its size to 88 Gigabytes. The raw, uncalibrated data ranges between 500 and 1000 Gigabytes. Data on this scale requires a mature pipeline for reading and image reconstruction. In this project, only a reconstruction with the WSCLEAN\cite{offringa2014wsclean} algorithm was feasible. and is later shown in figure \ref{results:wsclean}.
+
+ and on this 
 Show the imaging results on simulated meerkat data.
 
 Show scalability on the numbers of real meerkat observations
@@ -153,6 +156,12 @@ MeerKAT has by far more Visibilities than pixels
 
 Write one meerkat observation
 
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\linewidth]{./chapters/05.algorithms/sim00/full_cache_debug.png}
+	\caption{Pixels used to reconstruct the image}
+	\label{results:wsclean}
+\end{figure}
 The number of $S$ and then the lower bound of Coordinate Descent. (Put WSCLEAN image in here and Discuss $S$)
 
 
