@@ -1,13 +1,20 @@
-\section{Results and scalability of Coordinate Descent}
-Two Tasks: Show that coordinate descent works, and show its scalability. To show that it works, it was tested on two simulated MeerKAT data sets and compared to clean. The simulation was created with the Meqtrees Software package, using default settings. The simulations contain [only little gaussian noise on the Visibiliites]. The simulated data is therefore perfectly calibrated, the image reconstruction has to deal with the two fundamental issues of incomplete measurements and non-uniform sampling only.
+\section{Results and Scalability of Coordinate Descent}
+Two Tasks: Show that coordinate descent works, and show its scalability. To show that it works, it was tested on two simulated MeerKAT data sets and compared to clean.
+
+Show that the proof-of concept algorithms 
 
 Scalability is harder to analyse for Coordinate Descent. As mentioned in previous chapters, it does not have fast convergence guarantees. But with the heuristics  but it is ripe for heuristics that work well for the special case. Therefore it was analysed what an ideal Coordinate Descent implementation would need in terms of complexity.
 
-Two simulations, one of point sources and one of mixed sources. 
+
 
 \subsection{Imaging on Simulated Data}
+The simulation was created with the Meqtrees Software package, using default settings. The simulations contain [only little gaussian noise on the Visibiliites]. The simulated data is therefore perfectly calibrated, the image reconstruction has to deal with the two fundamental issues of incomplete measurements and non-uniform sampling only.
 
-$\lambda$ was fixed on both tests
+Free parameter $\lambda$ was fixed on both tests. 4 Full iterations.
+
+CLEAN parameters
+
+Two simulations, one of point sources in figure \ref{results:point} and one of mixed sources in figure \ref{results:mixed}. Two fundamental properties. Two point sources checks the super-resolution capability. Mixture of gaussian and point sources. 
 
 \begin{figure}[h]
 	\centering
@@ -27,21 +34,14 @@ $\lambda$ was fixed on both tests
 
 faint source is spread more widely. Not good, The paper \cite{starck2015starlet} used different $\lambda$ values for different starlet levels. Maybe with this it can be forced to do more precise results, but it was not tried in this work.
 
-\subsubsection{Mixed Sources}
-Mixture of gaussian and point sources. 
 
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=0.5\linewidth]{./chapters/05.algorithms/results/sim00_mixed_sources_dirty.png}
-	\caption{Dirty Image}
-	\label{alg:gauss:dirty}
-\end{figure}
+Mixed sources, 
 
 \begin{figure}[h]
 	\centering
 	\begin{subfigure}[b]{0.45\linewidth}
-		\includegraphics[width=\linewidth]{./chapters/05.algorithms/results/image.png}
-		\caption{Reconstruction after one full iteration}
+		\includegraphics[width=\linewidth]{./chapters/05.algorithms/results/sim00_mixed_sources_dirty.png}
+		\caption{dirty image}
 		\label{results:g55:nrao:rec}
 	\end{subfigure}
 	\begin{subfigure}[b]{0.45\linewidth}
@@ -49,18 +49,35 @@ Mixture of gaussian and point sources.
 		\caption{Reconstruction after 4 Full iterations}
 		\label{results:g55:nrao:dirty}
 	\end{subfigure}
-	\caption{}
-	\label{results:g55:nrao}
+	\caption{Reconstruction on mixed sources}
+	\label{results:mixed}
 \end{figure}
 
+Proper model for extended emissions. CLEAN reconstructs too much flux for the extended emissions.
+
+Not all point sources were detected in the 4 iterations of CD.
+
+
+
 \subsection{Scalability Comparison}
+
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.5\linewidth]{./chapters/05.algorithms/sim00/full_cache_debug.png}
+	\caption{Pixels used to reconstruct the image}
+	\label{results:pixels:used}
+\end{figure}
+Runtime depends heavily on how many columns of the Fourier Transform matrix we need to calculate. Depends on how many starlets are needed to represent a given image, and depends on how well our heuristic captures them. 
+
+Both, CLEAN depends on approximation, which are hard to calculate an "average case complexity". 
+Coordinate Descent uses heuristics. Also, average case analysis is difficult. 
 
 Number of Visibilities $M$
 
 Number of Pixels $N$
 
-\subsubsection{Lower Bound on Coordinate Descent}
-How many pixels need to be evaluated.
+\subsubsection{Best Case for Coordinate Descent}
 
 Bunch of heuristics. There are a lot of little ways to optimize this algorithm. The question is, is it worth going further and try to improve the algorithm further. So we want to estimate the lower bound of the algorithm.
 
@@ -77,16 +94,16 @@ $residuals, fcol*diff =  M$
 $total_mit_gencol = 11M$
 
 \begin{equation}\label{results:cd:omega}
-	CD(M, S, J) = S * 11M + J * 2M
+	\Omega_{CD}(M, S, J) = S * 11M + J * 2M
 \end{equation}
 
 $S$ depends on the image content directly. For example if the image contains 15 point sources and five Gaussian extended emissions, then $S$ equals 20 non-zero components (if we assume the Gaussian sources require only one starlet for representation). Coordinate Descent therefore is independent of the image size $N$. It solely depends on the size of the measurements $M$, and the number of non-zero components in the dictionary $S$. 
 
 It does not use any approximation for the fourier transform.
 
-Assumptions for $J$ = 12
+Assumptions for $J$ = 10
 
-\subsubsection{CLEAN average case}
+\subsubsection{CLEAN worst case}
 
 \begin{alignat*}{1}
 	\text{non-uniform FFT} &: M + 2N*ld(2N)\\
@@ -101,7 +118,7 @@ Deconvolution = $D*2N$
 
 
 \begin{equation}
-CLEAN(M, M_{Major}, N,  W, D) = M_{Major} * [M + W*(2N log 2N + 2N) + N log N + D*2N]
+O_{CLEAN}(M_{Major}, M, N,  W, D) = M_{Major} * [M + [W*(2N log 2N + 2N) + N log N] + D*2N]
 \end{equation}
 
 Complex formula. But for MeerKAT, the number of Visibilities $M$ is by far the largest. Simplifies to $M_{Major}*M$
@@ -109,10 +126,22 @@ Complex formula. But for MeerKAT, the number of Visibilities $M$ is by far the l
 Assumptions
 Estimates for $M_{Major}$ = 10. (Cite New W-stacking approach)
 W = $100$ depends on observation between 10, and hundreds. Depends on the observation. Cite new w-stacking approach can limit the number of w-stacks. 
-D=300'000
+D=35'000
 
-\subsubsection{Comparison on MeerKAT data}
+\subsubsection{Runtime Complexity on real MeerKAT data}
+Where the data comes from
+
+Too big to handle in a proof-of-concept implementation. 88GB of calibrated data
+
+Calibration: 
+Visibilities = 4060770
+Channels = 540
+
+pixels = 8192 * 8192 = 67 108 864
+
 Target, what would an Ideal Compressed Sensing implementation do.
+
+Memory requirement
 
 MeerKAT has by far more Visibilities than pixels
 
@@ -120,9 +149,10 @@ Write one meerkat observation
 
 The number of $S$ and then the lower bound of Coordinate Descent. (Put WSCLEAN image in here and Discuss $S$)
 
+
+
 Other compressed sensing approaches have a more expensive term than $D*2N$ for their complexity. But compared to compressed sensin.
 
 
-
-\subsection{evaluation}
+IMAGE CONTENT SCALES WITH pixels instead of Visibilities.
 
