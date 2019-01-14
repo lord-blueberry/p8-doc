@@ -1,16 +1,19 @@
 \section{Reconstruction and Scalability of Coordinate Descent}
 %\textbf{Coordinate Descent comparison to CLEAN reconstruction}
-In this section, we compare the Coordinate Descent reconstruction with CLEAN on simulated MeerKAT data, and compare the runtime complexity of the two approaches on a real-world MeerKAT observation. The real world observation was calibrated and averaged down to reduce its size to 88 Gigabytes. The raw, uncalibrated data ranges between 500 and 1000 Gigabytes. Data on this scale requires a mature pipeline for reading and image reconstruction. Within the time limit of this project, only a reconstruction with the WSCLEAN\cite{offringa2014wsclean} algorithm was possible and is shown in figure \ref{results:wsclean}.
+In this section, we compare the Coordinate Descent reconstruction with CLEAN on simulated MeerKAT data, and compare the runtime complexity of the two approaches on a real-world MeerKAT observation. We show that Coordinate Descent reconstructs the image by only computing a few columns of the Fourier Transform Matrix $F^{-1}$, and investigate if this approach reduces the runtime complexity on the large scale reconstruction problems of MeerKAT.
 
-On the simulated datasets, the Coordinate Descent algorithm was compared to the CASA tclean implementation.  Although WSCLEAN is the current state of the art pipeline for MeerKAT data, CASA tclean was chosen because it was already investigated in the previous project.  WSCLEAN and CASA tclean are both closely related CLEAN algorithms. They both produce similar reconstructions, but WSCLEAN implementations tend to scale better on large datasets.
+The real world MeerKAT data were calibrated and averaged down to reduce its size to 88 Gigabytes. The raw, uncalibrated data ranges between 500 and 1000 Gigabytes. Data on this scale requires a mature pipeline for reading and image reconstruction. Within the time limit of this project, only a reconstruction with the WSCLEAN\cite{offringa2014wsclean} pipeline was possible.
 
+The simulations were created with the Meqtrees software package. Two simulations which contain roughly (size of Visibilities) perfectly calibrated Visibilities were created. Compared to real-world observations, the two simulated data sets are small and not representative of the real data volume. Also, more realistic simulations which contain pointing errors, calibration errors, and thermal noise are out of scope for this project. The simulations are used to isolate the two fundamental issues in radio interferometer image reconstruction: Non-uniform sampling and incomplete measurements.
 
 \subsection{Imaging on Simulated Data}
-The simulation was created with the Meqtrees Software package, using default settings. The simulations contain [only little gaussian noise on the Visibiliites]. The simulated data is therefore perfectly calibrated, the image reconstruction has to deal with the two fundamental issues of incomplete measurements and non-uniform sampling only.
-
-Free parameter $\lambda$ was fixed on both tests. 4 Full iterations.
+The Coordinate Descent algorithm was compared to the CASA tclean implementation. CASA is an established software framework for radio interferometer image reconstruction. It was chosen over WSCLEAN, because CASA was used in the previous project. The main difference to WSCLEAN is, it does not have a non-uniform FFT with $w$-stacking implemented, and does not scale as well to MeerKATs data volume. Since CASA and WSCLEAN implement the same CLEAN deconvolution algorithms, the reconstructions of both should be similar.
 
 CLEAN parameters
+four major cycles
+default parameters
+
+Free parameter $\lambda$ was fixed on both tests. 4 Full iterations.
 
 Two simulations, one of point sources in figure \ref{results:point} and one of mixed sources in figure \ref{results:mixed}. Two fundamental properties. Two point sources checks the super-resolution capability. Mixture of gaussian and point sources. 
 
@@ -109,6 +112,7 @@ Assumptions for $J$ = 10
 
 \subsubsection{CLEAN worst case}
 What clean implementation
+
 \begin{alignat*}{1}
 	\text{non-uniform FFT} &: M + 2N*ld(2N)\\
 	\text{non-uniform FFT with} \:w\text{-stacking} &:M + W*(2N*ld(2N) + 2N) + N*ld(N)\\
