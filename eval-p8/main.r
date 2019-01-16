@@ -82,6 +82,7 @@ calcLineDF <- function(matrices, names, p0,p1, interpolation.length) {
   return(df)
 }
 
+
 folder <- "./sim01/"
 tclean <- read(paste(folder, "tclean.csv", sep=""), 256, 0.5) - read(paste(folder,"tclean.residual.csv", sep=""), 256, 0.5)
 cd <- read(paste(folder, "image3", sep=""), 256, 0.5)
@@ -104,7 +105,7 @@ asinh <- scales::trans_new(name = 'asinh',
 
 ggplot(data = df, aes(x=df$points, y=df$values, colour=df$names)) + 
   geom_line() +
-  scale_y_continuous(trans=asinh, breaks=c(0, 0.014, 0.033, 0.5, 1.4, 2.5)) +
+  scale_y_continuous(trans=asinh, breaks=c(0, 0.001, 0.014, 0.033, 0.1, 1, 1.4, 2.5)) +
   xlab("arc minute") +
   ylab("Jansky/beam") +
   labs(colour='Legend:') +
@@ -114,11 +115,38 @@ ggplot(data = df, aes(x=df$points, y=df$values, colour=df$names)) +
         legend.title=element_text(size=13))
 
 
-
-
-
 scales = list(at=c(1, 32, 64, 96, 128, 256))
 WriteMap2(tclean, at=seq(min(tclean), max(tclean), length.out=200), scales)
 WriteMap2(cd, at=seq(min(cd), max(cd), length.out=200), scales)
 
-WriteMap2(skymodel, at=seq(min(skymodel), max(skymodel), length.out=200), scales)
+
+
+
+
+
+
+
+lseq <- function(from=1, to=100000, length.out=6) {
+  # logarithmic spaced sequence
+  # blatantly stolen from library("emdbook"), because need only this
+  exp(seq(log(from), log(to), length.out = length.out))
+}
+
+folder <- "./sim00/"
+tclean <- read(paste(folder, "tclean.csv", sep=""), 1080, 0.5) - read(paste(folder,"tclean.residual.csv", sep=""), 1080, 0.5)
+cd <- read(paste(folder, "image3", sep=""), 1080, 0.5)
+
+skymodel <- t(read(paste(folder,"skymodel.csv", sep=""), 1080, 0.5))
+model.axis <- round(0:(1079) * 0.5, digits=1)
+colnames(skymodel) = model.axis
+rownames(skymodel) = model.axis
+
+
+scales = list(at=c(1, 32, 64, 96, 128, 256))
+colorbreaks <- seq(min(tclean), max(tclean), length.out=200)
+
+WriteMap2(tclean, at=seq(min(tclean), max(tclean), length.out=200), scales)
+
+colorbreaks <- seq(min(cd), 10, length.out=200)
+colorbreaks <- c(colorbreaks, max(cd))
+WriteMap2(cd, at=colorbreaks, scales)

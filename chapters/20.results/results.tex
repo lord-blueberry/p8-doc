@@ -47,19 +47,17 @@ In figure \ref{results:point} Coordinate Descent and tCLEAN reconstruction diffe
 
 The difference in intensity becomes more apparent with extended emissions. Figure \ref{results:mixed} shows Coordinate Descent and tCLEAN on the simulation with mixed sources. Again the two reconstructions arrive at different intensities. The gaussian emissions are reconstructed with a higher intensity than Coordinate Descent.
 
-Due to the convolved image reconstruction of clean. To arrive at the true intensity of an extended emission, we need to deconvolve the tCLEAN reconstruction.
-
 \begin{figure}[h]
 	\centering
 	\begin{subfigure}[b]{0.4\linewidth}
-		\includegraphics[width=\linewidth]{./chapters/05.algorithms/results/sim00_mixed_sources_dirty.png}
-		\caption{dirty image}
-		\label{results:g55:nrao:rec}
+		\includegraphics[width=\linewidth]{./chapters/20.results/mixed/mixed_tclean.png}
+		\caption{tclean reconstruction}
+		\label{results:mixed:tclean}
 	\end{subfigure}
 	\begin{subfigure}[b]{0.4\linewidth}
-		\includegraphics[width=\linewidth]{./chapters/05.algorithms/results/image4.png}
-		\caption{Reconstruction after 4 Full iterations}
-		\label{results:g55:nrao:dirty}
+		\includegraphics[width=\linewidth]{./chapters/20.results/mixed/mixed_cd.png}
+		\caption{Coordinate Descent Reconstruction}
+		\label{results:mixed:cd}
 	\end{subfigure}
 	\caption{Reconstruction on mixed sources}
 	\label{results:mixed}
@@ -84,9 +82,9 @@ Coordinate Descent did not reconstruct all point sources. How many starlets are 
 %\end{figure}
 Pinning down the precise runtime of Coordinate Descent is difficult. As mentioned in section \ref{cd}, Coordinate Descent has lose convergence guarantees in theory, but works well in practice with heuristics. However, these heuristics complicate the runtime analysis of Coordinate Descent. How well the active set heuristic performs on an average case is a difficult analysis.
 
-In this section, we compare the best case performance of Coordinate Descent, and the worst case performance of CLEAN on a real MeerKAT observation. We show that CLEAN with its major cycle architecture has the lower runtime complexity.
+Furthermore the current implementation can potentially be improved with other heuristics. In this section, we account for potential heuristics by looking at the best case runtime complexity of Coordinate Descent. We compare it to the complexity of CLEAN on a real MeerKAT observation. It turns out that CLEAN and the Major Cycle architecture eadd to a lower runtime complexity on large datasets.
 
-\subsubsection{Best case runtime complexity of Coordinate Descent}
+\subsubsection{Runtime complexity of Coordinate Descent}
 The runtime complexity of Coordinate Descent depends largely on the number of Visibilities $M$ and the number of non-zero starlets $S$. The number and location of the $S$ non-zero starlets are generally not known. However, we created a heuristic which finds likely non-zero starlet components. In a realistic setting, the heuristic will have found more than $S$ likely non-zero starlets. For the best case scenario, we assume an oracle performance heuristic: It finds the location and number of the $S$ non-zero starlet components in constant time ($O(1)$). Coordinate Descent therefore has to find the value of the $S$ non-zero starlet components, which takes three separate operations: creating the columns of $F^{-1}$, calculating the minima for each single component, and calculating the starlet layers:
 
 \begin{alignat*}{1}
@@ -103,9 +101,9 @@ CD(I_{CD}, M, S, J) = S*3M + I_{CD} * [S * 8M + J * 2M]
 
 Note that the runtime of Coordinate Descent is independent of the number of pixels. The only image related parameter in \eqref{results:cd:omega} is $J$, the number of starlet layers. The largest starlet layer represents the largest possible structure in the image, which is given by the instrument and the image resolution (pixels per arc-second). The runtime only depends indirectly on the image resolution, not the total number of pixels.
 
-Also note the term iterating over the $S$ non-zero starlets, $ I_{CD} * [S * 8M +\ldots]$. As it turns out, this is the Achilles heel of the algorithm. MeerKAT observations contain a large amount of Visibilities $M$ and a large amount of distinct structures, which leads to a large $S$. 
+Also note the term iterating over the $S$ non-zero starlets, $ I_{CD} * [S * 8M +\ldots]$. As it turns out, this is the Achilles heel of the algorithm. MeerKAT observations contain a very large amount of Visibilities $M$ and a large amount of distinct structures, which leads to a large $S$ (each point source needs at least one non-zero component to be represented). 
 
-\subsubsection{Worst case runtime complexity of CLEAN}
+\subsubsection{Runtime complexity of CLEAN}
 We look at CLEAN reconstructions which use the non-uniform FFT with $w$-stacking. The runtime of a single Major cycle depends on the non-uniform FFT with $w$-stacking and the number of CLEAN deconvolutions. The number $N$ denotes the number of pixels (for example $512^2$).
 
 \begin{alignat*}{1}
@@ -117,15 +115,24 @@ We look at CLEAN reconstructions which use the non-uniform FFT with $w$-stacking
 The overall complexity shown in \eqref{results:clean:o} can also be split into two parts: It depends on the number of Major on the number of Major Cycles $I_{Major}$ and the complexity of the non-uniform FFT, and $I_{Major}$ times the CLEAN deconvolutions. 
 
 \begin{equation}\label{results:clean:o}
-\begin{aligned}{1}
-CLEAN(I_{Major}, I_{CLEAN}, M, N,  W) =\: &I_{Major} * 2 * [M + W*(2N log 2N + 2N) + N log N]\\
+\begin{aligned}
+ CLEAN(I_{Major}, I_{CLEAN}, M, N,  W) =\: &I_{Major} * 2 * [M + W*(2N log 2N + 2N) + N log N]\\
 + &I_{Major} * [I_{CLEAN}*2N]
 \end{aligned}
 \end{equation}
 
 Notice that the number of CLEAN deconvolutions $I_{CLEAN}$ depends on the image content, similar the number of non-zero starlets $S$ for Coordinate Descent. Here however, it multiplies with the number of pixels $N$ instead of the number of Visibilities $M$. In a sense, the major cycle tries to reduce the runtime complexity of handling the image content by calculating the non-uniform FFT. If the difference is large enough $N \ll M$, then the Major Cycle will end up with a smaller overall runtime.
 
-\subsubsection{Runtime Complexity on real MeerKAT data}
+\subsubsection{Runtime complexity estimate on MeerKAT data}
+The MeerKAT observation contains approximately 540 channels with 4 million calibrated Visibilities each. After calibration, MeerKAT data is typically averaged over frequency and time to reduce its disk space. There are no strict rules on how to chose the image resolution and number of pixels. An initial CLEAN reconstruction was preformed with an image size of $8192^2$ and 1.6 arc-seconds per pixel resolution. These numbers were used for the estimate.
+
+Rest of the 
+
+
+
+Example reconstruction was used, with image size ofpixels. The image size can vary between 
+
+The image size is typically left to the user, and can vary widely. For this estimate, we use the $8192^2$ pixels as given
 
 
 Complex formula. But for MeerKAT, the number of Visibilities $M$ is by far the largest. Simplifies to $M_{Major}*M$
