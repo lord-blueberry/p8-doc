@@ -7,52 +7,56 @@ The real world MeerKAT data were calibrated and averaged down to reduce its size
 The simulations were created with the Meqtrees software package. Two simulations which contain roughly (size of Visibilities) perfectly calibrated Visibilities were created. Compared to real-world observations, the two simulated data sets are small and not representative of the real data volume. Also, more realistic simulations which contain pointing errors, calibration errors, and thermal noise are out of scope for this project. The simulations are used to isolate the two fundamental issues in radio interferometer image reconstruction: Non-uniform sampling and incomplete measurements.
 
 \subsection{Imaging on Simulated Data}
-Two simulations, one of point sources in figure \ref{results:point} and one of mixed sources in figure \ref{results:mixed}.
-
-The Coordinate Descent algorithm was compared to the CASA tclean implementation. CASA is an established software framework for radio interferometer image reconstruction and was already used in a previous project.
-
-The tclean parameters were 
-CLEAN parameters
-default parameters
-
-Free parameter $\lambda$ was fixed on both tests. 4 Full iterations.
+Two simulations were created, one with two point sources shown in figure \ref{results:point}, and the other in figure \ref{results:mixed} with three gaussian extended emissions plus 16 point sources. The Coordinate Descent algorithm was compared to the CASA tCLEAN implementation. CASA is an established software framework for radio interferometer image reconstruction and was already used in a previous project.
 
 \begin{figure}[h]
 	\centering
 	\begin{subfigure}[b]{0.4\linewidth}
 		\includegraphics[width=\linewidth]{./chapters/20.results/points/tCLEAN.png}
-		\caption{Reconstruction after 4 Full iterations}
+		\caption{tCLEAN reconstruction.}
 		\label{results:points:tclean}
 	\end{subfigure}
 	\begin{subfigure}[b]{0.4\linewidth}
 		\includegraphics[width=\linewidth]{./chapters/20.results/points/cd.png}
-		\caption{Reconstruction after 4 Full iterations}
+		\caption{Coordinate Descent reconstruction.}
 		\label{results:points:cd}
 	\end{subfigure}
-
-	\caption{Image reconstruction on two point sources.}
+	
+	\caption{Image reconstruction of two point sources.}
 	\label{results:point}
 \end{figure}
+
+Both algorithms have free parameters to tune. tCLEAN has a several parameters, but, CASA's default values were used except for the maximum number of CLEAN iterations (parameter niter), which was set to 250. The proof-of-concept Coordinate Descent implementation has three parameters to tune: Number of iterations, the number of starlet layers $J$, and the regularization parameter $\lambda$. The first two parameter could be estimated by the reconstruction algorithm itself. For this implementation, it was left to the user. For the two simulations the Coordinate Descent parameters were chosen:
+\begin{itemize}
+	\item Two Point sources: 4 full iterations, $J=3$, $\lambda=0.1$
+	\item Mixed sources: 4 full iterations, $J=7$, $\lambda=0.01$
+\end{itemize}
+
+In figure \ref{results:point} Coordinate Descent and tCLEAN reconstruction differ in two notable ways: The peak intensity of the source, and how much each algorithm spreads the point source. 
+
+\textit{Spread:} tCLEAN essentially reconstructs a convolve version of the observed image. The observed image gets convolved with a Gaussian function, which represents the accuracy limit of the instrument. Coordinate Descent tries to reconstruct the observed image directly, resulting in a reconstruction where the sources are much less spread and completely separated. 
+
+\textit{Intensity:} The reconstructions differ in intensity. The figure \ref{results:points:contour} shows the intensity profile of the two reconstructions. Note the $y$ axis is on a logarithmic scale. Also note that Coordinate Descent has shifted the smaller peak by a pixel in its reconstruction. [Total flux correct in CD?]
 
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=0.8\linewidth]{./chapters/20.results/points/line.png}
-	\caption{Reconstruction after 4 Full iterations}
+	\caption{Intensity profile of the two point sources.}
 	\label{results:points:contour}
 \end{figure}
-faint source is spread more widely. Not good, The paper \cite{starck2015starlet} used different $\lambda$ values for different starlet levels. Maybe with this it can be forced to do more precise results, but it was not tried in this work.
 
+The difference in intensity becomes more apparent with extended emissions. Figure \ref{results:mixed} shows Coordinate Descent and tCLEAN on the simulation with mixed sources. Again the two reconstructions arrive at different intensities. The gaussian emissions are reconstructed with a higher intensity than Coordinate Descent.
 
-Mixed sources, 
+Due to the convolved image reconstruction of clean. To arrive at the true intensity of an extended emission, we need to deconvolve the tCLEAN reconstruction.
 
 \begin{figure}[h]
 	\centering
-	\begin{subfigure}[b]{0.45\linewidth}
+	\begin{subfigure}[b]{0.4\linewidth}
 		\includegraphics[width=\linewidth]{./chapters/05.algorithms/results/sim00_mixed_sources_dirty.png}
 		\caption{dirty image}
 		\label{results:g55:nrao:rec}
 	\end{subfigure}
-	\begin{subfigure}[b]{0.45\linewidth}
+	\begin{subfigure}[b]{0.4\linewidth}
 		\includegraphics[width=\linewidth]{./chapters/05.algorithms/results/image4.png}
 		\caption{Reconstruction after 4 Full iterations}
 		\label{results:g55:nrao:dirty}
@@ -61,64 +65,48 @@ Mixed sources,
 	\label{results:mixed}
 \end{figure}
 
-Proper model for extended emissions. CLEAN reconstructs too much flux for the extended emissions.
+With starlets, coordinate descent has a representation for extended emissions. Looking at the intensity profile of an extended emisions \ref{}, we see Coordiante Descent coming closer to the true intensity. Although in the four iterations,  [it still had a considerable margin on error]. 
 
-Not all point sources were detected in the 4 iterations of CD.
+Total flux constraint, $\lambda$ for different starlet layers like in \cite{girard2015sparse}
 
-
-
-\subsection{Scalability of CLEAN and Coordinate Descent}
+Coordinate Descent did not reconstruct all point sources. How many starlets are non-zero is the major point for runtime. It depends on how many areas of the image are non-zero. Starlet has a representation for extended emission, how many starlets are needed for modelling is hard.
 
 
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=0.5\linewidth]{./chapters/05.algorithms/sim00/full_cache_debug.png}
-	\caption{Pixels used to reconstruct the image}
-	\label{results:pixels:used}
-\end{figure}
-Runtime depends heavily on how many columns of the Fourier Transform matrix we need to calculate. Depends on how many starlets are needed to represent a given image, and depends on how well our heuristic captures them. 
 
-Both, CLEAN depends on approximation, which are hard to calculate an "average case complexity". 
-Coordinate Descent uses heuristics. Also, average case analysis is difficult. 
 
-Number of Visibilities $M$
 
-Number of Pixels $N$
+\subsection{Scalability estimate of CLEAN and Coordinate Descent}
+%\begin{figure}[h]
+%	\centering
+%	\includegraphics[width=0.5\linewidth]{./chapters/05.algorithms/sim00/full_cache_debug.png}
+%	\caption{Pixels used to reconstruct the image}
+%	\label{results:pixels:used}
+%\end{figure}
+Pinning down the precise runtime of Coordinate Descent is difficult. As mentioned in section \ref{cd}, Coordinate Descent has lose convergence guarantees in theory, but works well in practice with heuristics. However, these heuristics complicate the runtime analysis of Coordinate Descent. How well the active set heuristic performs on an average case is a difficult analysis.
 
-\subsubsection{Best Case for Coordinate Descent}
-Oracle performance of 
+In this section, we compare the best case performance of Coordinate Descent, and the worst case performance of CLEAN on a real MeerKAT observation. We show that CLEAN with its major cycle architecture has the lower runtime complexity.
 
-Convergence is hard to determine in general. Following simplified assumptions were made: We have a heuristic with oracle performance. It returns only the locations of $\alpha$ in constant time. Furthermore, we assume all axes are independent from each other, only one descent per non-zero axis is necessary.
-$S$
+\subsubsection{Best case runtime complexity of Coordinate Descent}
+The runtime complexity of Coordinate Descent depends largely on the number of Visibilities $M$ and the number of non-zero starlets $S$. The number and location of the $S$ non-zero starlets are generally not known. However, we created a heuristic which finds likely non-zero starlet components. In a realistic setting, the heuristic will have found more than $S$ likely non-zero starlets. For the best case scenario, we assume an oracle performance heuristic: It finds the location and number of the $S$ non-zero starlet components in constant time ($O(1)$). Coordinate Descent therefore has to find the value of the $S$ non-zero starlet components, which takes three separate operations: creating the columns of $F^{-1}$, calculating the minima for each single component, and calculating the starlet layers:
 
 \begin{alignat*}{1}
-	\text{creating} \:S\: \text{columns of}\: F^{-1} &: S*3M\\
-	\text{locating} \:S\: \text{minima of} \:S\: \text{parabolas} &: S*8M\\
-	\text{calculating} \:J\: \text{Starlet layers} &: J * 2M
+\text{creating} \:S\: \text{columns of}\: F^{-1} &: S*3M\\
+\text{locating} \:S\: \text{minima of} \:S\: \text{parabolas} &: S*8M\\
+\text{calculating} \:J\: \text{Starlet layers} &: J * 2M
 \end{alignat*}
 
-
-$res * starlet = M$
-descent:
-$gen fcol = 3*M$
-$a = 3 * M$
-$b = 4 * M$
-$residuals, fcol*diff =  M$
-
-$total_mit_gencol = 11M$
+We assume we have enough memory to cache the columns of $F^{-1}$ and only need to calculate them once. Coordinate Descent arrives at the correct result in $I_{CD}$ iterations. Therefore we arrive at the runtime complexity of \eqref{results:cd:omega}.
 
 \begin{equation}\label{results:cd:omega}
-	\Omega_{CD}(I_{CD}, M, S, J) = I_{CD} * [S * 8M + J * 2M] + S*3M
+CD(I_{CD}, M, S, J) = S*3M + I_{CD} * [S * 8M + J * 2M]
 \end{equation}
 
-$S$ depends on the image content directly. For example if the image contains 15 point sources and five Gaussian extended emissions, then $S$ equals 20 non-zero components (if we assume the Gaussian sources require only one starlet for representation). Coordinate Descent therefore is independent of the image size $N$. It solely depends on the size of the measurements $M$, and the number of non-zero components in the dictionary $S$. 
+Note that the runtime of Coordinate Descent is independent of the number of pixels. The only image related parameter in \eqref{results:cd:omega} is $J$, the number of starlet layers. The largest starlet layer represents the largest possible structure in the image, which is given by the instrument and the image resolution (pixels per arc-second). The runtime only depends indirectly on the image resolution, not the total number of pixels.
 
-It does not use any approximation for the fourier transform.
+Also note the term iterating over the $S$ non-zero starlets, $ I_{CD} * [S * 8M +\ldots]$. As it turns out, this is the Achilles heel of the algorithm. MeerKAT observations contain a large amount of Visibilities $M$ and a large amount of distinct structures, which leads to a large $S$. 
 
-Assumptions for $J$ = 10
-
-\subsubsection{CLEAN worst case}
-What clean implementation
+\subsubsection{Worst case runtime complexity of CLEAN}
+We look at CLEAN reconstructions which use the non-uniform FFT with $w$-stacking. The runtime of a single Major cycle depends on the non-uniform FFT with $w$-stacking and the number of CLEAN deconvolutions. The number $N$ denotes the number of pixels (for example $512^2$).
 
 \begin{alignat*}{1}
 	\text{non-uniform FFT} &: M + 2N*ld(2N)\\
@@ -126,15 +114,19 @@ What clean implementation
 	I_{CLEAN}\: \text{deconvolutions} &: I_{CLEAN}*2N
 \end{alignat*}
 
-(Cite New W-stacking approach)
-Nufft: $M + 2N log 2N$
-W-stacking = $M + W*(2N log 2N + 2N) + N log N$
-Deconvolution = $D*2N$
+The overall complexity shown in \eqref{results:clean:o} can also be split into two parts: It depends on the number of Major on the number of Major Cycles $I_{Major}$ and the complexity of the non-uniform FFT, and $I_{Major}$ times the CLEAN deconvolutions. 
 
-
-\begin{equation}
-O_{CLEAN}(I_{Major}, I_{CLEAN}, M, N,  W) = I_{Major} * [M + [W*(2N log 2N + 2N) + N log N] + I_{CLEAN}*2N]
+\begin{equation}\label{results:clean:o}
+\begin{aligned}{1}
+CLEAN(I_{Major}, I_{CLEAN}, M, N,  W) =\: &I_{Major} * 2 * [M + W*(2N log 2N + 2N) + N log N]\\
++ &I_{Major} * [I_{CLEAN}*2N]
+\end{aligned}
 \end{equation}
+
+Notice that the number of CLEAN deconvolutions $I_{CLEAN}$ depends on the image content, similar the number of non-zero starlets $S$ for Coordinate Descent. Here however, it multiplies with the number of pixels $N$ instead of the number of Visibilities $M$. In a sense, the major cycle tries to reduce the runtime complexity of handling the image content by calculating the non-uniform FFT. If the difference is large enough $N \ll M$, then the Major Cycle will end up with a smaller overall runtime.
+
+\subsubsection{Runtime Complexity on real MeerKAT data}
+
 
 Complex formula. But for MeerKAT, the number of Visibilities $M$ is by far the largest. Simplifies to $M_{Major}*M$
 
@@ -143,7 +135,9 @@ Estimates for $M_{Major}$ = 10. (Cite New W-stacking approach)
 W = $100$ depends on observation between 10, and hundreds. Depends on the observation. Cite new w-stacking approach can limit the number of w-stacks. 
 D=35'000
 
-\subsubsection{Runtime Complexity on real MeerKAT data}
+Assumptions for $J$ = 10
+
+
 In terms of $S$ for 
 Where the data comes from
 
