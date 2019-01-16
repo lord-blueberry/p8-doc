@@ -7,32 +7,39 @@ The real world MeerKAT data were calibrated and averaged down to reduce its size
 The simulations were created with the Meqtrees software package. Two simulations which contain roughly (size of Visibilities) perfectly calibrated Visibilities were created. Compared to real-world observations, the two simulated data sets are small and not representative of the real data volume. Also, more realistic simulations which contain pointing errors, calibration errors, and thermal noise are out of scope for this project. The simulations are used to isolate the two fundamental issues in radio interferometer image reconstruction: Non-uniform sampling and incomplete measurements.
 
 \subsection{Imaging on Simulated Data}
-The Coordinate Descent algorithm was compared to the CASA tclean implementation. CASA is an established software framework for radio interferometer image reconstruction. It was chosen over WSCLEAN, because CASA was used in the previous project. The main difference to WSCLEAN is, it does not have a non-uniform FFT with $w$-stacking implemented, and does not scale as well to MeerKATs data volume. Since CASA and WSCLEAN implement the same CLEAN deconvolution algorithms, the reconstructions of both should be similar.
+Two simulations, one of point sources in figure \ref{results:point} and one of mixed sources in figure \ref{results:mixed}.
 
+The Coordinate Descent algorithm was compared to the CASA tclean implementation. CASA is an established software framework for radio interferometer image reconstruction and was already used in a previous project.
+
+The tclean parameters were 
 CLEAN parameters
-four major cycles
 default parameters
 
 Free parameter $\lambda$ was fixed on both tests. 4 Full iterations.
 
-Two simulations, one of point sources in figure \ref{results:point} and one of mixed sources in figure \ref{results:mixed}. Two fundamental properties. Two point sources checks the super-resolution capability. Mixture of gaussian and point sources. 
-
 \begin{figure}[h]
 	\centering
-	\begin{subfigure}[b]{0.45\linewidth}
-		\includegraphics[width=\linewidth]{./chapters/05.algorithms/sim02/sim02_point_dirty.png}
-		\caption{Dirty Image of two point sources}
-		\label{results:point:dirty}
-	\end{subfigure}
-	\begin{subfigure}[b]{0.45\linewidth}
-		\includegraphics[width=\linewidth]{./chapters/05.algorithms/sim02/image4.png}
+	\begin{subfigure}[b]{0.4\linewidth}
+		\includegraphics[width=\linewidth]{./chapters/20.results/points/tCLEAN.png}
 		\caption{Reconstruction after 4 Full iterations}
-		\label{results:point:cd}
+		\label{results:points:tclean}
 	\end{subfigure}
+	\begin{subfigure}[b]{0.4\linewidth}
+		\includegraphics[width=\linewidth]{./chapters/20.results/points/cd.png}
+		\caption{Reconstruction after 4 Full iterations}
+		\label{results:points:cd}
+	\end{subfigure}
+
 	\caption{Image reconstruction on two point sources.}
 	\label{results:point}
 \end{figure}
 
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{./chapters/20.results/points/line.png}
+	\caption{Reconstruction after 4 Full iterations}
+	\label{results:points:contour}
+\end{figure}
 faint source is spread more widely. Not good, The paper \cite{starck2015starlet} used different $\lambda$ values for different starlet levels. Maybe with this it can be forced to do more precise results, but it was not tried in this work.
 
 
