@@ -1,13 +1,13 @@
-N = (8192) * (8192)
+N = (8192*4) * (8192*4)
 M = 540 * 4060770
 
-W = 150
-I.major = 5
+W = 128
+I.major = 10
 I.clean = 35000
 
-S = 150
-I.cd = 10
-J=12
+S = 25000
+I.cd = 1
+J=10
 
 
 ld.N = log(N, base=2)
@@ -15,6 +15,20 @@ ld.2N = log(2*N, base=2)
 clean = I.major * 2 * (M + W*(2*N*ld.2N+2*N) + N * ld.N)
 clean = clean + I.major * (I.clean * 2 * N)
 
-cd = S * 3 * M + I.cd * (S * 8*M + J*2*M)
+CD <- function(S,M, I.cd, J) {
+  return(cd = S * 3 * M + I.cd * (S * 8*M + J*2*M))
+}
 
-clean/cd
+cd_cycles <- c(2, 4, 8)
+results <- c()
+for (i in cd_cycles) {
+  res <-clean/CD(S, M, i, J)
+  results <- c(results, toString(format(round(res, 2), nsmall = 2)))
+}
+
+print(paste(results, collapse=" & "))
+
+clean/CD(S, M, 2, J)
+clean/CD(S, M, 5, J)
+clean/CD(S, M, 10, J)
+

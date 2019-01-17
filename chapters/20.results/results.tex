@@ -29,7 +29,7 @@ Two simulations were created, one with two point sources shown in figure \ref{re
 Both algorithms have free parameters to tune. tCLEAN has a several parameters, but, CASA's default values were used except for the maximum number of CLEAN iterations (parameter niter), which was set to 250. The proof-of-concept Coordinate Descent implementation has three parameters to tune: Number of iterations, the number of starlet layers $J$, and the regularization parameter $\lambda$. The first two parameter could be estimated by the reconstruction algorithm itself. For this implementation, it was left to the user. For the two simulations the Coordinate Descent parameters were chosen:
 \begin{itemize}
 	\item Two Point sources: 4 full iterations, $J=3$, $\lambda=0.1$
-	\item Mixed sources: 4 full iterations, $J=7$, $\lambda=0.01$
+	\item Mixed sources: 4 full iterations, $J=7$, $\lambda=0.1$
 \end{itemize}
 
 In figure \ref{results:point} Coordinate Descent and tCLEAN reconstruction differ in two notable ways: The peak intensity of the source, and how much each algorithm spreads the point source. 
@@ -124,56 +124,66 @@ The overall complexity shown in \eqref{results:clean:o} can also be split into t
 Notice that the number of CLEAN deconvolutions $I_{CLEAN}$ depends on the image content, similar the number of non-zero starlets $S$ for Coordinate Descent. Here however, it multiplies with the number of pixels $N$ instead of the number of Visibilities $M$. In a sense, the major cycle tries to reduce the runtime complexity of handling the image content by calculating the non-uniform FFT. If the difference is large enough $N \ll M$, then the Major Cycle will end up with a smaller overall runtime.
 
 \subsubsection{Runtime complexity estimate on MeerKAT data}
-The MeerKAT observation contains approximately 540 channels with 4 million calibrated Visibilities each. After calibration, MeerKAT data is typically averaged over frequency and time to reduce its disk space. There are no strict rules on how to chose the image resolution and number of pixels. An initial CLEAN reconstruction was preformed with an image size of $8192^2$ and 1.6 arc-seconds per pixel resolution. These numbers were used for the estimate.
+The MeerKAT observation contains approximately 540 channels with 4 million calibrated Visibilities each. After calibration, MeerKAT data is typically averaged over frequency and time to reduce its disk space. There are no strict rules on how to chose the image resolution and number of pixels. An initial WSCLEAN reconstruction was preformed with:
+\begin{itemize}
+	\item Visibilities: $M=2.19e^9$
+	\item $w$-stacks: $W = 128$
+	\item Pixels: $N = 8192^2$
+	\item Maximum number of CLEAN iterations: $I_{CLEAN} = 35'000$
+\end{itemize}
 
-Rest of the 
+Let us use these numbers and compare the complexity of WSCLEAN \eqref{results:clean:o} with Coordinate Descent \eqref{results:cd:omega}. There are three values left to define: The number of Major Cycles $I_{Major}$ for CLEAN, and for Coordinate Descent the  number of non-zero starlets $S$, iterations $I_{CD}$, and starlet levels $J$. CLEAN reconstructions tend to use around five Major Cycles. For the first estimate, we make assumptions in favour of Coordinate Descent and set $I_{Major} = 10$. 10 Major Cycles is what a compressed sensing reconstruction needed to converge on simulated data \cite{pratley2018fast}. For Coordinate Descent we set $J = 10$, which lets the largest starlet span $5*2^{10} = 5120$ pixels, and an area of 136 arc-minutes. More than enough to capture the largest structures in the image. We compare the relative speedup of Coordinate Descent to CLEAN for different number of iterations $I_{CD}$ and non-zero starlets $S$. Table \ref{res:cd:table} shows the factor of how much Coordinate Descent is faster than CLEAN. With $S=500$ and $I_{CD} = 1$ iterations, Coordinate Descent is 4.69 times faster than CLEAN. 
 
+\begin{table}[h!]
+	\begin{center}
+		\begin{tabular}{l|c|c|c} % <-- Alignments: 1st column left, 2nd middle and 3rd right, with vertical lines in between
+			 & $I_{CD} = 1$ & $I_{CD} = 5$ &  $I_{CD} = 10$\\
+			\hline
+			$S=500$ & 4.69 &  1.19 & 0.62 \\
+			$S=2500$ & 0.93 &  0.24 & 0.12 \\
+			$S=5000$ & 0.47 &  0.12 & 0.06 \\
+			$S=7500$ & 0.31 &  0.08 & 0.04 \\
+		\end{tabular}
+		\caption{Relative speed-up of Coordinate Descent compared to CLEAN. }
+		\label{res:cd:table}
+	\end{center}
+\end{table}
 
-
-Example reconstruction was used, with image size ofpixels. The image size can vary between 
-
-The image size is typically left to the user, and can vary widely. For this estimate, we use the $8192^2$ pixels as given
-
-
-Complex formula. But for MeerKAT, the number of Visibilities $M$ is by far the largest. Simplifies to $M_{Major}*M$
-
-Assumptions
-Estimates for $M_{Major}$ = 10. (Cite New W-stacking approach)
-W = $100$ depends on observation between 10, and hundreds. Depends on the observation. Cite new w-stacking approach can limit the number of w-stacks. 
-D=35'000
-
-Assumptions for $J$ = 10
-
-
-In terms of $S$ for 
-Where the data comes from
-
-Calibration: 
-Visibilities = 4060770
-Channels = 540
-
-pixels = 8192 * 8192 = 67 108 864
-
-Target, what would an Ideal Compressed Sensing implementation do.
-
-Memory requirement
-
-MeerKAT has by far more Visibilities than pixels
-
-Write one meerkat observation
+To put the numbers into perspective, Coordinate Descent used roughly 7000 non-zero starlets to reconstruct the image \ref{results:mixed:cd}, which is based on simulated data only containing Gaussian and point sources. When we look at the WSCLEAN reconstruction of the MeerKAT observation \ref{results:wsclean}, we see complex extended emissions and a large number of point sources. [Create a reconstruction with 7000 non-zero starlets]. We need more than 7000 non-zero starlets for an accurate reconstruction of the image \ref{results:wsclean}. 
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=0.5\linewidth]{./chapters/05.algorithms/sim00/full_cache_debug.png}
-	\caption{WSCLEAN Reconstruction of a MeerKAT observation.}
+	\includegraphics[width=0.6\linewidth]{./chapters/20.results/meerkat.png}
+	\caption{WSCLEAN Reconstruction of the MeerKAT observation.}
 	\label{results:wsclean}
 \end{figure}
-The number of $S$ and then the lower bound of Coordinate Descent. (Put WSCLEAN image in here and Discuss $S$)
 
+Since Coordinate Descent does not depend on the image size $N$, and the image size changes depending on the use case, one might imagine Coordinate Descent may be useful for very large image sizes. Sadly, this is not the case unless we create images with more pixels than Visibilities, which is not likely in the MeerKAT case. Let us quadruple each image dimension to $N=32000^2$, now we have two Visibilities for each pixel, and just for demonstration's sake reduce $J=5$ for Coordinate Descent. The results are shown in table \ref{res:cd:large:table}. Coordinate Descent is only competitive if it needs just one iteration to converge. Any advantage shrinks fast as soon as Coordinate Descent needs more several iterations over all non-zero components $S$. 
 
+\begin{table}[h!]
+	\begin{center}
+		\begin{tabular}{l|c|c|c} % <-- Alignments: 1st column left, 2nd middle and 3rd right, with vertical lines in between
+			& $I_{CD} = 1$ & $I_{CD} = 5$ &  $I_{CD} = 10$\\
+			\hline
+			$S=500$ & 76.82 &  19.64 & 10.17 \\
+			$S=2500$ & 15.38 &  3.39 & 2.03 \\
+			$S=5000$ & 7.69 &  1.97 & 1.02 \\
+			$S=7500$ & 5.13 &  1.31 & 0.68 \\
+			$S=10000$ & 3.84 &  0.98 & 0.51 \\
+			\hline
+			$S=15000$ & 2.56 &  0.66 & 0.34 \\
+			$S=20000$ & 1.92 &  0.49 & 0.25 \\
+			$S=25000$ & 1.54 &  0.39 & 0.20 \\
+		\end{tabular}
+		\caption{Relative speed-up of Coordinate Descent compared to CLEAN with an image size of $N=32000^2$ and starlet levels $J=5$. }
+		\label{res:cd:large:table}
+	\end{center}
+\end{table}
 
-Other compressed sensing approaches have a more expensive term than $D*2N$ for their complexity. But compared to compressed sensin.
+How likely it is
 
+When we look at the WSCLEAN reconstruction of the obsevation in figure \ref{results:wsclean}, we see extended emissions with complex structures and a large number of point sources. [Applying the 2500 non-zero starlets to the image]. We cannot create a good reconstruction with 2500 non-zero components.
 
-IMAGE CONTENT SCALES WITH pixels instead of Visibilities.
+Even though Coordinate Descent does scale independently of the number of pixels, as soon as we stop assuming Coordinate Descent needs $I_{CD} = 1$ iterations to converge, CLEAN pulls ahead. We can quadruple each image side to $32'000^2$ pixels, and an image with $S=7000$, as the reconstruction of \ref{results:mixed:cd}, we can only afford $I_{CD} = 6$ Iterations before \ref{} non-zero components can iterate over each , and even if Coordinate Descent could represent the image with just 2500 non-zero components, we can only afford a total of $I_{CD} = 20$ iterations before
+
 
