@@ -2,10 +2,10 @@ N = (8192*4) * (8192*4)
 M = 540 * 4060770
 
 W = 128
-I.major = 10
+I.major = 6
 I.clean = 35000
 
-S = 25000
+S = 500
 I.cd = 1
 J=10
 
@@ -27,8 +27,4 @@ for (i in cd_cycles) {
 }
 
 print(paste(results, collapse=" & "))
-
-clean/CD(S, M, 2, J)
-clean/CD(S, M, 5, J)
-clean/CD(S, M, 10, J)
 
