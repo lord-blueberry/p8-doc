@@ -1,6 +1,6 @@
 \section{Reconstruction and Scalability of Coordinate Descent}
 %\textbf{Coordinate Descent comparison to CLEAN reconstruction}
-In this section, we compare the Coordinate Descent reconstruction with CLEAN on simulated MeerKAT data, and compare the runtime complexity of the two approaches on a real-world MeerKAT observation. We show that Coordinate Descent reconstructs the image by only computing a few columns of the Fourier Transform Matrix $F^{-1}$, and investigate if this approach reduces the runtime complexity on the large scale reconstruction problems of MeerKAT.
+In this section, we compare the Coordinate Descent reconstruction with CLEAN on simulated MeerKAT data, and compare the runtime complexity of the two approaches on a real-world MeerKAT observation. We show that Coordinate Descent reconstructs the image by only computing a subset  the Fourier Transform Matrix' columns $F^{-1}$, and investigate if this approach reduces the runtime complexity on the large scale reconstruction problems of MeerKAT.
 
 The real world MeerKAT data were calibrated and averaged down to reduce its size to 88 Gigabytes. The raw, uncalibrated data ranges between 500 and 1000 Gigabytes. Data on this scale requires a mature pipeline for reading and image reconstruction. Within the time limit of this project, only a reconstruction with the WSCLEAN\cite{offringa2014wsclean} pipeline was possible.
 
@@ -34,9 +34,9 @@ We used CASA's default parameters for CLEAN, except for the maximum number of CL
 
 In figure \ref{results:point} shows an image of the Coordinate Descent and CLEAN reconstruction. Figure \ref{results:points:contour} shows the intensity profile of both reconstructions compared with the ground truth. Note that figure \ref{results:points:contour} has a logarithmic y axis. The reconstructions differ in two notable ways: The peak intensity of the source, and how much each algorithm spreads the point source. 
 
-\textit{Spread}: CLEAN reconstructs a convolved version of the true image. CLEAN locates the two peaks in figure \ref{results:points:contour}, but convolves the point source with a Gaussian function. CLEAN reconstructs two Gaussian functions with same peak as the point source. The Gaussian represents the accuracy of the instrument. With compressed sensing, we try to reconstruct the observed image above the accuracy of the instrument. In the intensity profile \ref{results:points:contour}, Coordinate Descent reconstructs two narrow gaussian-like peaks, essentially super-resolving the image. However, note that the total intensity is a fraction of the original peaks.
+\textit{Spread}: CLEAN reconstructs a convolved version of the true image. CLEAN locates the two peaks in figure \ref{results:points:contour}, but convolves the point source with a Gaussian function. CLEAN reconstructs two Gaussian functions with same peak as the point source. The Gaussian represents the accuracy of the instrument. With compressed sensing, we try to reconstruct the observed image above the accuracy of the instrument. In the intensity profile, Coordinate Descent reconstructs two narrow gaussian-like peaks, essentially super-resolving the image. However, note that the total intensity is a fraction of the original peaks.
 
-\textit{Intensity:} [Total Flux] The reconstructions differ in intensity. The figure \ref{results:points:contour} shows the intensity profile of the two reconstructions. Note the $y$ axis is on a logarithmic scale. Also note that Coordinate Descent has shifted the smaller peak by a pixel in its reconstruction. [Total flux correct in CD?]
+\textit{Intensity:} [Total Flux] The reconstructions differ in intensity. The figure \ref{results:points:contour} shows the intensity pr. Also note that Coordinate Descent has shifted the smaller peak by a pixel in its reconstruction. [Total flux correct in CD?]
 
 \begin{figure}[h]
 	\centering
@@ -70,43 +70,35 @@ Total flux constraint, $\lambda$ for different starlet layers like in \cite{gira
 Coordinate Descent did not reconstruct all point sources. How many starlets are non-zero is the major point for runtime. It depends on how many areas of the image are non-zero. Starlet has a representation for extended emission, how many starlets are needed for modelling is hard.
 
 Runtime problems
-7000 non-zero starlets, 
+19 non-zero starlets, 
 
 
-\subsection{Scalability estimate of CLEAN and Coordinate Descent}
-%\begin{figure}[h]
-%	\centering
-%	\includegraphics[width=0.5\linewidth]{./chapters/05.algorithms/sim00/full_cache_debug.png}
-%	\caption{Pixels used to reconstruct the image}
-%	\label{results:pixels:used}
-%\end{figure}
-In this section, we first discuss the runtime complexity of Coordinate Descent and CLEAN. We compare the runtime complexity on a real MeerKAT observation and come to the conclusion, that the Major Cycle Architecture leads to a lower runtime complexity. 
+\subsection{Scalability comparison of CLEAN and Coordinate Descent}
+Pinning down the average runtime of Coordinate Descent is difficult. As mentioned in section \ref{cd}, Coordinate Descent has lose convergence guarantees in theory, but works well in practice with heuristics. For our algorithm, the runtime mainly depends on the number of non-zero starlet components $S$ and how many iterations Coordinate Descent needs to converge. How many non-zero starlets, or how many iterations Coordinate Descent needs on average are hard questions and cannot be answered in this project.
 
- depends too heavily on the
+Instead, this work focuses on a minimum runtime estimate of Coordinate Descent on MeerKAT observations. We compare the runtime complexity with CLEAN and analyse what improvements an idealized version of Coordinate Descent can provide.
+
+It turns out that the minimum runtime estimates are not promising.
 
 
-Pinning down the precise runtime of Coordinate Descent is difficult. As mentioned in section \ref{cd}, Coordinate Descent has lose convergence guarantees in theory, but works well in practice with heuristics. However, these heuristics complicate the runtime analysis of Coordinate Descent. How well the active set heuristic performs on an average case is a difficult analysis.
-
-Furthermore the current implementation can potentially be improved with other heuristics. In this section, we account for potential heuristics by looking at the best case runtime complexity of Coordinate Descent. We compare it to the complexity of CLEAN on a real MeerKAT observation. It turns out that CLEAN and the Major Cycle architecture eadd to a lower runtime complexity on large datasets.
-
-\subsubsection{Runtime complexity of Coordinate Descent}
+\subsubsection{Runtime complexity of an idealized Coordinate Descent}
 The runtime complexity of Coordinate Descent depends largely on the number of Visibilities $M$ and the number of non-zero starlets $S$. The number and location of the $S$ non-zero starlets are generally not known. However, we created a heuristic which finds likely non-zero starlet components. In a realistic setting, the heuristic will have found more than $S$ likely non-zero starlets. For the best case scenario, we assume an oracle performance heuristic: It finds the location and number of the $S$ non-zero starlet components in constant time ($O(1)$). Coordinate Descent therefore has to find the value of the $S$ non-zero starlet components, which takes three separate operations: creating the columns of $F^{-1}$, calculating the minima for each single component, and calculating the starlet layers:
 
 \begin{alignat*}{1}
-\text{creating} \:S\: \text{columns of}\: F^{-1} &: S*3M\\
-\text{locating} \:S\: \text{minima of} \:S\: \text{parabolas} &: S*8M\\
+\text{creating} \:S\: \text{columns of}\: F^{-1} &: S*7M\\
+\text{locating} \:S\: \text{minima of} \:S\: \text{parabolas} &: S*4M\\
 \text{calculating} \:J\: \text{Starlet layers} &: J * 2M
 \end{alignat*}
 
 We assume we have enough memory to cache the columns of $F^{-1}$ and only need to calculate them once. Coordinate Descent arrives at the correct result in $I_{CD}$ iterations. Therefore we arrive at the runtime complexity of \eqref{results:cd:omega}.
 
 \begin{equation}\label{results:cd:omega}
-CD(I_{CD}, M, S, J) = S*3M + I_{CD} * [S * 8M + J * 2M]
+CD(I_{CD}, M, S, J) = S*7M + I_{CD} * [S * 4M + J * 2M]
 \end{equation}
 
 Note that the runtime of Coordinate Descent is independent of the number of pixels. The only image related parameter in \eqref{results:cd:omega} is $J$, the number of starlet layers. The largest starlet layer represents the largest possible structure in the image, which is given by the instrument and the image resolution (pixels per arc-second). The runtime only depends indirectly on the image resolution, not the total number of pixels.
 
-Also note the term iterating over the $S$ non-zero starlets, $ I_{CD} * [S * 8M +\ldots]$. As it turns out, this is the Achilles heel of the algorithm. MeerKAT observations contain a very large amount of Visibilities $M$ and a large amount of distinct structures, which leads to a large $S$ (each point source needs at least one non-zero component to be represented). 
+Also note the term iterating over the $S$ non-zero starlets, $ I_{CD} * [S * 4M +\ldots]$. As it turns out, this is the Achilles heel of the algorithm. MeerKAT observations contain a very large amount of Visibilities $M$ and a large amount of distinct structures, which leads to a large $S$ (each point source needs at least one non-zero component to be represented). 
 
 \subsubsection{Runtime complexity of CLEAN}
 We look at CLEAN reconstructions which use the non-uniform FFT with $w$-stacking. The runtime of a single Major cycle depends on the non-uniform FFT with $w$-stacking and the number of CLEAN deconvolutions. The number $N$ denotes the number of pixels (for example $512^2$).
@@ -128,6 +120,7 @@ The overall complexity shown in \eqref{results:clean:o} can also be split into t
 
 Notice that the number of CLEAN deconvolutions $I_{CLEAN}$ depends on the image content, similar the number of non-zero starlets $S$ for Coordinate Descent. Here however, it multiplies with the number of pixels $N$ instead of the number of Visibilities $M$. In a sense, the major cycle tries to reduce the runtime complexity of handling the image content by calculating the non-uniform FFT. If the difference is large enough $N \ll M$, then the Major Cycle will end up with a smaller overall runtime.
 
+
 \subsubsection{Runtime complexity estimate on MeerKAT data}
 The MeerKAT observation contains approximately 540 channels with 4 million calibrated Visibilities each. After calibration, MeerKAT data is typically averaged over frequency and time to reduce its disk space. There are no strict rules on how to chose the image resolution and number of pixels. An initial WSCLEAN reconstruction was preformed with:
 \begin{itemize}
@@ -137,24 +130,27 @@ The MeerKAT observation contains approximately 540 channels with 4 million calib
 	\item Maximum number of CLEAN iterations: $I_{CLEAN} = 35'000$
 \end{itemize}
 
-Let us use these numbers and compare the complexity of WSCLEAN \eqref{results:clean:o} with Coordinate Descent \eqref{results:cd:omega}. There are three values left to define: The number of Major Cycles $I_{Major}$ for CLEAN, and for Coordinate Descent the  number of non-zero starlets $S$, iterations $I_{CD}$, and starlet levels $J$. CLEAN reconstructions tend to use around five Major Cycles. For the first estimate, we make assumptions in favour of Coordinate Descent and set $I_{Major} = 10$. 10 Major Cycles is what a compressed sensing reconstruction needed to converge on simulated data \cite{pratley2018fast}. For Coordinate Descent we set $J = 10$, which lets the largest starlet span $5*2^{10} = 5120$ pixels, and an area of 136 arc-minutes. More than enough to capture the largest structures in the image. We compare the relative speedup of Coordinate Descent to CLEAN for different number of iterations $I_{CD}$ and non-zero starlets $S$. Table \ref{res:cd:table} shows the factor of how much Coordinate Descent is faster than CLEAN. With $S=500$ and $I_{CD} = 1$ iterations, Coordinate Descent is 4.69 times faster than CLEAN. 
+For our estimate, we use the values of the initial WSCLEAN reconstruction, and we assume CLEAN requires $I_{Major}=10$ Major Cycles to converge. CLEAN reconstructions tend to use around five Major Cycles. Compressed sensing reconstructions which use the Major Cycle framework tend to use around 10 cycles. For the first estimate, we make assumptions in favour of Coordinate Descent.
+
+The idealized Coordinate Descent algorithm has three parameters left: Number of starlet levels $J$, number of non-zero starlets $S$, and number of iterations to converge $I_{CD}$. We under-estimate and set $J=5$, and assume the largest structure in the image is no more than 160 pixels in size. With these assumptions we plug in the values into the equations \eqref{results:cd:omega} and \eqref{results:clean:o}, and compare the runtime for different values of $S$ and $I_{CD}$ in table \ref{res:cd:table}
+	
+	. We estimate the numberer of Major Cycles  for CLEAN, and for Coordinate Descent the  number of non-zero starlets $S$, iterations $I_{CD}$, and starlet levels $J$. and set $I_{Major} = 10$. 10 Major Cycles is what a compressed sensing reconstruction needed to converge on simulated data \cite{pratley2018fast}. For Coordinate Descent we set $J = 10$, which lets the largest starlet span $5*2^{10} = 5120$ pixels, and an area of 136 arc-minutes. More than enough to capture the largest structures in the image. We compare the relative speedup of Coordinate Descent to CLEAN for different number of iterations $I_{CD}$ and non-zero starlets $S$. Table \ref{res:cd:table} shows the factor of how much Coordinate Descent is faster than CLEAN. With $S=500$ and $I_{CD} = 1$ iterations, Coordinate Descent is 4.69 times faster than CLEAN. 
 
 \begin{table}[h!]
 	\begin{center}
 		\begin{tabular}{l|c|c|c} % <-- Alignments: 1st column left, 2nd middle and 3rd right, with vertical lines in between
-			 & $I_{CD} = 1$ & $I_{CD} = 5$ &  $I_{CD} = 10$\\
+			 & $I_{CD} = 1$ & $I_{CD} = 4$ &  $I_{CD} = 8$\\
 			\hline
-			$S=500$ & 4.69 &  1.19 & 0.62 \\
-			$S=2500$ & 0.93 &  0.24 & 0.12 \\
-			$S=5000$ & 0.47 &  0.12 & 0.06 \\
-			$S=7500$ & 0.31 &  0.08 & 0.04 \\
+			$S=1000$ & 1.41 & 0.67 & 0.40 \\
+			$S=2000$ & 0.70 & 0.34 & 0.20 \\
+			$S=3000$ & 0.47 & 0.22 & 0.13 \\
 		\end{tabular}
-		\caption{Relative speed-up of Coordinate Descent compared to CLEAN. }
+		\caption{Relative speed-up of an idealized Coordinate Descent compared to CLEAN.}
 		\label{res:cd:table}
 	\end{center}
 \end{table}
 
-[To put the numbers into perspective, Coordinate Descent used roughly 7000 non-zero starlets to reconstruct the image \ref{results:mixed:cd}, which is based on simulated data only containing Gaussian and point sources. When we look at the WSCLEAN reconstruction of the MeerKAT observation \ref{results:wsclean}, we see complex extended emissions and a large number of point sources. [Create a reconstruction with 7000 non-zero starlets]. We need more than 7000 non-zero starlets for an accurate reconstruction of the image \ref{results:wsclean}.]
+To put the numbers into perspective, Coordinate Descent used about 2000 non-zero starlets to reconstruct the image \ref{results:mixed:cd}. Since the reconstruction does not contain all point sources, the true number of $S$ is likely to be higher than 2000 on a simulated dataset with simple, Gaussian extended emissions. A MeerKAT reconstruction can contain more complex emissions. Figure \ref{results:wsclean} shows the WSCLEAN reconstruction of the current observation. We see a large number of small, point-like objects and several complex extended emissions. We need at least 2000 non zero starlet components. Even if 2000 is enoug, even if Coordinate Descent converges with one full iteration, it is already about 30\% more expensive to calculate than CLEAN.
 
 \begin{figure}[h]
 	\centering
@@ -163,7 +159,7 @@ Let us use these numbers and compare the complexity of WSCLEAN \eqref{results:cl
 	\label{results:wsclean}
 \end{figure}
 
-Since Coordinate Descent does not depend on the image size $N$, and the image size changes depending on the use case, one might imagine Coordinate Descent may be useful for very large image sizes. Sadly, this is not the case unless we create images with more pixels than Visibilities, which is not likely in the MeerKAT case. Let us quadruple each image dimension to $N=32000^2$, now we have two Visibilities for each pixel, and just for demonstration's sake reduce $J=5$ for Coordinate Descent. The results are shown in table \ref{res:cd:large:table}. Coordinate Descent is only competitive if it needs just one iteration to converge. Any advantage shrinks fast as soon as Coordinate Descent needs several iterations over all non-zero components $S$. How likely is it that Coordinate Descent just needs one iteration to converge?
+Since Coordinate Descent does not depend on the image size $N$, and the image size changes depending on the use case, one might imagine Coordinate Descent may be useful for very large image sizes. Sadly, this is not the case. Let us quadruple each image dimension to $N=32000^2$, now we have two Visibilities for each pixel, and just for demonstration's sake reduce $J=5$ for Coordinate Descent. The results are shown in table \ref{res:cd:large:table}. Coordinate Descent is only competitive if it needs just one iteration to converge. Any advantage shrinks fast as soon as Coordinate Descent needs several iterations over all non-zero components $S$. How likely is it that Coordinate Descent just needs one iteration to converge?
 
 \begin{table}[h!]
 	\begin{center}
@@ -185,11 +181,19 @@ Since Coordinate Descent does not depend on the image size $N$, and the image si
 	\end{center}
 \end{table}
 
-If the starlet components are independent of each other, Coordinate Descent finds the optimum value of each component in one iteration. As mentioned in section \ref{cd}, Starlets are an over-complete representation. Many many different starlet components explain the same data, which makes them dependent on each other and Coordinate Descent need several iterations to converge. The issue with Coordinate Descent's runtime complexity lies in the term $ I_{CD} * [S * 8M +\ldots]$ of \eqref{results:cd:omega}. Since $M$ is the largest number in the reconstruction problem, Coordinate Descent cannot afford many iterations. In a sense the Major Cycle architecture allows for more iterations, because it first converts the Visibilities $M$ into an image $N$, where $N \ll M$.
+If the starlet components are independent of each other, Coordinate Descent finds the optimum value of each component in one iteration. As mentioned in section \ref{cd}, Starlets are an over-complete representation. Many many different starlet components explain the same data, which makes them dependent on each other and Coordinate Descent need several iterations to converge. [Converging in one iteration with an over-complete representation is unlikely.]
 
-In other words, we could implement the Coordinate Descent Algorithm within a Major Cycle architecture, and we can afford more non-zero starlet components and more iterations for the same runtime complexity. This gets more obvious when we look at the memory footprint of Coordinate Descent: Each cached column of the Fourier Transform Matrix $F^{-1}$ contains $M$ elements. Assuming 32 bit floating point precision, a single column requires 8 gigabytes of memory. Caching several hundreds of columns is simply infeasible. However, if we would use the Major Cycle architecture, we may be able to use the FFT to calculate a single column, and do not need to cache it.
+The issue with Coordinate Descent's runtime complexity lies in the term $ I_{CD} * [S * 8M +\ldots]$ of \eqref{results:cd:omega}. Coordinate Descent cannot afford many iterations nor many non-zero components, because both of these numbers get multiplied together with the number of Visibilities $M$, the largest number in the problem. . In a sense the Major Cycle architecture allows for more iterations, because it first converts the Visibilities $M$ into an image $N$, where $N \ll M$.
+
+In other words, if we use the Major Cycle architecture for Coordinate descent, we can afford more non-zero starlet components and more iterations for the same runtime complexity. This gets more obvious when we look at the memory footprint of Coordinate Descent: Each cached column of the Fourier Transform Matrix $F^{-1}$ contains $M$ elements. Assuming 32 bit floating point precision, a single column requires 8 gigabytes of memory. Caching several hundreds of columns is simply infeasible. However, if we would use the Major Cycle architecture, we work with a uniformly sampled grid of size $N$. We may be able to use the FFT to calculate the $F^{-1}$ columns, without the need of caching it.
 
 \subsection{Embracing the Major Cycle}
+In this project set out to eliminate the Major Cycle architecture. In this environment, Compressed Sensing reconstructions are more expensive to compute than the CLEAN algorithm, which is one of the reasons why CLEAN reconstructions are still used today. The Coordinate Descent algorithm developed in this project gets rid of the Major Cycle, and the resulting in a lightweight algorithm. 
+
+Coordinate Descent is primed for Paralellization, it does not have any of the approximation algorithm like the major cycle.
+
+However on the MeerKAT image reconstruction, even the idealized version of the algorithm results in a higher runtime complexity
+NO good alternatives to the major cycle.
 
 
 In this example, we over-estimated the runtime of CLEAN by setting the number of Major Cycles $I_{Major} = 10$, which is more in the area of current compressed sensing reconstructions. reconstructions. 
