@@ -7,13 +7,13 @@ The real world MeerKAT data were calibrated and averaged down to reduce its size
 The simulations were created with the Meqtrees software package. Two simulations which contain roughly (size of Visibilities) perfectly calibrated Visibilities were created. Compared to real-world observations, the two simulated data sets are small and not representative of the real data volume. Also, more realistic simulations which contain pointing errors, calibration errors, and thermal noise are out of scope for this project. The simulations are used to isolate the two fundamental issues in radio interferometer image reconstruction: Non-uniform sampling and incomplete measurements.
 
 \subsection{Imaging on Simulated Data}
-Two simulations were created, one with two point sources shown in figure \ref{results:point}, and the other in figure \ref{results:mixed} with three gaussian extended emissions plus 16 point sources. The Coordinate Descent algorithm was compared to the CASA tCLEAN implementation. CASA is an established software framework for radio interferometer image reconstruction and was already used in a previous project.
+We compare the reconstruction of Coordinate Descent and CLEAN on two simulated observations. The first observation contains two point sources, on which we show that Coordinate Descent is able to locate the sources below the accuracy limit of the instrument. The second observation contains point and Gaussian sources, on which we show that Coordinate Descent better captures the intensity profile of extended emissions. Also, we look at the shortcomings of the proof-of-concept implementations in terms of reconstruction quality and runtime. We use the CLEAN implementation of CASA in this section. CASA is an established software framework for radio interferometer image reconstruction and was already used in a previous project.
 
 \begin{figure}[h]
 	\centering
 	\begin{subfigure}[b]{0.4\linewidth}
 		\includegraphics[width=\linewidth]{./chapters/20.results/points/tCLEAN.png}
-		\caption{tCLEAN reconstruction.}
+		\caption{CLEAN reconstruction.}
 		\label{results:points:tclean}
 	\end{subfigure}
 	\begin{subfigure}[b]{0.4\linewidth}
@@ -26,17 +26,17 @@ Two simulations were created, one with two point sources shown in figure \ref{re
 	\label{results:point}
 \end{figure}
 
-Both algorithms have free parameters to tune. tCLEAN has a several parameters, but, CASA's default values were used except for the maximum number of CLEAN iterations (parameter niter), which was set to 250. The proof-of-concept Coordinate Descent implementation has three parameters to tune: Number of iterations, the number of starlet layers $J$, and the regularization parameter $\lambda$. The first two parameter could be estimated by the reconstruction algorithm itself. For this implementation, it was left to the user. For the two simulations the Coordinate Descent parameters were chosen:
+We used CASA's default parameters for CLEAN, except for the maximum number of CLEAN iterations, which we set to 250. The proof-of-concept Coordinate Descent implementation has three parameters to tune: Number of iterations, the number of starlet layers $J$, and the regularization parameter $\lambda$. The first two parameter could be estimated by the reconstruction algorithm itself. In this implementation, it was left to the user. For the two simulations the Coordinate Descent parameters were chosen:
 \begin{itemize}
 	\item Two Point sources: 4 full iterations, $J=3$, $\lambda=0.1$
 	\item Mixed sources: 4 full iterations, $J=7$, $\lambda=0.1$
 \end{itemize}
 
-In figure \ref{results:point} Coordinate Descent and tCLEAN reconstruction differ in two notable ways: The peak intensity of the source, and how much each algorithm spreads the point source. 
+In figure \ref{results:point} shows an image of the Coordinate Descent and CLEAN reconstruction. Figure \ref{results:points:contour} shows the intensity profile of both reconstructions compared with the ground truth. Note that figure \ref{results:points:contour} has a logarithmic y axis. The reconstructions differ in two notable ways: The peak intensity of the source, and how much each algorithm spreads the point source. 
 
-\textit{Spread:} tCLEAN essentially reconstructs a convolve version of the observed image. The observed image gets convolved with a Gaussian function, which represents the accuracy limit of the instrument. Coordinate Descent tries to reconstruct the observed image directly, resulting in a reconstruction where the sources are much less spread and completely separated. 
+\textit{Spread}: CLEAN reconstructs a convolved version of the true image. CLEAN locates the two peaks in figure \ref{results:points:contour}, but convolves the point source with a Gaussian function. CLEAN reconstructs two Gaussian functions with same peak as the point source. The Gaussian represents the accuracy of the instrument. With compressed sensing, we try to reconstruct the observed image above the accuracy of the instrument. In the intensity profile \ref{results:points:contour}, Coordinate Descent reconstructs two narrow gaussian-like peaks, essentially super-resolving the image. However, note that the total intensity is a fraction of the original peaks.
 
-\textit{Intensity:} The reconstructions differ in intensity. The figure \ref{results:points:contour} shows the intensity profile of the two reconstructions. Note the $y$ axis is on a logarithmic scale. Also note that Coordinate Descent has shifted the smaller peak by a pixel in its reconstruction. [Total flux correct in CD?]
+\textit{Intensity:} [Total Flux] The reconstructions differ in intensity. The figure \ref{results:points:contour} shows the intensity profile of the two reconstructions. Note the $y$ axis is on a logarithmic scale. Also note that Coordinate Descent has shifted the smaller peak by a pixel in its reconstruction. [Total flux correct in CD?]
 
 \begin{figure}[h]
 	\centering
@@ -69,8 +69,8 @@ Total flux constraint, $\lambda$ for different starlet layers like in \cite{gira
 
 Coordinate Descent did not reconstruct all point sources. How many starlets are non-zero is the major point for runtime. It depends on how many areas of the image are non-zero. Starlet has a representation for extended emission, how many starlets are needed for modelling is hard.
 
-
-
+Runtime problems
+7000 non-zero starlets, 
 
 
 \subsection{Scalability estimate of CLEAN and Coordinate Descent}
@@ -80,6 +80,11 @@ Coordinate Descent did not reconstruct all point sources. How many starlets are 
 %	\caption{Pixels used to reconstruct the image}
 %	\label{results:pixels:used}
 %\end{figure}
+In this section, we first discuss the runtime complexity of Coordinate Descent and CLEAN. We compare the runtime complexity on a real MeerKAT observation and come to the conclusion, that the Major Cycle Architecture leads to a lower runtime complexity. 
+
+ depends too heavily on the
+
+
 Pinning down the precise runtime of Coordinate Descent is difficult. As mentioned in section \ref{cd}, Coordinate Descent has lose convergence guarantees in theory, but works well in practice with heuristics. However, these heuristics complicate the runtime analysis of Coordinate Descent. How well the active set heuristic performs on an average case is a difficult analysis.
 
 Furthermore the current implementation can potentially be improved with other heuristics. In this section, we account for potential heuristics by looking at the best case runtime complexity of Coordinate Descent. We compare it to the complexity of CLEAN on a real MeerKAT observation. It turns out that CLEAN and the Major Cycle architecture eadd to a lower runtime complexity on large datasets.
@@ -149,7 +154,7 @@ Let us use these numbers and compare the complexity of WSCLEAN \eqref{results:cl
 	\end{center}
 \end{table}
 
-To put the numbers into perspective, Coordinate Descent used roughly 7000 non-zero starlets to reconstruct the image \ref{results:mixed:cd}, which is based on simulated data only containing Gaussian and point sources. When we look at the WSCLEAN reconstruction of the MeerKAT observation \ref{results:wsclean}, we see complex extended emissions and a large number of point sources. [Create a reconstruction with 7000 non-zero starlets]. We need more than 7000 non-zero starlets for an accurate reconstruction of the image \ref{results:wsclean}. 
+[To put the numbers into perspective, Coordinate Descent used roughly 7000 non-zero starlets to reconstruct the image \ref{results:mixed:cd}, which is based on simulated data only containing Gaussian and point sources. When we look at the WSCLEAN reconstruction of the MeerKAT observation \ref{results:wsclean}, we see complex extended emissions and a large number of point sources. [Create a reconstruction with 7000 non-zero starlets]. We need more than 7000 non-zero starlets for an accurate reconstruction of the image \ref{results:wsclean}.]
 
 \begin{figure}[h]
 	\centering
@@ -182,7 +187,10 @@ Since Coordinate Descent does not depend on the image size $N$, and the image si
 
 If the starlet components are independent of each other, Coordinate Descent finds the optimum value of each component in one iteration. As mentioned in section \ref{cd}, Starlets are an over-complete representation. Many many different starlet components explain the same data, which makes them dependent on each other and Coordinate Descent need several iterations to converge. The issue with Coordinate Descent's runtime complexity lies in the term $ I_{CD} * [S * 8M +\ldots]$ of \eqref{results:cd:omega}. Since $M$ is the largest number in the reconstruction problem, Coordinate Descent cannot afford many iterations. In a sense the Major Cycle architecture allows for more iterations, because it first converts the Visibilities $M$ into an image $N$, where $N \ll M$.
 
-In other words, we could implement the Coordinate Descent Algorithm within a Major Cycle architecture, and we can afford more non-zero starlet components and more iterations for the same runtime complexity. This gets more obvious when we look at the memory footprint of Coordinate Descent: Each cached column of the Fourier Transform Matrix $F^{-1}$ contains $M$ elements. Assuming 32 bit floating point precision, a single column requires 8 gigabytes of memory. Caching several hundreds of columns is simply infeasible. However, if we would use the Major Cycle architecture, we may be able to use the FFT to calculate a single column, and do not need to cache it in memory.
+In other words, we could implement the Coordinate Descent Algorithm within a Major Cycle architecture, and we can afford more non-zero starlet components and more iterations for the same runtime complexity. This gets more obvious when we look at the memory footprint of Coordinate Descent: Each cached column of the Fourier Transform Matrix $F^{-1}$ contains $M$ elements. Assuming 32 bit floating point precision, a single column requires 8 gigabytes of memory. Caching several hundreds of columns is simply infeasible. However, if we would use the Major Cycle architecture, we may be able to use the FFT to calculate a single column, and do not need to cache it.
+
+\subsection{Embracing the Major Cycle}
+
 
 In this example, we over-estimated the runtime of CLEAN by setting the number of Major Cycles $I_{Major} = 10$, which is more in the area of current compressed sensing reconstructions. reconstructions. 
 
