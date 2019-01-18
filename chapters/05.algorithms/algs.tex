@@ -42,7 +42,7 @@ def coordinate_descent(V_residual, x, lambda, max_iter):
 				V_residual = V_residual - fourier_column * (x_new - x_old)
 \end{lstlisting}\label{cd:basic}
 
-The simple version of coordinate descent converges to a solution which is similar to CLEAN. The convergence rate of coordinate descent is not well understood. Our image reconstruction problem falls in the class of quadratic programming, in coordinate descent converges at least linearly\cite{luo1992convergence}. (This a lose bound given by the theory). In practice, the convergence rate can be sped up with heuristics like active set\cite{activeset} and $\lambda$\cite{lambda}. Furthermore, coordinate descent is robust, even when the residual vector is only approximated, which is useful for distributing the algorithm.
+The simple version of coordinate descent converges to a solution which is similar to CLEAN. The convergence rate of coordinate descent is not well understood. Our image reconstruction problem falls in the class of quadratic programming, in coordinate descent converges at least linearly\cite{luo1992convergence}. (Strict convex function, may not be true in this section. This a lose bound given by the theory). In practice, the convergence rate can be sped up with heuristics like active set\cite{activeset} and $\lambda$\cite{lambda}. Furthermore, coordinate descent is robust, even when the residual vector is only approximated, which is useful for distributing the algorithm.
 
 The simple approach calculates the whole Fourier Transform Matrix $F^{-1}$ explicitly. The upside is that we do an exact $w$-term correction. The downside is $F^{-1}$ is too large to keep in memory, and too expensive to calculate on the fly for the scale of MeerKAT reconstructions. 
 
