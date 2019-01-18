@@ -12,14 +12,12 @@ WriteMap2 <- function(x, at, scales) {
   levelplot(x,
             at = at,
             margin=FALSE,
-            
+            zscaleLog = NULL,
             col.regions=colorRampPalette(brewer.pal(n =11, name="RdYlGn")),
             scales=list(x=scales, y=scales),
             xlab="arc seconds",
             ylab=""
-            
   )
-  
 }
 
 read <- function(img, pixels, resolution) {
@@ -59,10 +57,8 @@ calcline <- function(matrix, p0, p1, length.out=100) {
     
     i = i+ 1
   }
-  
   return(line)
 }
-
 
 calcLineDF <- function(matrices, names, p0,p1, interpolation.length) {
   index <- 1:interpolation.length
@@ -82,10 +78,13 @@ calcLineDF <- function(matrices, names, p0,p1, interpolation.length) {
   return(df)
 }
 
+asinh <- scales::trans_new(name = 'asinh', 
+                           transform = function(x) asinh(x*1000), 
+                           inverse = function(x) sinh(x)/1000)
 
 folder <- "./sim01/"
 tclean <- read(paste(folder, "tclean.csv", sep=""), 256, 0.5) - read(paste(folder,"tclean.residual.csv", sep=""), 256, 0.5)
-cd <- read(paste(folder, "image3", sep=""), 256, 0.5)
+cd <- read(paste(folder, "image2", sep=""), 256, 0.5)
 
 skymodel <- t(read(paste(folder,"skymodel.csv", sep=""), 512, 0.5))
 skymodel <- skymodel[129:384, 129:384]
@@ -94,29 +93,34 @@ colnames(skymodel) = model.axis
 rownames(skymodel) = model.axis
 p0 <- c(128, 92)
 p1 <- c(101, 159)
-
 matrices <- list(skymodel, tclean, cd)
-names <- c("Ground Truth", "tCLEAN", "Coordinate Descent")
-df <- calcLineDF(matrices, names, p0, p1, 1000)
+names <- c("Ground Truth", "CLEAN", "Coordinate Descent")
 
-asinh <- scales::trans_new(name = 'asinh', 
-                           transform = function(x) asinh(x*1000), 
-                           inverse = function(x) sinh(x)/1000)
-
-ggplot(data = df, aes(x=df$points, y=df$values, colour=df$names)) + 
+png(paste("./contour_points", ".png",sep=""),
+    width = 8.0,
+    height = 3.0,
+    units = "in",
+    res = 400)
+df <- calcLineDF(matrices, names, p0, p1, 10000)
+print(ggplot(data = df, aes(x=df$points, y=df$values, colour=df$names)) + 
   geom_line() +
-  scale_y_continuous(trans=asinh, breaks=c(0, 0.001, 0.014, 0.033, 0.1, 1, 1.4, 2.5)) +
-  xlab("arc minute") +
+  scale_y_continuous(trans=asinh, breaks=c(0, 0.001, 0.01, 0.1, 1, 1.4, 2.5)) +
+  xlab("arc seconds") +
   ylab("Jansky/beam") +
   labs(colour='Legend:') +
   scale_colour_brewer(palette = "Dark2") +
-  theme(legend.position="bottom",
-        legend.text=element_text(size=11), 
-        legend.title=element_text(size=13))
+  theme(legend.text=element_text(size=11), 
+        legend.title=element_text(size=13)))
+dev.off()
 
-
-scales = list(at=c(1, 32, 64, 96, 128, 256))
+scales = list(at=c(1, 65, 129, 197, 255))
+png("tclean_points.png",
+    width = 4.0,
+    height = 4.0,
+    units = "in",
+    res = 400)
 WriteMap2(tclean, at=seq(min(tclean), max(tclean), length.out=200), scales)
+dev.off()
 WriteMap2(cd, at=seq(min(cd), max(cd), length.out=200), scales)
 
 
