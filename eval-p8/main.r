@@ -167,10 +167,10 @@ dev.off()
 
 
 pix = 256
-cut.row.names <- round(527:654*resol, digits=2)
-cut.col.names <- round(round(816:943*resol, digits=2))
-cut.row <- 528:655
-cut.col <- 817:944
+cut.row.names <- round(463:718*resol, digits=2)
+cut.col.names <- round(round(752:1007*resol, digits=2))
+cut.row <- 464:719
+cut.col <- 753:1008
 scales = list(at=c(1, pix/8+1, pix/4+1, pix/8*3+1 ,pix/2+1, pix/8*5+1, pix/4*3+1, pix/8*7+1, pix))
 cut.model <- skymodel[cut.row, cut.col]
 rownames(cut.model) =cut.row.names
@@ -194,8 +194,8 @@ dev.off()
 matrices <- list(cut.model, cut.tclean, cut.cd)
 names <- c("Ground Truth", "CLEAN", "Coordinate Descent")
 interpolation <- 10000
-p0 <- c(63+128, 60+128)
-p1 <- c(67+128,65+128)
+p0 <- c(63+64, 60+64)
+p1 <- c(67+64,65+64)
 df <- calcLineDF(matrices, names, p0, p1, interpolation)
 print(ggplot(data = df, aes(x=df$points, y=df$values, colour=df$names)) + 
         geom_line() +
