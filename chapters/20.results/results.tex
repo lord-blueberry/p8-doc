@@ -192,6 +192,8 @@ Half as many pixels as Visibilities. An extreme example.
 
 The Coordinate Descent approach sees considerable speed up, if it converges within one iteration. But it falls off quickly as soon as it needs several iterations to converge. For reference, the proof-of-concept approach uses at least ten iterations. 
 
+The problem is MeerKAT can always just put in more Visibilities. $M$ can be increased at will. As soon as we go into self-calibration, we are hopeless. The number of Visibilities increases by factor 4-16, and Coordinate Descent is again too expensive to run.
+
 The issue with Coordinate Descent's runtime complexity lies in the term $I_{CD} * [S * 4M +\ldots]$ of \eqref{results:cd:omega}. Coordinate Descent cannot afford many iterations nor many non-zero components, because both of these numbers get multiplied together with $M$, the largest number in the problem.
 
 We cannot move far away from the ideal algorithm before the speed up vanishes. 
@@ -200,26 +202,40 @@ We over-estimated the runtime of CLEAN with 10 Major Cycles. If we assume 5 Majo
 In the MeerKAT context where we have a factor of 10-20 times more Visibilities than pixels, the Major cycle improves the runtime complexity of reconstruciton algorithms
 
 Indeed, the runtime of our Coordinate Descent algorithm can be improved by using the major cycle architecture, essentially replacing $M$ with $N$ and we arrive at the term
-h $I_{CD} * [S * 4N +\ldots]$. By using the Major Cycle architecture, Coordinate Descent can afford more iterations and more non-zero components in the image for the same runtime complexity. Furthermore $N$ lies on a uniformly sampled grid. We may be able to use the FFT instead of caching columns of the Fourier transform matrix.
+h $I_{CD} * [S * 4N +\ldots]$. By using the Major Cycle architecture, Coordinate Descent can afford more iterations and more non-zero components in the image for the same runtime complexity. Furthermore $N$ lies on a uniformly sampled grid. We may be able to use the FFT instead of caching columns of $F^{-1}$, and reduce the memory requirement to a sane amount.
 
 
 \subsection{Embracing the Major Cycle}
-In this project set out to eliminate the Major Cycle architecture. 
+We searched for a compressed sensing algorithm which does not need the major cycle, with the hope it would improve runtime complexity. Arriving at a Coordinate Descent algorithm, which does not require any of the approximation algorithm. It is very simple to implement. Results of 
 
-We did this and arrived at a simple Coordinate descent algorithm, getting rid of the major cycle. 
-
-Huge memory requirement. In the context of MeerKAT, it does not improve runtime compared to other compressed sensing approaches, let alone clean.
-
-Primed for paralellization. But the huge
+Runtime estimate
 
 Ironically, we can also use the major cycle in this algorithm and improve the runtime, maybe even get rid of the large memory requirement.
 
-At least for MeerKAT, the signs point to the Major Cycle architecture to handle large scale image reconstruction problems. From different directions, we always arrive at a similar architecture for image reconstruction. From Self-Calibration, from
+Can we use Coordinate Descent for asynchronous optimization.
+
+Huge memory requirement. In the context of MeerKAT, it does not improve runtime compared to other compressed sensing approaches, let alone clean.
+
+Self-calibration increases the 
+
+At least for MeerKAT, the signs point to the Major Cycle architecture to handle large scale image reconstruction problems. From different directions, self-calibration, we always arrive at a similar Major Cycle Architecture for image reconstruction.
 
 
-CAlibration 
 
 
-The question still remains open., how we get compressed sensing to scale better and finally getting rid of clean
 
+
+In this project explored different architectures for compressed sensing reconstructions. 
+
+We did this and arrived at a simple proof-of concept Coordinate Descent algorithm, getting rid of the major cycle. Although it again may produce better reconstructions,
+
+The major cycle seems here to stay. As soon as we factor in self-calibration, the reconstruction algorithm has to transform between Visibilities and image space several times. Becoming some form of major cycle.
+
+We have developed an algorithm which does not need the major cycle. But because it does not have one, it scales worse on large scale reconstruction problems of MeerKAT.
+
+The question still remains open., how we get compressed sensing to scale better and finally getting rid of clean. 
+
+Moving to the sphere.
+
+Asynchronous implementations.
  
