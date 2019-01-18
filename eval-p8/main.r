@@ -115,15 +115,15 @@ dev.off()
 
 scales = list(at=c(1, 65, 129, 197, 255))
 png("tclean_points.png",
-    width = 6.0,
-    height = 6.0,
+    width = 5.0,
+    height = 5.0,
     units = "in",
     res = 400)
 WriteMap2(tclean, at=seq(min(tclean), max(tclean), length.out=200), scales)
 dev.off()
 png("cd_points.png",
-    width = 6.0,
-    height = 6.0,
+    width = 5.0,
+    height = 5.0,
     units = "in",
     res = 400)
 WriteMap2(cd, at=seq(min(cd), max(cd), length.out=200), scales)

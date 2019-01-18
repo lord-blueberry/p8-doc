@@ -8,15 +8,18 @@ Show super resolution, and more accurate flux reconstruction on simulated data.
 We compare the reconstruction of Coordinate Descent and CLEAN on two simulated observations.
 
 \subsection{Super-resolution of two point sources}
+
+Simulation of the two point sources. Does not contain calibration-, pointing-, or thermal noise.
+
 \begin{figure}[h]
 	\centering
 	\begin{subfigure}[b]{0.4\linewidth}
-		\includegraphics[width=\linewidth]{./chapters/20.results/points/tclean_points.png}
+		\includegraphics[width=\linewidth, trim={0.2in, 0.2in, 0, 0.2in}, clip]{./chapters/20.results/points/tclean_points.png}
 		\caption{CLEAN reconstruction.}
 		\label{results:points:tclean}
 	\end{subfigure}
 	\begin{subfigure}[b]{0.4\linewidth}
-		\includegraphics[width=\linewidth]{./chapters/20.results/points/cd_points.png}
+		\includegraphics[width=\linewidth, trim={0.2in, 0.2in, 0, 0.2in}, clip]{./chapters/20.results/points/cd_points.png}
 		\caption{Coordinate Descent reconstruction.}
 		\label{results:points:cd}
 	\end{subfigure}
@@ -24,6 +27,20 @@ We compare the reconstruction of Coordinate Descent and CLEAN on two simulated o
 	\caption{Image reconstruction of two point sources.}
 	\label{results:point}
 \end{figure}
+
+Coordinate Descent reconstruction uses smaller peaks 
+
+
+intensity profile
+
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{./chapters/20.results/points/contour_points.png}
+	\caption{Intensity profile of the two point sources.}
+	\label{results:points:contour}
+\end{figure}
+
 192 non-zeros
 
 \subsection{Flux reconstruction of extended Gaussian sources}
@@ -56,12 +73,7 @@ In figure \ref{results:point} shows an image of the Coordinate Descent and CLEAN
 
 \textit{Intensity:} [Total Flux] The reconstructions differ in intensity. The figure \ref{results:points:contour} shows the intensity pr. Also note that Coordinate Descent has shifted the smaller peak by a pixel in its reconstruction. [Total flux correct in CD?]
 
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=0.8\linewidth]{./chapters/20.results/points/contour_points.png}
-	\caption{Intensity profile of the two point sources.}
-	\label{results:points:contour}
-\end{figure}
+
 
 The difference in intensity becomes more apparent with extended emissions. Figure \ref{results:mixed} shows Coordinate Descent and tCLEAN on the simulation with mixed sources. Again the two reconstructions arrive at different intensities. The gaussian emissions are reconstructed with a higher intensity than Coordinate Descent.
 
