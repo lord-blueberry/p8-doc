@@ -1,2 +1,14 @@
 \section*{Abstract}
-abstract plcaceholder
+MeerKAT new Radio Interferometer, poses a large scale image reconstruction problem.
+
+Compressed sensing reconstructions for Radio astronomy exist, but are slower than CLEAN. 
+
+Compressed Sensing and CLEAN use the same architecture, both use Major Cycle. In this work, we explore if Compressed Sensing reconstructions can be made faster with in a different architecture
+
+Several possibiliites are discussed and a new proof-of-concept algorithm is developed, which does not require a Major Cycle. We estimate the minimum runtime complexity of the algorithm and compare it to CLEAN. 
+
+However, the algorithm is not suitable in the context of meerkat reconstructions. It requires too much memory and 
+
+we come to the conclusion that in the context of MeerKAT reconstructions, the Major Cycle architecture is easier to compute.
+
+No obvious contender to replace the Major Cycle.

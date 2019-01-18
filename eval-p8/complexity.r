@@ -1,4 +1,4 @@
-N = (8192) * (8192)
+N = (8192*4) * (8192*4)
 M = 540 * 4060770
 
 W = 128
@@ -19,7 +19,7 @@ CD <- function(S,M, I.cd, J) {
   return(cd = S * 7 * M + I.cd * (S * 4*M + J*2*M))
 }
 
-cd_cycles <- c(1, 4, 8)
+cd_cycles <- c(1, 4, 8, 10, 12, 16)
 results <- c()
 for (i in cd_cycles) {
   res <-clean/CD(S, M, i, J)

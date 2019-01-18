@@ -1,5 +1,6 @@
-\section{Reconstruction and Scalability of Coordinate Descent}
+%\section{Reconstruction and Scalability of Coordinate Descent}
 %\textbf{Coordinate Descent comparison to CLEAN reconstruction}
+\section{Coordinate Descent Reconstructions on Simulated Data}
 In this section, we compare the Coordinate Descent reconstruction with CLEAN on simulated MeerKAT data, and compare the runtime complexity of the two approaches on a real-world MeerKAT observation. We show that Coordinate Descent reconstructs the image by only computing a subset  the Fourier Transform Matrix' columns $F^{-1}$, and investigate if this approach reduces the runtime complexity on the large scale reconstruction problems of MeerKAT.
 
 The real world MeerKAT data were calibrated and averaged down to reduce its size to 88 Gigabytes. The raw, uncalibrated data ranges between 500 and 1000 Gigabytes. Data on this scale requires a mature pipeline for reading and image reconstruction. Within the time limit of this project, only a reconstruction with the WSCLEAN\cite{offringa2014wsclean} pipeline was possible.
@@ -73,15 +74,14 @@ Runtime problems
 19 non-zero starlets, 
 
 
-\subsection{Scalability comparison of CLEAN and Coordinate Descent}
+\pagebreak
+\section{Runtime complexity on large scale reconstructions}
 Pinning down the average runtime of Coordinate Descent is difficult. As mentioned in section \ref{cd}, Coordinate Descent has lose convergence guarantees in theory, but works well in practice with heuristics. For our algorithm, the runtime mainly depends on the number of non-zero starlet components $S$ and how many iterations Coordinate Descent needs to converge. How many non-zero starlets, or how many iterations Coordinate Descent needs on average are hard questions and cannot be answered in this project.
 
-Instead, this work focuses on a minimum runtime estimate of Coordinate Descent on MeerKAT observations. We compare the runtime complexity with CLEAN and analyse what improvements an idealized version of Coordinate Descent can provide.
-
-It turns out that the minimum runtime estimates are not promising.
+Instead, this work focuses on a minimum runtime estimate of Coordinate Descent on MeerKAT observations. We compare the runtime complexity with CLEAN and analyse what speed up an idealized version of Coordinate Descent can provide. Sadly, the speed up of an idealized Coordinate Descent is negligible. The Major Cycle architecture leads to a lower runtime complexity in the context of MeerKAT reconstructions.
 
 
-\subsubsection{Runtime complexity of an idealized Coordinate Descent}
+\subsection{Runtime complexity of an idealized Coordinate Descent}
 The runtime complexity of Coordinate Descent depends largely on the number of Visibilities $M$ and the number of non-zero starlets $S$. The number and location of the $S$ non-zero starlets are generally not known. However, we created a heuristic which finds likely non-zero starlet components. In a realistic setting, the heuristic will have found more than $S$ likely non-zero starlets. For the best case scenario, we assume an oracle performance heuristic: It finds the location and number of the $S$ non-zero starlet components in constant time ($O(1)$). Coordinate Descent therefore has to find the value of the $S$ non-zero starlet components, which takes three separate operations: creating the columns of $F^{-1}$, calculating the minima for each single component, and calculating the starlet layers:
 
 \begin{alignat*}{1}
@@ -100,7 +100,7 @@ Note that the runtime of Coordinate Descent is independent of the number of pixe
 
 Also note the term iterating over the $S$ non-zero starlets, $ I_{CD} * [S * 4M +\ldots]$. As it turns out, this is the Achilles heel of the algorithm. MeerKAT observations contain a very large amount of Visibilities $M$ and a large amount of distinct structures, which leads to a large $S$ (each point source needs at least one non-zero component to be represented). 
 
-\subsubsection{Runtime complexity of CLEAN}
+\subsection{Runtime complexity of CLEAN}
 We look at CLEAN reconstructions which use the non-uniform FFT with $w$-stacking. The runtime of a single Major cycle depends on the non-uniform FFT with $w$-stacking and the number of CLEAN deconvolutions. The number $N$ denotes the number of pixels (for example $512^2$).
 
 \begin{alignat*}{1}
@@ -121,7 +121,7 @@ The overall complexity shown in \eqref{results:clean:o} can also be split into t
 Notice that the number of CLEAN deconvolutions $I_{CLEAN}$ depends on the image content, similar the number of non-zero starlets $S$ for Coordinate Descent. Here however, it multiplies with the number of pixels $N$ instead of the number of Visibilities $M$. In a sense, the major cycle tries to reduce the runtime complexity of handling the image content by calculating the non-uniform FFT. If the difference is large enough $N \ll M$, then the Major Cycle will end up with a smaller overall runtime.
 
 
-\subsubsection{Runtime complexity estimate on MeerKAT data}
+\subsection{Comparison on MeerKAT reconstruction problem}
 The MeerKAT observation contains approximately 540 channels with 4 million calibrated Visibilities each. After calibration, MeerKAT data is typically averaged over frequency and time to reduce its disk space. There are no strict rules on how to chose the image resolution and number of pixels. An initial WSCLEAN reconstruction was preformed with:
 \begin{itemize}
 	\item Visibilities: $M=2.19e^9$
@@ -136,13 +136,13 @@ The idealized Coordinate Descent algorithm has three parameters left: Number of 
 
 \begin{table}[h!]
 	\begin{center}
-		\begin{tabular}{l|c|c|c} % <-- Alignments: 1st column left, 2nd middle and 3rd right, with vertical lines in between
-			 & $I_{CD} = 1$ & $I_{CD} = 4$ &  $I_{CD} = 8$\\
+		\begin{tabular}{l|c|c|c|c} % <-- Alignments: 1st column left, 2nd middle and 3rd right, with vertical lines in between
+			 & $I_{CD} = 1$ & $I_{CD} = 5$ &  $I_{CD} = 10$ &  $I_{CD} = 15$\\
 			\hline
-			$S=1000$ & 2.35 & 1.12 & 0.66 \\
-			$S=2000$ & 1.17 & 0.56 & 0.33 \\
-			$S=3000$ & 0.78 & 0.37 & 0.22 \\
-			$S=4000$ & 0.59 & 0.28 & 0.17\\
+			$S=1000$ & 2.35 & 1.12 & 0.66 & \\
+			$S=2000$ & 1.17 & 0.56 & 0.33 &\\
+			$S=3000$ & 0.78 & 0.37 & 0.22 &\\
+			$S=4000$ & 0.59 & 0.28 & 0.17 & \\
 		\end{tabular}
 		\caption{Relative speed-up of an idealized Coordinate Descent compared to CLEAN.}
 		\label{res:cd:table}
@@ -158,25 +158,34 @@ To put the numbers into perspective, Coordinate Descent used about 2000 non-zero
 	\label{results:wsclean}
 \end{figure}
 
+
+Memory
+
 Not good, 
-Since Coordinate Descent does not depend on the image size $N$, and the image size changes depending on the use case, one might imagine Coordinate Descent may be useful for very large image sizes. Indeed, it is, but sadly, even the  Sadly, this is not the case. Let us quadruple each image dimension to $N=32000^2$, now we have two Visibilities for each pixel, and just for demonstration's sake reduce $J=5$ for Coordinate Descent. The results are shown in table \ref{res:cd:large:table}. Coordinate Descent is only competitive if it needs just one iteration to converge. Any advantage shrinks fast as soon as Coordinate Descent needs several iterations over all non-zero components $S$. How likely is it that Coordinate Descent just needs one iteration to converge?
+
+Let us ignore the memory requirement. The Major Cycle 
+If we ignore the memory requirement, 
+
+when we say we need at least $S=2000$, and at least as many iterations for reconstruction
+Since Coordinate Descent does not depend on the image size $N$, and the image size changes depending on the use case, one might imagine Coordinate Descent may be useful for very large image sizes. Indeed, it is
+
+but sadly, even the  Sadly, this is not the case. Let us quadruple each image dimension to $N=32000^2$, now we have two Visibilities for each pixel, and just for demonstration's sake reduce $J=5$ for Coordinate Descent. The results are shown in table \ref{res:cd:large:table}. Coordinate Descent is only competitive if it needs just one iteration to converge. Any advantage shrinks fast as soon as Coordinate Descent needs several iterations over all non-zero components $S$. How likely is it that Coordinate Descent just needs one iteration to converge?
 
 \begin{table}[h!]
 	\begin{center}
-		\begin{tabular}{l|c|c|c} % <-- Alignments: 1st column left, 2nd middle and 3rd right, with vertical lines in between
-			& $I_{CD} = 1$ & $I_{CD} = 5$ &  $I_{CD} = 10$\\
+		\begin{tabular}{l|c|c|c|c} % <-- Alignments: 1st column left, 2nd middle and 3rd right, with vertical lines in between
+			& $I_{CD} = 1$ & $I_{CD} = 4$ &  $I_{CD} = 8$ &  $I_{CD} = 12$\\
 			\hline
-			$S=500$ & 76.82 &  19.64 & 10.17 \\
-			$S=2500$ & 15.38 &  3.39 & 2.03 \\
-			$S=5000$ & 7.69 &  1.97 & 1.02 \\
-			$S=7500$ & 5.13 &  1.31 & 0.68 \\
-			$S=10000$ & 3.84 &  0.98 & 0.51 \\
+			$S=1000$ & 38.45 & 18.37 & 10.83 & 7.68\\
+			$S=2000$ & 19.23 & 9.19 & 5.42 & 3.84 \\
+			$S=3000$ & 12.82 & 6.13 & 3.62 & 2.56 \\
+			$S=4000$ & 9.62 & 4.60 & 2.71 & 1.92\\
 			\hline
-			$S=15000$ & 2.56 &  0.66 & 0.34 \\
-			$S=20000$ & 1.92 &  0.49 & 0.25 \\
-			$S=25000$ & 1.54 &  0.39 & 0.20 \\
+			$S=10000$ & 3.85 & 1.84 & 1.09 & 0.77 \\
+			$S=15000$ & 2.57 & 1.23 & 0.72 & 0.51\\
+			$S=20000$ & 1.92 & 0.92 & 0.54 & 0.38 \\
 		\end{tabular}
-		\caption{Relative speed-up of Coordinate Descent compared to CLEAN with an image size of $N=32000^2$ and starlet levels $J=5$. }
+		\caption{Relative speed-up of Coordinate Descent compared to CLEAN with an image size of $N=32000^2$. }
 		\label{res:cd:large:table}
 	\end{center}
 \end{table}
