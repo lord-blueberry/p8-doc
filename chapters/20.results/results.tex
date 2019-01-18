@@ -11,6 +11,11 @@ We compare the reconstruction of Coordinate Descent and CLEAN on two simulated o
 
 Simulation of the two point sources. Does not contain calibration-, pointing-, or thermal noise.
 
+What is super resolutios
+accuracy of the instrument. in arcseconds
+
+Parameters of Coordinate Descent
+
 \begin{figure}[h]
 	\centering
 	\begin{subfigure}[b]{0.4\linewidth}
@@ -30,9 +35,11 @@ Simulation of the two point sources. Does not contain calibration-, pointing-, o
 
 Coordinate Descent reconstruction uses smaller peaks 
 
+Sparse representation, 192 non-zeros
 
 intensity profile
 
+Flux
 
 \begin{figure}[h]
 	\centering
@@ -41,14 +48,33 @@ intensity profile
 	\label{results:points:contour}
 \end{figure}
 
-192 non-zeros
+issues with Coordinate descent reconstruction, wrong flux, lower peak is wider than, and is offest by approximately a pixel
+
+
 
 \subsection{Flux reconstruction of extended Gaussian sources}
 
+Lets look closer at the flux reconstruction of extended emissions
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.4\linewidth}
+		\includegraphics[width=\linewidth, trim={0.2in, 0.2in, 0, 0.2in}, clip]{./chapters/20.results/mixed/mixed_clean.png}
+		\caption{CLEAN reconstruction}
+		\label{results:mixed:tclean}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.4\linewidth}
+		\includegraphics[width=\linewidth, trim={0.2in, 0.2in, 0, 0.2in}, clip]{./chapters/20.results/mixed/mixed_cd.png}
+		\caption{Coordinate Descent Reconstruction}
+		\label{results:mixed:cd}
+	\end{subfigure}
+	\caption{Reconstruction on mixed sources}
+	\label{results:mixed}
+\end{figure}
 
 
-v
 
+V
 
 In this section, we compare the Coordinate Descent reconstruction with CLEAN on simulated MeerKAT data, and compare the runtime complexity of the two approaches on a real-world MeerKAT observation. We show that Coordinate Descent reconstructs the image by only computing a subset of the Fourier Transform Matrix' columns $F^{-1}$, and investigate if this approach reduces the runtime complexity on the large scale reconstruction problems of MeerKAT.
 
