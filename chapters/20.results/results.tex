@@ -6,7 +6,7 @@ We compare the reconstruction quality to CASA's CLEAN implementation. Coordinate
 \subsection{Super-resolution of two point sources}
 The first simulated observation contains two non-zero pixels, i.e. point sources, with intensity of 2.5 and 1.4 Jansky/Beam, with a resolution of 0.5 arc-seconds per pixel. The resolution of the image is therefore higher than MeerKAT. An ideal compressed sensing reconstruction would create an image where all pixels are zero except for the two point sources. Figure \ref{results:points} shows the reconstructed images of CLEAN and Coordinate Descent.
 
-CLEAN reconstructs the image \ref{results:points:tclean} at the accuracy limit of the instrument. It essentially reconstructs a blurred version of the observed image, where the blurring represents the accuracy of the instrument. With compressed sensing, we aim to reconstruct a de-blurred image. The image \ref{results:points:cd} shows the Coordinate Descent reconstruction, which creates two much narrower peaks than CLEAN. This is an example of super resolution, Coordinate Descent finds structures smaller than the accuracy of MeerKAT would allow. 
+CLEAN reconstructs the image \ref{results:points:tclean} at the accuracy limit of the instrument. It essentially reconstructs a blurred version of the observed image, where the blurring represents the accuracy of the instrument. With compressed sensing, we aim to reconstruct a de-blurred image. The image \ref{results:points:cd} shows the Coordinate Descent reconstruction, which creates two much narrower peaks than CLEAN. This is an example of super resolution. Coordinate Descent located structures smaller than the accuracy of MeerKAT would allow.
 
 \begin{figure}[h]
 	\centering
@@ -42,7 +42,6 @@ intensity profile
 
 Flux
 
-}
 
 issues with Coordinate descent reconstruction, wrong flux, lower peak is wider than, and is offest by approximately a pixel
 
@@ -74,6 +73,8 @@ Lets look closer at the flux reconstruction of extended emissions
 \end{figure}
 
 Question of Flux reconstruction
+
+ $\lambda$ for different starlet layers like in \cite{girard2015sparse}
 
 \begin{figure}[h]
 	\centering
@@ -111,25 +112,14 @@ In figure \ref{results:point} shows an image of the Coordinate Descent and CLEAN
 
 The difference in intensity becomes more apparent with extended emissions. Figure \ref{results:mixed} shows Coordinate Descent and tCLEAN on the simulation with mixed sources. Again the two reconstructions arrive at different intensities. The gaussian emissions are reconstructed with a higher intensity than Coordinate Descent.
 
-\begin{figure}[h]
-	\centering
-	\begin{subfigure}[b]{0.4\linewidth}
-		\includegraphics[width=\linewidth]{./chapters/20.results/points/tclean_points.png}
-		\caption{CLEAN reconstruction}
-		\label{results:mixed:tclean}
-	\end{subfigure}
-	\begin{subfigure}[b]{0.4\linewidth}
-		\includegraphics[width=\linewidth]{./chapters/20.results/points/tclean_points.png}
-		\caption{Coordinate Descent Reconstruction}
-		\label{results:mixed:cd}
-	\end{subfigure}
-	\caption{Reconstruction on mixed sources}
-	\label{results:mixed}
-\end{figure}
+
+
+
+
 
 With starlets, coordinate descent has a representation for extended emissions. Looking at the intensity profile of an extended emisions \ref{}, we see Coordiante Descent coming closer to the true intensity. Although in the four iterations,  [it still had a considerable margin on error]. 
 
-Total flux constraint, $\lambda$ for different starlet layers like in \cite{girard2015sparse}
+
 
 Coordinate Descent did not reconstruct all point sources. How many starlets are non-zero is the major point for runtime. It depends on how many areas of the image are non-zero. Starlet has a representation for extended emission, how many starlets are needed for modelling is hard.
 
