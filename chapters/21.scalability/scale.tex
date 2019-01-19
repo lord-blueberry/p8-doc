@@ -90,7 +90,7 @@ To put the numbers into perspective, Coordinate Descent used about 2000 non-zero
 
 So far, we have excluded the memory requirement of Coordinate Descent from our analysis. A short glance at the numbers reveals it is impractically large. A single column of $F^{-1}$ has $M$ entries, effectively multiplying the number of Visibilities with each column we need to cache. With 2000 starlets, we may not need 2000 columns, since we may have several starlets at the same pixel location, but at different scales. Since we have 5 levels, we need at least 400 pixels to arrive at 2000 non-zero starlets. When we use 128bit accuracy for a complex valued Visibility, we need need at least 12 terabytes of memory just for the columns.
 
-There is one last question, for which Coordinate Descent could be useful: Since the runtime complexity \eqref{results:cd:omega} scales independently of the image size $N$, maybe it offers a speed up if we want to reconstruct very large images. Let us quadruple each image dimension to  to $N=32768^2$ and compare the speed up to WSCLEAN in table \ref{res:cd:large:table}. 
+There is one last question, for which Coordinate Descent could be useful: Since the runtime complexity \eqref{results:cd:omega} scales independently of the image size $N$, maybe it offers a speed up if we want to reconstruct very large images. Let us scale up the image by a factor of 16, to $N=32768^2$ and compare the speed up to WSCLEAN in table \ref{res:cd:large:table}. 
 
 \begin{table}[h!]
 	\begin{center}
@@ -111,20 +111,11 @@ There is one last question, for which Coordinate Descent could be useful: Since 
 	\end{center}
 \end{table}
 
-The Coordinate Descent approach sees considerable speed up, if it converges within one iteration. But it falls off quickly as soon as it needs several iterations to converge. For reference, the proof-of-concept approach uses at least ten iterations. 
+The Coordinate Descent approach sees considerable speed up, if it converges within one iteration. But it falls off quickly as soon as it needs several iterations to converge. Any realistic Coordinate Descent algorithm cannot move far away from the minimum estimate of the ideal before it gets more expensive than our WSCLEAN estimate. However, there is another point to consider: An image of this size will have a high resolution coupled with a wide field of view. In this scenario, we would likely want to improve the image with self-calibration. At this point, we need the uncalibrated, raw Visibilities for imaging, which increases $M$ again by a factor of [FACTOR]. By including self-calibration, we have arrived at a similar ratio of $M$ to $N$ to our first estimate, and negated the speed-up of Coordinate Descent.  
 
-The problem is MeerKAT can always just put in more Visibilities. $M$ can be increased at will. As soon as we go into self-calibration, we are hopeless. The number of Visibilities increases by factor 4-16, and Coordinate Descent is again too expensive to run.
+The issue with Coordinate Descent's runtime complexity lies in the term $I_{CD} * [S * 4M +\ldots]$ of \eqref{results:cd:omega}, which scales with the "content" of the image $S$, multiplied with the Visibilities. Coordinate Descent cannot afford many iterations nor many non-zero components, because both of these numbers get multiplied together with $M$, the largest number in the problem. With the Major Cycle, WSCLEAN is able to get around this limitation, and scales any content dependant factors on $N$ instead of $M$. 
 
-The issue with Coordinate Descent's runtime complexity lies in the term $I_{CD} * [S * 4M +\ldots]$ of \eqref{results:cd:omega}. Coordinate Descent cannot afford many iterations nor many non-zero components, because both of these numbers get multiplied together with $M$, the largest number in the problem.
-
-We cannot move far away from the ideal algorithm before the speed up vanishes. 
-
-We over-estimated the runtime of CLEAN with 10 Major Cycles. If we assume 5 Major Cycles, which is what we would more realistically expect from clean, we essentially half the speed up in tables \ref{res:cd:table} and \ref{res:cd:large:table}. Our CLEAN estimate puts the runtime complexity in the ballpark of other compressed sensing reconstructions.
-In the MeerKAT context where we have a factor of 10-20 times more Visibilities than pixels, the Major cycle improves the runtime complexity of reconstruciton algorithms
-
-Indeed, the runtime of our Coordinate Descent algorithm can be improved by using the major cycle architecture, essentially replacing $M$ with $N$ and we arrive at the term
-h $I_{CD} * [S * 4N +\ldots]$. By using the Major Cycle architecture, Coordinate Descent can afford more iterations and more non-zero components in the image for the same runtime complexity. Furthermore $N$ lies on a uniformly sampled grid. We may be able to use the FFT instead of caching columns of $F^{-1}$, and reduce the memory requirement to a sane amount.
-
+Indeed, the runtime of our Coordinate Descent algorithm could be improved by using the major cycle architecture, essentially replacing $M$ with $N$ and we arrive at the term $I_{CD} * [S * 4N +\ldots]$. By using the Major Cycle architecture, Coordinate Descent can afford more iterations and more non-zero components in the image for the same runtime complexity. Furthermore $N$ lies on a uniformly sampled grid. We may be able to use the FFT instead of caching columns of $F^{-1}$, and reduce the memory requirement to a sane amount.
 
 \subsection{Embracing the Major Cycle}
 We searched for a compressed sensing algorithm which does not need the major cycle, with the hope it would improve runtime complexity. Arriving at a Coordinate Descent algorithm, which does not require any of the approximation algorithm. It is very simple to implement. Results of 
