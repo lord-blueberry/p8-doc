@@ -1,4 +1,21 @@
 \section{Compressed Sensing reconstructions in the MeerKAT era}
+MeerKAT poses a large scale reconstruction problem. Compressed Sensing approaches exist, they use the major cycle, but they all are slower to compute than CLEAN, for which the major cycle was developed. 
+
+It uses the non-uniform FFT to approximate the Fourier transformation of non-uniformly sampled Visibilities.
+
+This project set out to explore different architectures for Compressed Sensing Reconstructions. A different way of getting from Visibilities to image. 
+
+Three different possibilities, with calculating the non-uniform FFT once, using spherical harmonics, or calculating only columns of the Fourier transform matrix
+
+For the former, we created a novel approach which does not need the major cycle. We need a transformation, where we can both estimate which components are likely to be non-zero, and which use few non-zero components to represent an image.
+
+This project used starlets, which were developed for astronomical images. Their solution is not sparse enough to scale to MeerKAT problems.
+
+This approach does not scale. Compared to major cycle algorithms, we need a space where the image can be VERY sparsely represented, and even 
+
+Different approaches have
+
+
 Runtime is a major drawback of Compressed Sensing reconstructions.
 
 This project searched if the architecture can be optimized for Compressed sensing.

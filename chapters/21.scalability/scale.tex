@@ -29,7 +29,7 @@ Note that the runtime of Coordinate Descent is independent of the number of pixe
 Also note the term iterating over the $S$ non-zero starlets, $ I_{CD} * [S * 4M +\ldots]$. As it turns out, this is the Achilles heel of the algorithm. MeerKAT observations contain a very large amount of Visibilities $M$.
 
 \subsection{Runtime complexity of WSCLEAN}
-We look at WSCLEAN reconstructions which use the non-uniform FFT with $w$-stacking. The runtime of a single Major cycle depends on the non-uniform FFT with $w$-stacking and the number of CLEAN deconvolutions. $N$ denotes the number of pixels (for example $512^2$).
+We look at WSCLEAN reconstructions which use the non-uniform FFT with $w$-stacking. The runtime of a single Major cycle depends on the non-uniform FFT with $w$-stacking and the number of CLEAN deconvolutions. $N$ denotes the number of pixels.
 
 \begin{alignat*}{1}
 	\text{non-uniform FFT} &: M + 2N*ld(2N)\\
@@ -118,11 +118,34 @@ The issue with Coordinate Descent's runtime complexity lies in the term $I_{CD} 
 Indeed, the runtime of our Coordinate Descent algorithm could be improved by using the major cycle architecture, essentially replacing $M$ with $N$ and we arrive at the term $I_{CD} * [S * 4N +\ldots]$. By using the Major Cycle architecture, Coordinate Descent can afford more iterations and more non-zero components in the image for the same runtime complexity. Furthermore $N$ lies on a uniformly sampled grid. We may be able to use the FFT instead of caching columns of $F^{-1}$, and reduce the memory requirement to a sane amount.
 
 \subsection{Embracing the Major Cycle}
+In this project we developed a new Compressed Sensing reconstruction, which uses Coordinate Descent and does not need the Major Cycle architecture.
+
+A novel approach. Instead, it calculates columns of the Fourier transform matrix  $F^{-1}$ direclty. It works with a subset, and does not need to keep the whole matrix in memory. A lightweight reconstruction algorithm.
+
+Proof of concept, A sub-optimal implementation. 
+
+We showed that it worked on simulated MeerKAT dataset. Together with starlets as its regularization, Coordinate Descent produced super-resolved images of simulated MeerKAT datasets and showed better Flux reconstruction of extended emissions. 
+
+Question: By using columns of $F^{-1}$ directly, can the runtime complexity be improved on large scale reconstructions? 
+
+We used an idealized version of Coordinate Descent to explore if it can reduce the computational complexity of large scale image reconstructions. Sadly, For MeerKAT datasets, it would need too much memory. Plus, the minimum runtime of the algorithm is comparable to the expected runtime other Major Cycle reconstructions.
+
+Speed is the main reason for getting rid of the major cycle. 
+
+Other compressed sensing approaches, which use the major cycle, can also produce super-resolved images and do not need an insane amount
+
+Ironically, we can also use the major cycle in this algorithm and improve the runtime, maybe even get rid of the large memory requirement.
+
+More sensible approach if we try compressed sensing in the major cycle framework.
+
+Distribution, by calculating the $F^{-1}$ is possible in theory,  Asynchronous implementation. 
+
+
+
 We searched for a compressed sensing algorithm which does not need the major cycle, with the hope it would improve runtime complexity. Arriving at a Coordinate Descent algorithm, which does not require any of the approximation algorithm. It is very simple to implement. Results of 
 
 Runtime estimate
 
-Ironically, we can also use the major cycle in this algorithm and improve the runtime, maybe even get rid of the large memory requirement.
 
 Can we use Coordinate Descent for asynchronous optimization.
 

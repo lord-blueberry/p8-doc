@@ -1,4 +1,20 @@
 \section{Compressed Sensing with Coordinate Descent}\label{cd}
+simple implementation using the L1 norm. But most of the pixels will be zero, so it does not need to iterate over them.
+Cache the columns of $F^{1}$ we actually need
+
+Theory of compressed sensing 
+
+We can use a non-uniform FFT to estimate which pixels are likely to be non-zero and iterate over those
+
+
+This is basically how the algorithm in this project works, but it does not iterate over pixels. It reconstructs the image in starlet space. 
+
+Starlet is an over-complete representation, with the hope that it takes fewer pixels than starlets to reconstruct an image, and we can iterate over an even smaller set. Usually, an it is difficult to estimate the likely non-zero components of over-complete representations, but we have the starlet transform to do exactly that.
+
+
+
+
+
 The three components of a compressed sensing reconstruction. Using a combination so we do not need to calculate the whole Fourier Transform matrix. Regularization represents our previous knowledge of possible images. With it we find the most likely image which represents our data.
 
 Doing compressed Sensing with Coordinate Descent and starlet regularization.
@@ -49,6 +65,12 @@ The simple approach calculates the whole Fourier Transform Matrix $F^{-1}$ expli
 The starlet transform is used from here on. Instead of reconstructing the image directly, we represent the image as a combination of starlets $x = D\alpha$. Where $D$ is an over-complete dictionary of starlets, and $\alpha$ is the starlet component vector. Since the dictionary $D$ is over-complete, it is a matrix with more columns than rows, and does generally not have an inverse (more formally: $D^{-1}x \neq \alpha$). However, the starlet transform does have an pseudo-inverse. In this work, the pseudo inverse is used to only look at a subset of starlet components which are likely to be non-zero, and only evaluate a subset of columns of $F^{-1}$ .
 
 Actual implementation
+
+
+
+
+
+
 
 \subsection{Starlet Transform} \label{cd:starlets}
 First how the starlet transform works, and then we discuss how we can leverage the properties to only use
@@ -155,6 +177,8 @@ $w_2 = F^{-1}V * (\hat{S_0}\hat{S_1} - \hat{S_0}\hat{S_1}\hat{S_2})$
 How many layers are needed. starlets rise in pixels with $2^J$. Meaning if we want starlets over the whole image, the number of starlets rise logarithmically to the image dimensions.
 
 How to iterate over the image in detail.
+
+
 
 \subsubsection{Iteration scheme}
 Many ways to iterate over the image. A simple scheme was used here. 
