@@ -101,8 +101,8 @@ df <- calcLineDF(matrices, names, p0, p1, interpolation)
 df$points <- df$points / interpolation* 0.5 * 256
 
 png(paste("./contour_points", ".png",sep=""),
-    width = 8.0,
-    height = 3.0,
+    width = 6.0,
+    height = 2.0,
     units = "in",
     res = 400)
 print(ggplot(data = df, aes(x=df$points, y=df$values, colour=df$names)) + 
@@ -118,15 +118,15 @@ dev.off()
 
 scales = list(at=c(1, 65, 129, 197, 255))
 png("tclean_points.png",
-    width = 5.0,
-    height = 5.0,
+    width = 4.0,
+    height = 4.0,
     units = "in",
     res = 400)
 WriteMap2(tclean, at=seq(min(tclean), max(tclean), length.out=200), scales)
 dev.off()
 png("cd_points.png",
-    width = 5.0,
-    height = 5.0,
+    width = 4.0,
+    height = 4.0,
     units = "in",
     res = 400)
 WriteMap2(cd, at=seq(min(cd), max(cd), length.out=200), scales)
@@ -186,9 +186,8 @@ png("mixed_cut_model.png",
     height = 5.0,
     units = "in",
     res = 400)
-colorbreaks <- seq(min(cutout.model), 0.5, length.out=11)
-colorbreaks <- c(colorbreaks, 0.58)
-print(WriteMap2(cutout.model, at=colorbreaks, scales, xunits="arc minutes"))
+colorbreaks <- seq(min(cut.model), max(cut.model), length.out=200)
+print(WriteMap2(cut.model, at=colorbreaks, scales, xunits="arc minutes"))
 dev.off()
 
 matrices <- list(cut.model, cut.tclean, cut.cd)
@@ -197,12 +196,50 @@ interpolation <- 10000
 p0 <- c(63+64, 60+64)
 p1 <- c(67+64,65+64)
 df <- calcLineDF(matrices, names, p0, p1, interpolation)
+png("mixed_contour.png",
+    width = 6.0,
+    height = 3.0,
+    units = "in",
+    res = 400)
 print(ggplot(data = df, aes(x=df$points, y=df$values, colour=df$names)) + 
         geom_line() +
-        scale_y_continuous(trans=asinh, breaks=c(0, 0.001, 0.01, 0.1, 1, 1.4, 2.5)) +
+        scale_y_continuous(trans=asinh, breaks=c(0, 0.001, 0.01, 0.1, 1, 10, 100,1000)) +
         xlab("arc seconds") +
         ylab("Jansky/beam") +
         labs(colour='Legend:') +
-        scale_colour_brewer(palette = "Dark2") +
-        theme(legend.text=element_text(size=11), 
-              legend.title=element_text(size=13)))
+        scale_colour_brewer(palette = "Dark2"))
+dev.off()
+
+
+pix = 512
+cut.row.names <- round(271:782*resol, digits=2)
+cut.col.names <- round(round(251:762*resol, digits=2))
+cut.row <- 272:783
+cut.col <- 252:763
+scales = list(at=c(1, pix/8+1, pix/4+1, pix/8*3+1 ,pix/2+1, pix/8*5+1, pix/4*3+1, pix/8*7+1, pix))
+cut.model <- skymodel[cut.row, cut.col]
+rownames(cut.model) =cut.row.names
+colnames(cut.model) =cut.col.names
+cut.tclean <- tclean[cut.row, cut.col]
+rownames(cut.tclean) =cut.row.names
+colnames(cut.tclean) =cut.col.names
+cut.cd <- cd[cut.row, cut.col]
+rownames(cut.cd) =cut.row.names
+colnames(cut.cd) =cut.col.names
+
+matrices <- list(cut.model, cut.tclean, cut.cd)
+names <- c("Ground Truth", "CLEAN", "Coordinate Descent")
+p1 <- c(531-271, 501-251)
+p0 <- c(513-271, 551-251)
+df <- calcLineDF(matrices, names, p0, p1, interpolation)
+print(ggplot(data = df, aes(x=df$points, y=df$values, colour=df$names)) + 
+        geom_line() +
+        scale_y_continuous(trans=asinh, breaks=c(0, 0.001, 0.01, 0.1, 1, 10, 100,1000)) +
+        xlab("arc seconds") +
+        ylab("Jansky/beam") +
+        labs(colour='Legend:') +
+        scale_colour_brewer(palette = "Dark2"))
+
+colorbreaks <- seq(min(cut.model), 0.7, length.out=200)
+colorbreaks <- c(colorbreaks, max(cut.model))
+print(WriteMap2(cut.model, at=colorbreaks, scales, xunits="arc minutes"))

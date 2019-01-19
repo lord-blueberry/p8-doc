@@ -1,6 +1,7 @@
 \section{Coordinate Descent Reconstructions on Simulated Data}
-Here we test the Coordinate Descent algorithm on two simulated datasets and show we indeed only need a subset of the Fourier Transform Matrix' columns $F^{-1}$.
-
+Here we test the Coordinate Descent algorithm on two simulated datasets and show we indeed only need a subset of the Fourier Transform Matrix' columns $F^{-1}$. The datasets contain idealized MeerKAT observations. Compared to the real world, the two simulated datasets contain few Visibilities and not representative of the real data volume. Also, more realistic simulations which contain pointing errors, calibration errors, and thermal noise are out of scope for this project. The simulations are used to isolate the two fundamental issues in radio interferometer image reconstruction: Non-uniform sampling and incomplete measurements.
+We compare the reconstruction quality to CASA's CLEAN implementation. Coordinate Descent was able to produce a super-resolved version of the simulated measurements, reconstructing point sources above the accuracy
+Coordinate Descent gets compared to CASA's CLEAN implementation. 
 WE compare the reconstruction quality to CASA's CLEAN implementation.
 
 Show super resolution, and more accurate flux reconstruction on simulated data.
@@ -8,7 +9,7 @@ Show super resolution, and more accurate flux reconstruction on simulated data.
 We compare the reconstruction of Coordinate Descent and CLEAN on two simulated observations.
 
 \subsection{Super-resolution of two point sources}
-
+Two point sources, with flux of 2.5 and 1.4. Located at a single pixel. 
 Simulation of the two point sources. Does not contain calibration-, pointing-, or thermal noise.
 
 What is super resolutios
@@ -52,8 +53,12 @@ issues with Coordinate descent reconstruction, wrong flux, lower peak is wider t
 
 
 
-\subsection{Flux reconstruction of extended Gaussian sources}
+\subsection{Reconstruction of mixed sources}
 
+
+Parameters of Coordinate Descent
+
+super resolution of CD. However, it did not find all point sources
 Lets look closer at the flux reconstruction of extended emissions
 
 \begin{figure}[h]
@@ -72,7 +77,14 @@ Lets look closer at the flux reconstruction of extended emissions
 	\label{results:mixed}
 \end{figure}
 
+Question of Flux reconstruction
 
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{./chapters/20.results/mixed/mixed_contour.png}
+	\caption{Reconstruction on mixed sources}
+	\label{results:mixed:contour}
+\end{figure}
 
 V
 
@@ -81,7 +93,7 @@ In this section, we compare the Coordinate Descent reconstruction with CLEAN on 
 
 The real world MeerKAT data were calibrated and averaged down to reduce its size to 88 Gigabytes. The raw, uncalibrated data ranges between 500 and 1000 Gigabytes. Data on this scale requires a mature pipeline for reading and image reconstruction. Within the time limit of this project, only a reconstruction with the WSCLEAN\cite{offringa2014wsclean} pipeline was possible.
 
-The simulations were created with the Meqtrees software package. Two simulations which contain roughly (size of Visibilities) perfectly calibrated Visibilities were created. Compared to real-world observations, the two simulated data sets are small and not representative of the real data volume. Also, more realistic simulations which contain pointing errors, calibration errors, and thermal noise are out of scope for this project. The simulations are used to isolate the two fundamental issues in radio interferometer image reconstruction: Non-uniform sampling and incomplete measurements.
+The simulations were created with the Meqtrees software package. Two simulations which contain roughly (size of Visibilities) perfectly calibrated Visibilities were created. 
 
 \subsection{Imaging on Simulated Data}
 We compare the reconstruction of Coordinate Descent and CLEAN on two simulated observations. The first observation contains two point sources, on which we show that Coordinate Descent is able to locate the sources below the accuracy limit of the instrument. The second observation contains point and Gaussian sources, on which we show that Coordinate Descent better captures the intensity profile of extended emissions. Also, we look at the shortcomings of the proof-of-concept implementations in terms of reconstruction quality and runtime. We use the CLEAN implementation of CASA in this section. CASA is an established software framework for radio interferometer image reconstruction and was already used in a previous project.
