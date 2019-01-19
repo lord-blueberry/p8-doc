@@ -83,6 +83,12 @@ Question of Flux reconstruction
 	\label{results:mixed:contour}
 \end{figure}
 
+Coordinate Descent did not reconstruct all point sources. How many starlets are non-zero is the major point for runtime. It depends on how many areas of the image are non-zero. Starlet has a representation for extended emission, how many starlets are needed for modelling is hard.
+
+Runtime problems
+1900 non-zero starlets, 
+
+
 V
 
 In this section, we compare the Coordinate Descent reconstruction with CLEAN on simulated MeerKAT data, and compare the runtime complexity of the two approaches on a real-world MeerKAT observation. We show that Coordinate Descent reconstructs the image by only computing a subset of the Fourier Transform Matrix' columns $F^{-1}$, and investigate if this approach reduces the runtime complexity on the large scale reconstruction problems of MeerKAT.
@@ -121,7 +127,3 @@ With starlets, coordinate descent has a representation for extended emissions. L
 
 
 
-Coordinate Descent did not reconstruct all point sources. How many starlets are non-zero is the major point for runtime. It depends on how many areas of the image are non-zero. Starlet has a representation for extended emission, how many starlets are needed for modelling is hard.
-
-Runtime problems
-1900 non-zero starlets, 
