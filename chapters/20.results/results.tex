@@ -1,46 +1,33 @@
 \section{Coordinate Descent Reconstructions on Simulated Data}
-Here we test the Coordinate Descent algorithm on two simulated datasets and show we indeed only need a subset of the Fourier Transform Matrix' columns $F^{-1}$. The datasets contain idealized MeerKAT observations. Compared to the real world, the two simulated datasets contain few Visibilities and not representative of the real data volume. Also, more realistic simulations which contain pointing errors, calibration errors, and thermal noise are out of scope for this project. The simulations are used to isolate the two fundamental issues in radio interferometer image reconstruction: Non-uniform sampling and incomplete measurements.
-We compare the reconstruction quality to CASA's CLEAN implementation. Coordinate Descent was able to produce a super-resolved version of the simulated measurements, reconstructing point sources above the accuracy
-Coordinate Descent gets compared to CASA's CLEAN implementation. 
-WE compare the reconstruction quality to CASA's CLEAN implementation.
+Here we test the Coordinate Descent algorithm on two simulated datasets and show we indeed only need a subset of the Fourier Transform Matrix' columns $F^{-1}$. The datasets contain idealized MeerKAT observations. Compared to the real world, the two simulated datasets contain few Visibilities and not representative of the real data volume. Also, more realistic simulations which contain pointing-, calibration-, and thermal noise are out of scope for this project. The simulations are used to isolate the two fundamental issues in radio interferometer image reconstruction: Non-uniform sampling and incomplete measurements.
 
-Show super resolution, and more accurate flux reconstruction on simulated data.
-
-We compare the reconstruction of Coordinate Descent and CLEAN on two simulated observations.
+We compare the reconstruction quality to CASA's CLEAN implementation. Coordinate Descent was able to produce a super-resolved version of the simulated measurements, reconstructing point sources above the accuracy limit of MeerKAT.
 
 \subsection{Super-resolution of two point sources}
-Two point sources, with flux of 2.5 and 1.4. Located at a single pixel. 
-Simulation of the two point sources. Does not contain calibration-, pointing-, or thermal noise.
+The first simulated observation contains two non-zero pixels, i.e. point sources, with intensity of 2.5 and 1.4 Jansky/Beam, with a resolution of 0.5 arc-seconds per pixel. The resolution of the image is therefore higher than MeerKAT. An ideal compressed sensing reconstruction would create an image where all pixels are zero except for the two point sources. Figure \ref{results:points} shows the reconstructed images of CLEAN and Coordinate Descent.
 
-What is super resolutios
-accuracy of the instrument. in arcseconds
-
-Parameters of Coordinate Descent
+CLEAN reconstructs the image \ref{results:points:tclean} at the accuracy limit of the instrument. It essentially reconstructs a blurred version of the observed image, where the blurring represents the accuracy of the instrument. With compressed sensing, we aim to reconstruct a de-blurred image. The image \ref{results:points:cd} shows the Coordinate Descent reconstruction, which creates two much narrower peaks than CLEAN. This is an example of super resolution, Coordinate Descent finds structures smaller than the accuracy of MeerKAT would allow. 
 
 \begin{figure}[h]
 	\centering
 	\begin{subfigure}[b]{0.4\linewidth}
 		\includegraphics[width=\linewidth, trim={0.2in, 0.2in, 0, 0.2in}, clip]{./chapters/20.results/points/tclean_points.png}
-		\caption{CLEAN reconstruction.}
+		\caption{CLEAN reconstruction \\with CASA standard parameters.}
 		\label{results:points:tclean}
 	\end{subfigure}
 	\begin{subfigure}[b]{0.4\linewidth}
 		\includegraphics[width=\linewidth, trim={0.2in, 0.2in, 0, 0.2in}, clip]{./chapters/20.results/points/cd_points.png}
-		\caption{Coordinate Descent reconstruction.}
+		\caption{Coordinate Descent reconstruction\\ with $\lambda = 0.1, J=3$.}
 		\label{results:points:cd}
 	\end{subfigure}
 	
 	\caption{Image reconstruction of two point sources.}
-	\label{results:point}
+	\label{results:points}
 \end{figure}
 
-Coordinate Descent reconstruction uses smaller peaks 
+The total Flux of the image, the sum of all emissions, is 2.5+1.4 Jansky/Beam in this simulation. CLEAN reconstructs the right peak intensities, both ending up at 2.5 and 1.7 respectively. Since CLEAN reconstructs a blurred version, the total Flux of the image is off by magnitudes. Figure \ref{results:points:contour} compares the intensity profile of CLEAN, Coordinate Descent and the Ground Truth.
 
-Sparse representation, 192 non-zeros
-
-intensity profile
-
-Flux
+Intensity profile
 
 \begin{figure}[h]
 	\centering
@@ -48,12 +35,21 @@ Flux
 	\caption{Intensity profile of the two point sources.}
 	\label{results:points:contour}
 \end{figure}
+		
+Sparse representation, 192 non-zeros
+
+intensity profile
+
+Flux
+
+}
 
 issues with Coordinate descent reconstruction, wrong flux, lower peak is wider than, and is offest by approximately a pixel
 
+Look at the flux in a more complex environment
 
 
-\subsection{Reconstruction of mixed sources}
+\subsection{Flux reconstruction of mixed sources}
 
 
 Parameters of Coordinate Descent
