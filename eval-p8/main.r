@@ -100,7 +100,7 @@ interpolation <- 10000
 df <- calcLineDF(matrices, names, p0, p1, interpolation)
 df$points <- df$points / interpolation* 0.5 * 256
 
-png(paste("./contour_points", ".png",sep=""),
+png(paste("./points/contour_points", ".png",sep=""),
     width = 10.0,
     height = 4.0,
     units = "in",
@@ -118,14 +118,14 @@ dev.off()
 
 
 scales = list(at=c(1, 65, 129, 197, 255))
-png("tclean_points.png",
+png("./points/tclean_points.png",
     width = 4.0,
     height = 4.0,
     units = "in",
     res = 400)
 WriteMap2(tclean, at=seq(min(tclean), max(tclean), length.out=200), scales)
 dev.off()
-png("cd_points.png",
+png("./points/cd_points.png",
     width = 4.0,
     height = 4.0,
     units = "in",
@@ -140,7 +140,7 @@ dev.off()
 folder <- "./sim00/"
 resol <- 0.5/60
 tclean <- read(paste(folder, "tclean.csv", sep=""), 1080, resol) - read(paste(folder,"tclean.residual.csv", sep=""), 1080, resol)
-cd <- read(paste(folder, "image8", sep=""), 1080, resol)
+cd <- read(paste(folder, "image_2dbg8", sep=""), 1080, resol)
 
 skymodel <- t(read(paste(folder,"skymodel.csv", sep=""), 1080, resol))
 model.axis <- round(0:(1079) * resol, digits=1)
@@ -148,7 +148,7 @@ colnames(skymodel) = model.axis
 rownames(skymodel) = model.axis
 pix = 1080
 scales = list(at=c(1, pix/8+1, pix/4+1, pix/8*3+1 ,pix/2+1, pix/8*5+1, pix/4*3+1, pix/8*7+1, pix))
-png("mixed_clean.png",
+png("./mixed/mixed_clean.png",
     width = 5.0,
     height = 5.0,
     units = "in",
@@ -156,7 +156,7 @@ png("mixed_clean.png",
 colorbreaks <- seq(min(tclean), max(tclean), length.out=200)
 print(WriteMap2(tclean, at=colorbreaks, scales, xunits="arc minutes"))
 dev.off()
-png("mixed_cd.png",
+png("./mixed/mixed_cd.png",
     width = 5.0,
     height = 5.0,
     units = "in",
@@ -182,12 +182,13 @@ colnames(cut.tclean) =cut.col.names
 cut.cd <- cd[cut.row, cut.col]
 rownames(cut.cd) =cut.row.names
 colnames(cut.cd) =cut.col.names
-png("mixed_cut_model.png",
+png("./mixed/mixed_cut_model.png",
     width = 5.0,
     height = 5.0,
     units = "in",
     res = 400)
-colorbreaks <- seq(min(cut.model), max(cut.model), length.out=200)
+colorbreaks <- seq(min(cut.model), 0.6, length.out=200)
+colorbreaks <- c(colorbreaks, max(cut.model))
 print(WriteMap2(cut.model, at=colorbreaks, scales, xunits="arc minutes"))
 dev.off()
 
@@ -197,18 +198,19 @@ interpolation <- 10000
 p0 <- c(63+64, 60+64)
 p1 <- c(67+64,65+64)
 df <- calcLineDF(matrices, names, p0, p1, interpolation)
-png("mixed_contour.png",
-    width = 6.0,
-    height = 3.0,
+png("./mixed/mixed_contour.png",
+    width = 10.0,
+    height = 4.0,
     units = "in",
     res = 400)
-print(ggplot(data = df, aes(x=df$points, y=df$values, colour=df$names)) + 
+print(ggplot(data = df, aes(x=df$points, y=df$values, colour=Legend)) + 
         geom_line() +
         scale_y_continuous(trans=asinh, breaks=c(0, 0.001, 0.01, 0.1, 1, 10, 100,1000)) +
+        geom_polygon(aes(fill=Legend), alpha=0.1) +
         xlab("arc seconds") +
         ylab("Jansky/beam") +
-        labs(colour='Legend:') +
-        scale_colour_brewer(palette = "Dark2"))
+        theme(legend.text=element_text(size=11), 
+              legend.title=element_text(size=13)))
 dev.off()
 
 
