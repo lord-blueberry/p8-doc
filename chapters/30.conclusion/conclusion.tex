@@ -11,16 +11,20 @@ For the former, we created a novel approach which does not need the major cycle.
 
 This project used starlets, which were developed for astronomical images. Their solution is not sparse enough to scale to MeerKAT problems.
 
-This approach does not scale. Compared to major cycle algorithms, we need a space where the image can be VERY sparsely represented, and even 
-
-Different approaches have
+This leaves two other ways, splitting the major cycle falls off if we consider self-calibration
 
 
-Runtime is a major drawback of Compressed Sensing reconstructions.
 
-This project searched if the architecture can be optimized for Compressed sensing.
+Spherical harmonics are the last way,
+Compressed Sensing algorithms have used it to gain another improvement in reconstruction quality. At this point, there is no Compressed Sensing algorithm which used the sphere for speed up.
 
- How to get the runtime down at least to comparable levels of CLEAN is still an open question.
+here I see a possibility. The downside is it leads to a new measurement equation. It did not have as much time to formalize corrupting effects like antenna beam pattern, ionosphere and so on.
+
+There is yet an
+
+
+
+ 
 Still an open question
 
 

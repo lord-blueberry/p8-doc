@@ -25,9 +25,7 @@ CLEAN reconstructs the image \ref{results:points:tclean} at the accuracy limit o
 	\label{results:points}
 \end{figure}
 
-The total Flux of the image, the sum of all emissions, is 2.5+1.4 Jansky/Beam in this simulation. CLEAN reconstructs the right peak intensities, both ending up at 2.5 and 1.7 respectively. Since CLEAN reconstructs a blurred version, the total Flux of the image is off by magnitudes. Figure \ref{results:points:contour} compares the intensity profile of CLEAN, Coordinate Descent and the Ground Truth.
-
-Intensity profile
+The total Flux of the image, the sum of all emissions, is 2.5+1.4 Jansky/Beam in this simulation. CLEAN reconstructs the right peak intensities, both ending up at 2.5 and 1.7 respectively. Since CLEAN reconstructs a blurred version, the total Flux of the image is off by magnitudes. Figure \ref{results:points:contour} compares the intensity profile of CLEAN, Coordinate Descent and the Ground Truth. For a correct total flux, the integrals should be equal.
 
 \begin{figure}[h]
 	\centering
@@ -35,7 +33,11 @@ Intensity profile
 	\caption{Intensity profile of the two point sources.}
 	\label{results:points:contour}
 \end{figure}
-		
+
+Note the logarithmic y scale of figure \ref{results:points:contour}. In the contour plot, the Coordinate Descents narrow contours become apparent. However, note that the smaller emission is shifted by a pixel and the contour is wider than it's larger cousin. 
+
+Note the logarithmic scale. Intensity profile, the integrals should be euqal. CLEAN overshoots the integral. Coordinate Descent looks better, but currently does an erroneous 
+
 Sparse representation, 192 non-zeros
 
 intensity profile

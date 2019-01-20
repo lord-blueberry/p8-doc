@@ -74,7 +74,7 @@ calcLineDF <- function(matrices, names, p0,p1, interpolation.length) {
     value <- c(value, line)
     name <- c(name, rep(n, interpolation.length))
   }
-  df <- data.frame(points=point, values=value, names=name)
+  df <- data.frame(points=point, values=value, Legend=name)
   return(df)
 }
 
@@ -84,7 +84,7 @@ asinh <- scales::trans_new(name = 'asinh',
 
 folder <- "./sim01/"
 tclean <- read(paste(folder, "tclean.csv", sep=""), 256, 0.5) - read(paste(folder,"tclean.residual.csv", sep=""), 256, 0.5)
-cd <- read(paste(folder, "image2", sep=""), 256, 0.5)
+cd <- read(paste(folder, "image_2dbg2", sep=""), 256, 0.5)
 
 skymodel <- t(read(paste(folder,"skymodel.csv", sep=""), 512, 0.5))
 skymodel <- skymodel[129:384, 129:384]
@@ -101,20 +101,21 @@ df <- calcLineDF(matrices, names, p0, p1, interpolation)
 df$points <- df$points / interpolation* 0.5 * 256
 
 png(paste("./contour_points", ".png",sep=""),
-    width = 6.0,
-    height = 2.0,
+    width = 10.0,
+    height = 4.0,
     units = "in",
     res = 400)
-print(ggplot(data = df, aes(x=df$points, y=df$values, colour=df$names)) + 
-  geom_line() +
-  scale_y_continuous(trans=asinh, breaks=c(0, 0.001, 0.01, 0.1, 1, 1.4, 2.5)) +
-  xlab("arc seconds") +
-  ylab("Jansky/beam") +
-  labs(colour='Legend:') +
-  scale_colour_brewer(palette = "Dark2") +
-  theme(legend.text=element_text(size=11), 
-        legend.title=element_text(size=13)))
+print(ggplot(data = df, aes(x=points, y=values, colour=Legend)) + 
+        geom_line() +
+        scale_y_continuous(trans=asinh, breaks=c(0, 0.001, 0.01, 0.1, 1, 1.4, 2.5)) +
+        geom_polygon(aes(fill=Legend), alpha=0.1) +
+        xlab("arc seconds") +
+        ylab("Jansky/beam") +
+        
+        theme(legend.text=element_text(size=11), 
+              legend.title=element_text(size=13)))
 dev.off()
+
 
 scales = list(at=c(1, 65, 129, 197, 255))
 png("tclean_points.png",
@@ -139,7 +140,7 @@ dev.off()
 folder <- "./sim00/"
 resol <- 0.5/60
 tclean <- read(paste(folder, "tclean.csv", sep=""), 1080, resol) - read(paste(folder,"tclean.residual.csv", sep=""), 1080, resol)
-cd <- read(paste(folder, "image3", sep=""), 1080, resol)
+cd <- read(paste(folder, "image8", sep=""), 1080, resol)
 
 skymodel <- t(read(paste(folder,"skymodel.csv", sep=""), 1080, resol))
 model.axis <- round(0:(1079) * resol, digits=1)
