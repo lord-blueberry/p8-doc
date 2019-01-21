@@ -6,7 +6,6 @@ library(graphics)
 library(ggplot2)
 library(scales)
 
-
 WriteMap2 <- function(x, at, scales, zlog=FALSE, xunits="arc seconds") {
   par(mar=c(0,0,0,0),plt=c(0,0,0,0),oma=c(0,0,0,0))
   levelplot(x,
@@ -78,13 +77,12 @@ calcLineDF <- function(matrices, names, p0,p1, interpolation.length) {
   return(df)
 }
 
-asinh <- scales::trans_new(name = 'asinh', 
-                           transform = function(x) asinh(x*1000), 
+asinh <- scales::trans_new(name = 'asinh', transform = function(x) asinh(x*1000), 
                            inverse = function(x) sinh(x)/1000)
 
 folder <- "./sim01/"
 tclean <- read(paste(folder, "tclean.csv", sep=""), 256, 0.5) - read(paste(folder,"tclean.residual.csv", sep=""), 256, 0.5)
-cd <- read(paste(folder, "image_2dbg2", sep=""), 256, 0.5)
+cd <- read(paste(folder, "image2", sep=""), 256, 0.5)
 
 skymodel <- t(read(paste(folder,"skymodel.csv", sep=""), 512, 0.5))
 skymodel <- skymodel[129:384, 129:384]
@@ -140,7 +138,7 @@ dev.off()
 folder <- "./sim00/"
 resol <- 0.5/60
 tclean <- read(paste(folder, "tclean.csv", sep=""), 1080, resol) - read(paste(folder,"tclean.residual.csv", sep=""), 1080, resol)
-cd <- read(paste(folder, "image_2dbg8", sep=""), 1080, resol)
+cd <- read(paste(folder, "image3", sep=""), 1080, resol)
 
 skymodel <- t(read(paste(folder,"skymodel.csv", sep=""), 1080, resol))
 model.axis <- round(0:(1079) * resol, digits=1)
@@ -165,7 +163,6 @@ colorbreaks <- seq(min(cd), 5, length.out=200)
 colorbreaks <- c(colorbreaks, max(cd))
 print(WriteMap2(cd, at=colorbreaks, scales, xunits="arc minutes"))
 dev.off()
-
 
 pix = 256
 cut.row.names <- round(463:718*resol, digits=2)
@@ -213,7 +210,6 @@ print(ggplot(data = df, aes(x=df$points, y=df$values, colour=Legend)) +
               legend.title=element_text(size=13)))
 dev.off()
 
-
 pix = 512
 cut.row.names <- round(271:782*resol, digits=2)
 cut.col.names <- round(round(251:762*resol, digits=2))
@@ -233,7 +229,7 @@ colnames(cut.cd) =cut.col.names
 matrices <- list(cut.model, cut.tclean, cut.cd)
 names <- c("Ground Truth", "CLEAN", "Coordinate Descent")
 p1 <- c(531-271, 501-251)
-p0 <- c(513-271, 551-251)
+p0 <- c(546-271, 586-251)
 df <- calcLineDF(matrices, names, p0, p1, interpolation)
 print(ggplot(data = df, aes(x=df$points, y=df$values, colour=df$names)) + 
         geom_line() +
@@ -246,3 +242,35 @@ print(ggplot(data = df, aes(x=df$points, y=df$values, colour=df$names)) +
 colorbreaks <- seq(min(cut.model), 0.7, length.out=200)
 colorbreaks <- c(colorbreaks, max(cut.model))
 print(WriteMap2(cut.model, at=colorbreaks, scales, xunits="arc minutes"))
+
+
+
+
+
+
+pix = 2048
+scales = list(at=c(1, pix/8+1, pix/4+1, pix/8*3+1 ,pix/2+1, pix/8*5+1, pix/4*3+1, pix/8*7+1, pix))
+arcmin <- 3.2/60
+meerkat <- read("./sim_meerkat/meerkat.csv", pix, arcmin)
+
+stopped <- meerkat
+stopped[stopped < 0] = 0
+stopped[stopped > 0.01] = 0.01
+png("meerkat.png",
+    width = 6.0,
+    height = 6.0,
+    units = "in",
+    res = 600)
+colorbreaks <- seq(min(stopped), max(stopped), length.out=800)
+par(mar=c(0,0,0,0),plt=c(0,0,0,0),oma=c(0,0,0,0))
+print(levelplot(stopped,
+          at = colorbreaks,
+          margin=FALSE,
+          zscaleLog = FALSE,
+          #col.regions=colorRampPalette(brewer.pal(n =11, name="RdYlGn")),
+          col.regions= colorRampPalette(c("black","midnightblue", "royalblue4","seagreen", "darkolivegreen4" ,"springgreen4", "violet","lightpink", "lightblue", "white"), bias = 1),  
+          scales=list(x=scales, y=scales),
+          xlab="arc minutes",
+          ylab=""
+))
+dev.off()

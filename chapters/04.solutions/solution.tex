@@ -55,7 +55,7 @@ Spherical harmonics were researched in the context of Compressed Sensing image r
 The push on solving on the sphere directly. Using spherical haar wavelets, (cite) was able to speed up the simulation problem. Simulation tries to solve to problem of finding the measurements corresponding to a given image $x$. However, this has so far not been used for imaging.
 
 
-\subsection{Explicit Fourier Transform Matrix}
+\subsection{Direct Fourier Transform}
 Hardy et al\cite{hardy2013direct} handled the whole inverse Fourier Transform as an explicit matrix $F^{-1}$ of size  $M*N$. They dropped the non-uniform FFT and $w$-stacking approximations. This is trivially to distribute later. The only problem is of Course that for MeerKAT data sizes $M*N$ is too large (4gb of visibilities times $1$ Billion Pixels).
 
 However there is potential for improvement: Only a limited number of pixels in a reconstruction are not zero. We spent a lot of processing power on pixels which do not matter in the reconstruction. If we could predict which pixels are not zero, we would only need to calculate a subset of $F^{-1}$ columns to reconstruct the image. The starlet transform\cite{starck2015starlet} has a way to predict its non-zero components. We represent the image as a combination of starlets, and estimate which starlets are likely non-zero from the Visibilities directly.
