@@ -82,7 +82,7 @@ asinh <- scales::trans_new(name = 'asinh', transform = function(x) asinh(x*1000)
 
 folder <- "./sim01/"
 tclean <- read(paste(folder, "tclean.csv", sep=""), 256, 0.5) - read(paste(folder,"tclean.residual.csv", sep=""), 256, 0.5)
-cd <- read(paste(folder, "image2", sep=""), 256, 0.5)
+cd <- read(paste(folder, "image0", sep=""), 256, 0.5)
 
 skymodel <- t(read(paste(folder,"skymodel.csv", sep=""), 512, 0.5))
 skymodel <- skymodel[129:384, 129:384]
@@ -138,7 +138,7 @@ dev.off()
 folder <- "./sim00/"
 resol <- 0.5/60
 tclean <- read(paste(folder, "tclean.csv", sep=""), 1080, resol) - read(paste(folder,"tclean.residual.csv", sep=""), 1080, resol)
-cd <- read(paste(folder, "image3", sep=""), 1080, resol)
+cd <- read(paste(folder, "image1", sep=""), 1080, resol)
 
 skymodel <- t(read(paste(folder,"skymodel.csv", sep=""), 1080, resol))
 model.axis <- round(0:(1079) * resol, digits=1)
@@ -195,7 +195,7 @@ interpolation <- 10000
 p0 <- c(63+64, 60+64)
 p1 <- c(67+64,65+64)
 df <- calcLineDF(matrices, names, p0, p1, interpolation)
-png("./mixed/mixed_contour.png",
+png("./mixed/mixed_cut0r.png",
     width = 10.0,
     height = 4.0,
     units = "in",
@@ -228,9 +228,17 @@ colnames(cut.cd) =cut.col.names
 
 matrices <- list(cut.model, cut.tclean, cut.cd)
 names <- c("Ground Truth", "CLEAN", "Coordinate Descent")
+#p1 <- c(531-271, 501-251)
+#p0 <- c(546-271, 586-251)
+p0 <- c(544-271, 586-251)
 p1 <- c(531-271, 501-251)
-p0 <- c(546-271, 586-251)
+#p1 <- c(513-271, 551-251)
 df <- calcLineDF(matrices, names, p0, p1, interpolation)
+png("./mixed/mixed_contour.png",
+    width = 10.0,
+    height = 4.0,
+    units = "in",
+    res = 400)
 print(ggplot(data = df, aes(x=df$points, y=df$values, colour=df$Legend)) + 
         geom_line() +
         scale_y_continuous(trans=asinh, breaks=c(0, 0.001, 0.01, 0.1, 1, 10, 100,1000)) +
@@ -238,7 +246,7 @@ print(ggplot(data = df, aes(x=df$points, y=df$values, colour=df$Legend)) +
         ylab("Jansky/beam") +
         labs(colour='Legend:') +
         scale_colour_brewer(palette = "Dark2"))
-
+dev.off()
 colorbreaks <- seq(min(cut.model), 0.7, length.out=200)
 colorbreaks <- c(colorbreaks, max(cut.model))
 print(WriteMap2(cut.model, at=colorbreaks, scales, xunits="arc minutes"))

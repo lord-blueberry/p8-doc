@@ -1,4 +1,4 @@
-\section{Coordinate Descent Reconstructions on Simulated Data}
+\section{Coordinate Descent reconstructions on Simulated Data}\label{results}
 Here we test the Coordinate Descent algorithm on two simulated datasets and show we indeed only need a subset of the Fourier Transform Matrix' columns $F^{-1}$. The datasets contain idealized MeerKAT observations. Compared to the real world, the two simulated datasets contain few Visibilities and not representative of the real data volume. Also, more realistic simulations which contain pointing-, calibration-, and thermal noise are out of scope for this project. The simulations are used to isolate the two fundamental issues in radio interferometer image reconstruction: Non-uniform sampling and incomplete measurements.
 
 We compare the reconstruction quality to CASA's CLEAN implementation. Coordinate Descent was able to produce a super-resolved version of the simulated measurements, reconstructing point sources above the accuracy limit of MeerKAT.
@@ -83,7 +83,7 @@ Question of Flux reconstruction
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=0.8\linewidth]{./chapters/20.results/mixed/mixed_contour.png}
+	\includegraphics[width=0.8\linewidth]{./chapters/20.results/mixed/mixed_cut0.png}
 	\caption{Reconstruction on mixed sources}
 	\label{results:mixed:contour}
 \end{figure}

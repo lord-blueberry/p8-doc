@@ -1,11 +1,11 @@
-\section{Runtime complexity on large scale reconstructions}
-In practice, Coordinate Descent gets used together with heuristics, which improve its runtime complexity. Pinning down the average runtime of Coordinate Descent is difficult, because we need an estimate of how well the heuristics work on average. For our algorithm, the runtime mainly depends on the number of non-zero starlet components $S$ and how many iterations Coordinate Descent needs to converge. How many non-zero starlets, or how many iterations Coordinate Descent needs on average are hard questions and cannot be answered in this project.
+\section{Runtime cost comparison on a real-world MeerKAT reconstruction}
+Current Compressed Sensing reconstructions produce images at a higher quality than CLEAN. However, CLEAN is significantly cheaper to compute. MeerKAT's large scale reconstruction problems, CLEAN is still the go-to algorithm. In this project, we developed for a new architecture which hopefully reduces the cost of Compressed Sensing algorithms. The previous section \ref{results} demonstrated super-resolution capabilities of our Coordinate Descent algorithm, which does not use the common Major Cycle architecture. The question, if our new approach can lower the runtime cost of Compressed Sensing reconstructions, is still open. 
 
-Instead, this work focuses on a minimum runtime estimate of Coordinate Descent on MeerKAT observations. We compare the runtime complexity with WSCLEAN and analyse what speed up an idealized version of Coordinate Descent can provide. Sadly, the speed up of an idealized Coordinate Descent is negligible. The Major Cycle architecture leads to a lower runtime complexity in the context of MeerKAT reconstructions.
+In this section, we compare the costs of our approach and WSCLEAN, which is the algorithm of choice for MeerKAT reconstructions. We create cost functions for each algorithm, counting the number of operations depending on the input size. WSCLEAN was executed on a real-world MeerKAT dataset, shown in image \ref{scale:wsclean}. Our proof-of-concept implementation was not able to handle the large dataset. Instead, we extrapolate the best-case costs of our approach and compare them to WSCLEAN on the MeerKAT dataset.
 
 
-\subsection{Runtime complexity of an idealized Coordinate Descent}
-The runtime complexity of Coordinate Descent depends largely on the number of Visibilities $M$ and the number of non-zero starlets $S$. The number and location of the $S$ non-zero starlets are generally not known. However, we created a heuristic which finds likely non-zero starlet components. In a realistic setting, the heuristic will have found more than $S$ likely non-zero starlets. For the idealized version of Coordinate Descent, we assume an oracle performance heuristic: It finds the location and number of the $S$ non-zero starlet components in constant time ($O(1)$). Coordinate Descent therefore has to find the value of $S$  components. In total, the idealized Coordinate Descent algorithm has four operations: creating J starlet levels with the non-uniform FFT, creating the columns of $F^{-1}$, calculating the minima for each single component, and calculating the starlet layers:
+\subsection{Cost function of an idealized Coordinate Descent}
+The runtime cost of Coordinate Descent depends on the number of Visibilities $M$ and the number of non-zero starlets $S$. The number and location of the $S$ non-zero starlets are generally not known. However, we created a heuristic which finds likely non-zero starlet components. In a realistic setting, the heuristic will have found more than $S$ likely non-zero starlets. For the idealized version of Coordinate Descent, we assume an oracle performance heuristic: It finds the location and number of the $S$ non-zero starlet components in constant time. Coordinate Descent therefore has to calculate the value of $S$  components. In total, the idealized Coordinate Descent algorithm uses four steps: creating $J$ starlet levels with the non-uniform FFT, creating the columns of $F^{-1}$, calculating the minima for each single component, and calculating the starlet layers:
 
 \begin{alignat*}{1}
 J \text{non-uniform FFTs for the starlet regularization} &: J*(M + 2N*ld(2N))\\
@@ -14,7 +14,7 @@ J \text{non-uniform FFTs for the starlet regularization} &: J*(M + 2N*ld(2N))\\
 \text{calculating} \:J\: \text{Starlet layers} &: J * 2M
 \end{alignat*}
 
-We assume we have enough memory to cache the columns of $F^{-1}$ and only need to calculate them once. Coordinate Descent arrives at the correct result in $I_{CD}$ iterations. Therefore we arrive at the runtime complexity of \eqref{results:cd:omega}.
+We assume we have enough memory to cache the columns of $F^{-1}$ and only need to calculate them once. Keep in mind that each column of $F^{1}$ has the same length as the Visibilities, essentially multiplying the input data. The last parameter for Coordinate Descent is the number of iterations to converge, $I_CD$. Estimating this number is difficult as Coordinate Descent does not have strict guarantees (as discussed in section \ref{cd}). Instead, we assume it converges after a fixed number of iterations. Therefore we arrive at the cost function of \eqref{results:cd:omega}.
 
 \begin{equation}\label{results:cd:omega}
 \begin{aligned}
@@ -24,12 +24,12 @@ We assume we have enough memory to cache the columns of $F^{-1}$ and only need t
 \end{aligned}
 \end{equation}
 
-Note that the runtime of Coordinate Descent is independent of the number of pixels. The only image related parameter in \eqref{results:cd:omega} is $J$, the number of starlet layers. The largest starlet layer represents the largest possible structure in the image, which is given by the instrument and the image resolution (pixels per arc-second). The runtime only depends indirectly on the image resolution, not the total number of pixels.
+Note that the runtime of Coordinate Descent is independent of the number of pixels. The only image related parameter in \eqref{results:cd:omega} is $J$, the number of starlet layers. The largest starlet layer represents the largest possible structure in the image, which is given by the instrument and the image resolution. The runtime only depends indirectly on the image resolution, not the total number of pixels. For simplicity, we assume the image cannot have structures larger than half the image size. For our MeerKAT example, this is more than enough to represent the largest structures.
 
 Also note the term iterating over the $S$ non-zero starlets, $ I_{CD} * [S * 4M +\ldots]$. As it turns out, this is the Achilles heel of the algorithm. MeerKAT observations contain a very large amount of Visibilities $M$.
 
-\subsection{Runtime complexity of WSCLEAN}
-We look at WSCLEAN reconstructions which use the non-uniform FFT with $w$-stacking. The runtime of a single Major cycle depends on the non-uniform FFT with $w$-stacking and the number of CLEAN deconvolutions. $N$ denotes the number of pixels.
+\subsection{Cost function of WSCLEAN}
+The WSCLEAN algorithm uses the Major Cycle architecture. It uses the non-uniform FFT with $w$-stacking. The runtime costs of a single Major Cycle depends on the non-uniform FFT with $w$-stacking and the number of CLEAN deconvolutions. $N$ denotes the number of pixels.
 
 \begin{alignat*}{1}
 	\text{non-uniform FFT} &: M + 2N*ld(2N)\\
@@ -37,7 +37,7 @@ We look at WSCLEAN reconstructions which use the non-uniform FFT with $w$-stacki
 	I_{WSCLEAN}\: \text{deconvolutions} &: I_{WSCLEAN}*2N
 \end{alignat*}
 
-The overall complexity shown in \eqref{results:clean:o} can also be split into two parts. In each Major Cycle, the forward and backwards non-uniform FFTs gets calculated, and CLEAN deconvolves the image for a certain number of iterations.
+The overall cost function shown in \eqref{results:clean:o} can also be split into two parts. In each Major Cycle, the forward and backwards non-uniform FFTs gets calculated, and CLEAN deconvolves the image for a certain number of iterations.
 
 \begin{equation}\label{results:clean:o}
 \begin{aligned}
@@ -46,7 +46,7 @@ The overall complexity shown in \eqref{results:clean:o} can also be split into t
 \end{aligned}
 \end{equation}
 
-Notice that the number of CLEAN deconvolutions $I_{CLEAN}$ depends on the image content, similar the number of non-zero starlets $S$ for Coordinate Descent. Here however, it multiplies with the number of pixels $N$ instead of the number of Visibilities $M$. In a sense, the major cycle tries to reduce the runtime complexity of handling the image content by calculating the non-uniform FFT. If the difference is large enough $N \ll M$, then the Major Cycle will end up with a smaller overall runtime.
+Notice that the number of CLEAN deconvolutions $I_{CLEAN}$ depends on the image content, similar the number of non-zero starlets $S$ for Coordinate Descent. Here however, it multiplies with the number of pixels instead of the number of Visibilities. In a sense, the major cycle tries to reduce the runtime complexity of handling the image content by calculating the non-uniform FFT. If the difference is large enough $N \ll M$, then the Major Cycle will end up with a smaller overall runtime.
 
 
 \subsection{Comparison on a MeerKAT reconstruction problem}
