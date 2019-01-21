@@ -50,7 +50,7 @@ Notice that the number of CLEAN deconvolutions $I_{CLEAN}$ depends on the image 
 
 
 \subsection{Comparison on a MeerKAT reconstruction problem}
-Our real-world MeerKAT observation has been calibrated and averaged in frequency and time, to reduce storage space. The resulting dataset contains 540 channels with 4 million Visibilities each. The uncalibrated dataset contains [FACTOR] more Visibilities. First we estimate the runtime complexity on the calibrated and averaged dataset. The size of the uncalibrated data becomes relevant for the second estimate, where we compare WSCLEAN and Coordinate Descent in the self-calibration setting.
+Our real-world MeerKAT observation has been calibrated and averaged in frequency and time, to reduce storage space. The resulting dataset contains 540 channels with 4 million Visibilities each. The uncalibrated dataset contains 8 times more Visibilities. First we estimate the runtime complexity on the calibrated and averaged dataset. The size of the uncalibrated data becomes relevant for the second estimate, where we compare WSCLEAN and Coordinate Descent in the self-calibration setting.
 
 For our first estimate, we same values needed for the WSCLEAN reconstruction in image \ref{scale:wsclean}:
 \begin{itemize}
@@ -83,12 +83,12 @@ To put the numbers into perspective, Coordinate Descent used about 2000 non-zero
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=0.6\linewidth]{./chapters/20.results/meerkat.png}
+	\includegraphics[width=0.6\linewidth]{./chapters/21.scalability/meerkat.png}
 	\caption{WSCLEAN Reconstruction of the MeerKAT observation.}
 	\label{scale:wsclean}
 \end{figure}
 
-So far, we have excluded the memory requirement of Coordinate Descent from our analysis. A short glance at the numbers reveals it is impractically large. A single column of $F^{-1}$ has $M$ entries, effectively multiplying the number of Visibilities with each column we need to cache. With 2000 starlets, we may not need 2000 columns, since we may have several starlets at the same pixel location, but at different scales. Since we have 5 levels, we need at least 400 pixels to arrive at 2000 non-zero starlets. When we use 128bit accuracy for a complex valued Visibility, we need need at least 12 terabytes of memory just for the columns.
+So far, we have excluded the memory requirement of Coordinate Descent from our analysis. A short glance at the numbers reveals it is impractically large. A single column of $F^{-1}$ has $M$ entries, effectively multiplying the number of Visibilities with each column we need to cache. With 2000 starlets, we may not need 2000 columns. Several starlets may be at the same pixel location, but at different scales. In this estimate, we used $J=5$ levels. In the best case, we need just 400 pixels to arrive at 2000 starlets. Still, this results to 12 terabytes of memory minimum just for the columns alone, when we use 128bit accuracy for complex valued Visibilities. 
 
 There is one last question, for which Coordinate Descent could be useful: Since the runtime complexity \eqref{results:cd:omega} scales independently of the image size $N$, maybe it offers a speed up if we want to reconstruct very large images. Let us scale up the image by a factor of 16, to $N=32768^2$ and compare the speed up to WSCLEAN in table \ref{res:cd:large:table}. 
 
@@ -111,22 +111,29 @@ There is one last question, for which Coordinate Descent could be useful: Since 
 	\end{center}
 \end{table}
 
-The Coordinate Descent approach sees considerable speed up, if it converges within one iteration. But it falls off quickly as soon as it needs several iterations to converge. Any realistic Coordinate Descent algorithm cannot move far away from the minimum estimate of the ideal before it gets more expensive than our WSCLEAN estimate. However, there is another point to consider: An image of this size will have a high resolution coupled with a wide field of view. In this scenario, we would likely want to improve the image with self-calibration. At this point, we need the uncalibrated, raw Visibilities for imaging, which increases $M$ again by a factor of [FACTOR]. By including self-calibration, we have arrived at a similar ratio of $M$ to $N$ to our first estimate, and negated the speed-up of Coordinate Descent.  
+Note that the speed up is roughly linear to the pixels per Visibility ratio. We increased the pixels by a factor of 16, and table \ref{res:cd:large:table} is approximately the result of 16 multiplied by table \ref{scale:cd:table}. The Coordinate Descent approach sees considerable speed up, if it converges within one iteration. But it falls off quickly as soon as it needs several iterations to converge. Any realistic Coordinate Descent algorithm cannot move far away from the minimum estimate of the ideal before it gets more expensive than our WSCLEAN estimate. However, there is another point to consider: An image of this size will have a high resolution coupled with a wide field of view. In this scenario, we would likely want to improve the image with self-calibration. At this point, we need the uncalibrated, raw Visibilities for imaging, which increases $M$ again by a factor of 8. By including self-calibration, any speed up of table \ref{scale:cd:table} gets approximately divided by 8. Again, Coordinate Descent is again only competitive if it needs just 1 iteration to converge.  
 
 The issue with Coordinate Descent's runtime complexity lies in the term $I_{CD} * [S * 4M +\ldots]$ of \eqref{results:cd:omega}, which scales with the "content" of the image $S$, multiplied with the Visibilities. Coordinate Descent cannot afford many iterations nor many non-zero components, because both of these numbers get multiplied together with $M$, the largest number in the problem. With the Major Cycle, WSCLEAN is able to get around this limitation, and scales any content dependant factors on $N$ instead of $M$. 
 
 Indeed, the runtime of our Coordinate Descent algorithm could be improved by using the major cycle architecture, essentially replacing $M$ with $N$ and we arrive at the term $I_{CD} * [S * 4N +\ldots]$. By using the Major Cycle architecture, Coordinate Descent can afford more iterations and more non-zero components in the image for the same runtime complexity. Furthermore $N$ lies on a uniformly sampled grid. We may be able to use the FFT instead of caching columns of $F^{-1}$, and reduce the memory requirement to a sane amount.
 
 \subsection{Embracing the Major Cycle}
-In this project, we created a Compressed Sensing reconstruction which works outside the major cycle. To our knowledge this approach has not been explored previously for radio interferometer image reconstruction. It uses Coordinate Descent and directly calculates the columns of $F^{-1}$ relevant to the reconstruction. Together with starlets as its regularization created super-resolved point sources on simulated MeerKAT data. The total flux of extended emissions were captured more accurately than CLEAN. 
+In this project, we created a Compressed Sensing reconstruction which works outside the Major Cycle architecture. With Coordinate Descent as optimization algorithm and starlets as regularization,  it does not need the non-uniform FFT during reconstruction. Instead, it directly uses the relevant columns of the Fourier Transform matrix. We exploited the starlets for estimating which columns are likely relevant for the reconstruction, and do not need the full matrix at any point. To our knowledge, this approach has not been explored previously for radio interferometer image reconstruction. 
 
+Coordinate Descent created super-resolved point sources on simulated MeerKAT data. Compared to CLEAN, our reconstruction recovered the total flux of extended emissions more accurately. Since it uses the Fourier columns directly, it naturally extends to wide field of view observations and does not need any $w$-term approximations.
+
+
+
+
+The number of columns needed for reconstruction relates with the number of non-zero components in the regularization. We used the starlet regularization. The fewer starlets we need to represent an image, the fewer columns are necessary.
+
+It uses Coordinate Descent and directly calculates the columns of $F^{-1}$ relevant to the reconstruction. Together with starlets as its regularization, it created super-resolved point sources on simulated MeerKAT data, and reconstructed the total flux of extended emissions more accurately than CLEAN.
+
+Because our algorithm uses the relevant Fourier columns directly, it can handle the third Fourier component, the $w$-term, explicitly. It does not need the $w$-stacking approximation nor the non-uniform FFT during optimization. This results in a lightweight algorithm which has a potential for distributed computing. However, when an idealized 
 
 Because of the direct calculations, it can get rid of the non-uniform FFT and $w$-term approximations, which may prove useful for distributing Coordinate Descent.
 
  
-
-Super resolution on real observations was not done.
-
 
 We used an idealized version of Coordinate Descent to explore if it can reduce the computational complexity of large scale image reconstructions. Sadly, For MeerKAT datasets, it would need too much memory. Plus, the minimum runtime of the algorithm is comparable to the expected runtime other Major Cycle reconstructions.
 

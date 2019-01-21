@@ -268,7 +268,7 @@ print(levelplot(stopped,
           margin=FALSE,
           zscaleLog = FALSE,
           #col.regions=colorRampPalette(brewer.pal(n =11, name="RdYlGn")),
-          col.regions= colorRampPalette(c("black","midnightblue", "royalblue4","seagreen", "darkolivegreen4" ,"springgreen4", "violet","lightpink", "lightblue", "white"), bias = 1),  
+          col.regions= colorRampPalette(c("gray40","royalblue4", "dodgerblue4", "darkgreen", "darkolivegreen4" ,"darkgoldenrod","plum4", "orchid", "lightblue","lightcyan", "white"), bias = 1),  
           scales=list(x=scales, y=scales),
           xlab="arc minutes",
           ylab=""
