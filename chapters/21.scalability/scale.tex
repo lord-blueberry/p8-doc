@@ -118,24 +118,20 @@ The issue with Coordinate Descent's runtime complexity lies in the term $I_{CD} 
 Indeed, the runtime of our Coordinate Descent algorithm could be improved by using the major cycle architecture, essentially replacing $M$ with $N$ and we arrive at the term $I_{CD} * [S * 4N +\ldots]$. By using the Major Cycle architecture, Coordinate Descent can afford more iterations and more non-zero components in the image for the same runtime complexity. Furthermore $N$ lies on a uniformly sampled grid. We may be able to use the FFT instead of caching columns of $F^{-1}$, and reduce the memory requirement to a sane amount.
 
 \subsection{Embracing the Major Cycle}
-In this project, we created a Compressed Sensing reconstruction which works outside the Major Cycle architecture. With Coordinate Descent as optimization algorithm and starlets as regularization,  it does not need the non-uniform FFT during reconstruction. Instead, it directly uses the relevant columns of the Fourier Transform matrix. We exploited the starlets for estimating which columns are likely relevant for the reconstruction, and do not need the full matrix at any point. To our knowledge, this approach has not been explored previously for radio interferometer image reconstruction. 
+In this project, we created a Compressed Sensing reconstruction which works outside the Major Cycle architecture. With Coordinate Descent as optimization algorithm and starlets as regularization,  it does not need the non-uniform FFT during reconstruction. Instead, it directly uses the relevant columns of the Fourier Transform matrix.  We exploited the starlets for estimating which columns are likely relevant for the reconstruction, and do not need the full matrix at any point. It naturally extends to the wide field of view measurement equation and does not need any $w$-term approximation algorithm. To our knowledge, this approach has not been explored previously for radio interferometer image reconstruction. 
 
-Coordinate Descent created super-resolved point sources on simulated MeerKAT data. Compared to CLEAN, our reconstruction recovered the total flux of extended emissions more accurately. Since it uses the Fourier columns directly, it naturally extends to wide field of view observations and does not need any $w$-term approximations.
+Proof-of-concept-implementation
+
+Coordinate Descent created super-resolved point sources on simulated MeerKAT data. Compared to CLEAN, our reconstruction recovered the total flux of extended emissions more accurately. Algorithm was not run on real datasets. The starlet regularization has been used in other Compressed sensing reconstructions. This algorithm might achieve similar results to \cite{girard2015sparse}.
+
+Question if this is the way to scale to large scale reconstruction. Our way is potentially easier to distribute, because it has plain matrix multiplications instead of approximation algorithms.
+
+used an idealized algorithm to estimate the minimum runtime complexity. Turns out it is not competitive to other Major Cycle reconstructions. Each column of the Fourier Matrix has the length of the Visibilities. Massive Memory requirement on top of it.  Sparsity depends on the prior. We could use different priors for reconstruction which may be more sparse, reducing the runtime and need for caching columns. However, the major cycle is just too competitive, we would need a VERY sparse prior in order to have a chance against Major Cycle reconstructions.
+
+Indeed, even our Coordinate Descent algorithm can potentially be sped up with the Major Cycle, potentially getting rid of the massive memory requirement.
 
 
 
-
-The number of columns needed for reconstruction relates with the number of non-zero components in the regularization. We used the starlet regularization. The fewer starlets we need to represent an image, the fewer columns are necessary.
-
-It uses Coordinate Descent and directly calculates the columns of $F^{-1}$ relevant to the reconstruction. Together with starlets as its regularization, it created super-resolved point sources on simulated MeerKAT data, and reconstructed the total flux of extended emissions more accurately than CLEAN.
-
-Because our algorithm uses the relevant Fourier columns directly, it can handle the third Fourier component, the $w$-term, explicitly. It does not need the $w$-stacking approximation nor the non-uniform FFT during optimization. This results in a lightweight algorithm which has a potential for distributed computing. However, when an idealized 
-
-Because of the direct calculations, it can get rid of the non-uniform FFT and $w$-term approximations, which may prove useful for distributing Coordinate Descent.
-
- 
-
-We used an idealized version of Coordinate Descent to explore if it can reduce the computational complexity of large scale image reconstructions. Sadly, For MeerKAT datasets, it would need too much memory. Plus, the minimum runtime of the algorithm is comparable to the expected runtime other Major Cycle reconstructions.
 
 Speed is the main reason for getting rid of the major cycle. 
 
@@ -149,35 +145,8 @@ Distribution, by calculating the $F^{-1}$ is possible in theory,  Asynchronous i
 
 
 
-We searched for a compressed sensing algorithm which does not need the major cycle, with the hope it would improve runtime complexity. Arriving at a Coordinate Descent algorithm, which does not require any of the approximation algorithm. It is very simple to implement. Results of 
-
-Runtime estimate
-
-
-Can we use Coordinate Descent for asynchronous optimization.
-
-Huge memory requirement. In the context of MeerKAT, it does not improve runtime compared to other compressed sensing approaches, let alone clean.
-
-Self-calibration increases the 
-
-At least for MeerKAT, the signs point to the Major Cycle architecture to handle large scale image reconstruction problems. From different directions, self-calibration, we always arrive at a similar Major Cycle Architecture for image reconstruction.
 
 
 
 
-
-
-In this project explored different architectures for compressed sensing reconstructions. 
-
-We did this and arrived at a simple proof-of concept Coordinate Descent algorithm, getting rid of the major cycle. Although it again may produce better reconstructions,
-
-The major cycle seems here to stay. As soon as we factor in self-calibration, the reconstruction algorithm has to transform between Visibilities and image space several times. Becoming some form of major cycle.
-
-We have developed an algorithm which does not need the major cycle. But because it does not have one, it scales worse on large scale reconstruction problems of MeerKAT.
-
-The question still remains open., how we get compressed sensing to scale better and finally getting rid of clean. 
-
-Moving to the sphere.
-
-Asynchronous implementations.
  

@@ -231,7 +231,7 @@ names <- c("Ground Truth", "CLEAN", "Coordinate Descent")
 p1 <- c(531-271, 501-251)
 p0 <- c(546-271, 586-251)
 df <- calcLineDF(matrices, names, p0, p1, interpolation)
-print(ggplot(data = df, aes(x=df$points, y=df$values, colour=df$names)) + 
+print(ggplot(data = df, aes(x=df$points, y=df$values, colour=df$Legend)) + 
         geom_line() +
         scale_y_continuous(trans=asinh, breaks=c(0, 0.001, 0.01, 0.1, 1, 10, 100,1000)) +
         xlab("arc seconds") +
