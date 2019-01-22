@@ -195,7 +195,7 @@ interpolation <- 10000
 p0 <- c(63+64, 60+64)
 p1 <- c(67+64,65+64)
 df <- calcLineDF(matrices, names, p0, p1, interpolation)
-png("./mixed/mixed_cut0r.png",
+png("./mixed/mixed_cut0.png",
     width = 10.0,
     height = 4.0,
     units = "in",
@@ -234,7 +234,7 @@ p0 <- c(544-271, 586-251)
 p1 <- c(531-271, 501-251)
 #p1 <- c(513-271, 551-251)
 df <- calcLineDF(matrices, names, p0, p1, interpolation)
-png("./mixed/mixed_contour.png",
+png("./mixed/mixed_cut2.png",
     width = 10.0,
     height = 4.0,
     units = "in",
