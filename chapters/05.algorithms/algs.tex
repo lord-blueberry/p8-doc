@@ -33,62 +33,19 @@ def coordinate_descent(V_residual, x, lambda, max_iter):
 
 Coordinate Descent has to iterate over every pixels possibly several times. How quickly Coordinate Descent converges in theory is not well understood. Optimizing our function \eqref{cd:clean} falls in the class of quadratic programming, with a strictly convex objective. In this case, Coordinate Descent is guaranteed to converge at least linearly\cite{luo1992convergence}. Sadly, real-world objective functions for image reconstruction are often not strictly convex. Usually our image is constrained to have only positive pixels, which breaks the strictly convex property of our objective. In our environment, the convergence guarantees of Coordinate Descent are not well understood in theory.
 
-In practice, Coordinate Descent can be improved with heuristics. Since we assume our image contains only a few stars, a few non-zero pixels, the simple Coordinate Descent algorithm wastes resources checking if the pixel is still zero. A better scheme would be the active set heuristic: We iterate over every pixel once. Then, for a given number of iterations, we only check the pixels that have changed. This is an improvement, but impossible in the context of MeerKAT. We have too many pixels and Visibilities, iterating over every pixel once is too expensive. 
+In practice, Coordinate Descent can be improved with heuristics. Since we assume our image contains only a few stars, a few non-zero pixels, the simple Coordinate Descent algorithm wastes resources checking if the pixel is still zero. A better scheme would be the active set heuristic\cite{friedman2010regularization}: We iterate over every pixel once. Then, for a given number of iterations, we only check the pixels that have changed. This is an improvement, but impossible in the context of MeerKAT. We have too many pixels and Visibilities, iterating over every pixel once is too expensive. 
 
-However, it turns out we do not need to if we imitate CLEAN. For CLEAN, the non-uniform FFT approximates the 'dirty' image, which is corrupted by the effects of incomplete measurements. Then, it subtracts a fraction of the PSF at the largest pixel value. In other words, the largest pixel value in the dirty image is the most likely non-zero pixel.
+However, it turns out we do not need to if we imitate CLEAN: For CLEAN, the non-uniform FFT approximates the 'dirty' image, which is corrupted by the effects of incomplete measurements. CLEAN then subtracts a fraction of the PSF at the largest pixel value. In other words, the largest pixel value in the dirty image is the most likely non-zero pixel. We can use the dirty image approximation for a 'probability distribution' of non-zero pixels. It does not need to be accurate, since the actual reconstruction is done with the direct Fourier Transform.
 
+This is, in principle, how this proof-of-concept algorithm works. Instead of reconstructing an image, it reconstructs in the starlet space. Instead of using the dirty image approximation, it uses the starlet transform to find likely non-zero components. Coordinate Descent is used to optimize single starlets. A proof-of-concept version of this algorithm was developed in python.
 
+Although the algorithm produces super-resolved images in section \ref{results}, it is currently not known if it actually converges to the true optimum. Finding all relevant non-zero starlets is left to the heuristic, there may be conditions under which it never includes relevant components. Further analysis of the convergence was outside the scope of the project.
 
+ does not find  
 
-simple implementation using the L1 norm. But most of the pixels will be zero, so it does not need to iterate over them.
-Cache the columns of $F^{1}$ we actually need
+How accurate the dirty image has to be was not investigated in this project.
 
-Theory of compressed sensing 
-
-We can use a non-uniform FFT to estimate which pixels are likely to be non-zero and iterate over those
-
-
-This is basically how the algorithm in this project works, but it does not iterate over pixels. It reconstructs the image in starlet space. 
-
-Starlet is an over-complete representation, with the hope that it takes fewer pixels than starlets to reconstruct an image, and we can iterate over an even smaller set. Usually, an it is difficult to estimate the likely non-zero components of over-complete representations, but we have the starlet transform to do exactly that.
-
-
-
-
-
-The three components of a compressed sensing reconstruction. Using a combination so we do not need to calculate the whole Fourier Transform matrix. Regularization represents our previous knowledge of possible images. With it we find the most likely image which represents our data.
-
-Doing compressed Sensing with Coordinate Descent and starlet regularization.
-
-
-
-
-
-
-The idea behind compressed sensing is we use prior information about the image, and find the most likely image $x$ from all possible solutions. In practice, we formulate a minimization problem with a data and regularization term. The data term forces the image to be as close to the measured Visibilities as possible, and the regularization term tells us how likely the image is to be true. 
-
-The regularization is responsible for an accurate reconstruction. In this work, two regularizations are used. The L1 pixel regularization is used to demonstrate a simple version of the coordinate descent algorithm. For the actual algorithm starlet regularization is used. Starlets have been used as regularization for the LOFAR interferometer\cite{girard2015sparse}, which was able to produce super-resolved reconstructions.
-
-First, let us look at the coordinate descent algorithm in its simplest form, and discuss its properties. we want to minimize the objective \eqref{cd:clean}, where the data term $\left \| V - F^{-1}x \right \|_2^2$ forces the image to be close to the Visibilities $V$, and the regularization term $\left \| x \right \|_1$ forces the image to have as few non-zero pixels as possible. The parameter $\lambda$ represents our trade-off between reconstruction accuracy and regularization. 
-
-
-
-The objective function \eqref{cd:clean} has a property, which we can exploit with Coordinate Descent: The optimum for a single pixel, if we keep all others fixed, turns out to be a parabola. The optimum for a single pixel of \eqref{cd:clean} is simply finding the apex of a parabola,  . Sadly, the pixels are not independent of each other, and we need multiple iterations over all pixels to converge. This leads to the following reconstruction algorithm, written in python code:
-
-
-
-
-
-
-
-The simple version of coordinate descent converges to a solution which is similar to CLEAN. . (Strict convex function, may not be true in this section. This a lose bound given by the theory). In practice, the convergence rate can be sped up with heuristics like active set\cite{activeset} and $\lambda$\cite{lambda}. Furthermore, coordinate descent is robust, even when the residual vector is only approximated, which is useful for distributing the algorithm.
-
-The simple approach calculates the whole Fourier Transform Matrix $F^{-1}$ explicitly. The upside is that we do an exact $w$-term correction. The downside is $F^{-1}$ is too large to keep in memory, and too expensive to calculate on the fly for the scale of MeerKAT reconstructions. 
-
-The starlet transform is used from here on. Instead of reconstructing the image directly, we represent the image as a combination of starlets $x = D\alpha$. Where $D$ is an over-complete dictionary of starlets, and $\alpha$ is the starlet component vector. Since the dictionary $D$ is over-complete, it is a matrix with more columns than rows, and does generally not have an inverse (more formally: $D^{-1}x \neq \alpha$). However, the starlet transform does have an pseudo-inverse. In this work, the pseudo inverse is used to only look at a subset of starlet components which are likely to be non-zero, and only evaluate a subset of columns of $F^{-1}$ .
-
-Actual implementation
-
+Unclear, if it just 
 
 
 
