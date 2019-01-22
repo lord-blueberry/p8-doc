@@ -31,7 +31,7 @@ def coordinate_descent(V_residual, x, lambda, max_iter):
 				V_residual = V_residual - fourier_column * (x_new - x_old)
 \end{lstlisting}\label{cd:basic}
 
-Coordinate Descent has to iterate over every pixels possibly several times. How quickly Coordinate Descent converges in theory is not well understood. Optimizing our function \eqref{cd:clean} falls in the class of quadratic programming, with a strictly convex objective. In this case, Coordinate Descent is guaranteed to converge at least linearly\cite{luo1992convergence}. Sadly, real-world objective functions for image reconstruction are often not strictly convex. Usually our image is constrained to have only positive pixels, which breaks the strictly convex property of our objective. In our environment, the convergence guarantees of Coordinate Descent are not well understood in theory.
+Coordinate Descent has to iterate over every pixels possibly several times. How quickly Coordinate Descent converges in theory is not well understood. Optimizing our function \eqref{cd:clean} falls in the class of quadratic programming, with a strictly convex objective. In this case, Coordinate Descent is guaranteed to converge at least linearly\cite{luo1992convergence}. Sadly, real-world objective functions for image reconstruction are often not strictly convex. Usually our image is constrained to have only positive pixels\cite{mcewen2011compressed}, which breaks the strictly convex property of our objective. In our environment, the convergence guarantees of Coordinate Descent are not well understood in theory.
 
 In practice, Coordinate Descent can be improved with heuristics. Since we assume our image contains only a few stars, a few non-zero pixels, the simple Coordinate Descent algorithm wastes resources checking if the pixel is still zero. A better scheme would be the active set heuristic\cite{friedman2010regularization}: We iterate over every pixel once. Then, for a given number of iterations, we only check the pixels that have changed. This is an improvement, but impossible in the context of MeerKAT. We have too many pixels and Visibilities, iterating over every pixel once is too expensive. 
 
@@ -42,8 +42,7 @@ This is, in principle, how the proof-of-concept algorithm works. Instead of reco
 Although the algorithm produces super-resolved images in section \ref{results}, it is currently not known if it actually converges to the true optimum. Finding all relevant non-zero starlets is left to the heuristic, there may be conditions under which it never includes relevant components. Further convergence analysis was outside the scope of the project. Also note that for this implementation, every time likely non-zero components are searched, it simply uses the non-uniform FFT for the dirty image approximation. This was done for simplicity's sake and can be improved.
 
 
-\subsection{Starlet Transform} \label{cd:starlets}
-First how the starlet transform works, and then we discuss how we can leverage the properties to only use
+\subsection{The Starlet Transform} \label{cd:starlets}
 
 \begin{figure}[h]
 	\centering
@@ -61,49 +60,22 @@ First how the starlet transform works, and then we discuss how we can leverage t
 	\label{cd:starlets:figure}
 \end{figure}
 
-The starlet transform is an Isotropic Undecimated Wavelet Transform (IUWT) based on the starlet wavelet shown in figure \ref{cd:starlets:figure}. The IUWT decomposes an image into multiple layers, each representing parts of the image at different scales. The lower layers contain small structures like point sources, while the higher layers contain extended emissions like hydrogen clouds. The two transforms are shown in equation \eqref{cd:starlet:backwards} and \eqref{cd:starlet:decomposition}. The transformation from starlets to image $x$, shown in \eqref{cd:starlet:backwards}, is a simple addition of all $J$ layers. The transformation from image $x$ to starlet space, shown in \eqref{cd:starlet:decomposition} is done with a multi-scale wavelet decomposition.
+The starlet transform is an Isotropic Undecimated Wavelet Transform (IUWT) with the starlet wavelet shown in figure \ref{cd:starlets:figure}. As such, it defines two operations: The transformation from starlet into image space which is called synthesis, and the inverse which is called decomposition. The starlet space represents an image in multiple layers at different scales, where lower layers contain smaller objects and upper layers the extended emissions. The lowest starlet layer represents the stars, while the upper layer represents the largest hydrogen clouds in the image.
 
-\begin{equation} \label{cd:starlet:backwards}
-\bm{x} = \bm{w_0} + \bm{w_1} + \ldots + \bm{w_{J-1}} + \bm{c_J}
+\begin{equation}\label{cd:starlet:w0}
+\begin{aligned}
+	c_0 &= \bm{x} \star B_0 \\
+	\bm{w_0} &= \bm{x} - c_0
+\end{aligned}
 \end{equation}
 
-\begin{equation}\label{cd:starlet:decomposition}
-	\begin{split}
-		c_0 &= \bm{x} \star S_0 \\
-		\bm{w_0} &= \bm{x} - c_0
-	\end{split}
-	\qquad
-	\begin{split}
-		c_1 &= c_0 \star S_1 \\
-		\bm{w_1} &= c_0 - c_1
-	\end{split}
-	\qquad \ldots \qquad
-	\begin{split}
-		c_{J-1} &= c_{J-2} \star S_{J-1} \\
-		\bm{w_{J-1}} &= c_{J-2} - c_{J-1}
-	\end{split}
-	\qquad
-	\begin{split}
-		\bm{c_J} &= c_{J-1} \star S_J
-	\end{split}
-\end{equation}
-
-Let us look at the multi-scale wavelet decomposition in more detail. $w_i$ represents the starlet components at layer $i$, where $w_0$ contains the smallest structures in the image, and $w_{J-1}$ contains the largest structures. Note that the starlets $w_i$, $c_i$ and the image $x$ all have the same dimensions. $c_i$ contains an ever increasingly blurred version of the image $x$. $c_i$ represents the image convolved with all the scaling functions $S_0, S_1, \ldots, S_i$, where $S_i$ is the scaling function shown in figure \ref{cd:starlets:scaling} of the layer $i$. The scaling function increases in size for each successive layer. 
-
-The decomposition starts iteratively, blurrs the image $x$ with the smallest scaling function $S_0$. 
+Let us look at the lowest starlet layer first, and how it is calculated from the image.
+B, and x.
+x - c0 removes the larger structures from the image, leaving us with the smallest in $w_0$. Does are not the starlet components, $\alpha_0$. However, we can estimate them with a shrink operation.
+we can then convolve $\alpha$ with the starlet function to get back to $w_0$.  In our implementation
 
 
-The last, heavily blurred $c_J$ contains the structures which were too big to represent with the largest starlets, and is the last layer of the decomposition.
-
-This is an over-complete representation. Many different components can explain the same pixel.
-
-!!!!!A trous algorithm, size of the differtent $S_i$
-
-
-
-\subsubsection{Active set heuristic with Starlets}\label{cd:heuristic}
-
-The multi-scale decomposition can be used to estimate the which starlet components $w_i$ are likely to be non-zero. The figure \ref{cd:heuristic:figure} shows an example of the process. Each "pixel" in \ref{cd:heuristic:starlet} represents a starlet at scale 0, i.e. point sources. We can apply the shrink operator on the $w_0$ map, is essentially a parameter estimation. This property is used in the SASIR\cite{girard2015sparse} reconstruction, which uses the Fast Iterative Shrinkage-Thresholding Algorithm (FISTA) for optimization.
+In this case, we use it for estimating likely non-zero $\alpha$. Figure \ref{cd:heuristic:figure} shows an example for the lowest starlet layer.
 
 \begin{figure}[h]
 	\centering
@@ -114,28 +86,70 @@ The multi-scale decomposition can be used to estimate the which starlet componen
 	\end{subfigure}
 	\begin{subfigure}[b]{0.45\linewidth}
 		\includegraphics[width=\linewidth]{./chapters/05.algorithms/sim02/starlets0.png}
-		\caption{Layer $w_0$ of the multi-scale decomposition.}
+		\caption{Layer $w_0$ of the multi-scale decomposition after shrinkage.}
 		\label{cd:heuristic:starlet}
 	\end{subfigure}
 	\caption{Dirty map and $w_0$ starlet layer. The right image shows the probability distribution for point sources in the dirty image.}
 	\label{cd:heuristic:figure}
 \end{figure}
 
-For our purposes, we use the result of the decomposition as a probability distribution. The higher the values of the decomposed $w_i$, the more likely it is to be non-zero.
 
-the X highest values of the $w_i$ decomposition are put into the active set. Only components in the active set get optimized.
+The full decomposition is then just repeated for each intermediate layer $w_i$. \eqref{cd:starlet:decomposition}
+!!!!!A trous algorithm, size of the differtent $S_i$
+The last, heavily blurred $c_J$ contains the structures which were too big to represent with the largest starlets, and is the last layer of the decomposition.
 
-Note however that the different locations are dependent on each other. The image \ref{cd:heuristic:starlet} shows two areas for the two point sources. From the $w_0$ map alone it is hard to know if the center blob is due to a single point source, or multiple point sources in a small area.
+\begin{equation}\label{cd:starlet:decomposition}
+	\begin{split}
+		c_0 &= \bm{x} \star B_0 \\
+		\bm{w_0} &= \bm{x} - c_0
+	\end{split}
+	\qquad
+	\begin{split}
+		c_1 &= c_0 \star B_1 \\
+		\bm{w_1} &= c_0 - c_1
+	\end{split}
+	\qquad \ldots \qquad
+	\begin{split}
+		c_{J-1} &= c_{J-2} \star B_{J-1} \\
+		\bm{w_{J-1}} &= c_{J-2} - c_{J-1}
+	\end{split}
+	\qquad
+	\begin{split}
+		\bm{c_J} &= c_{J-1} \star B_J
+	\end{split}
+\end{equation}
+
+The synthesis transform however is easy.
+
+\begin{equation} \label{cd:starlet:backwards}
+\bm{x} = \bm{w_0} + \bm{w_1} + \ldots + \bm{w_{J-1}} + \bm{c_J}
+\end{equation}
+
+The starlet decomposition is over-complete.
+
+The difference between $\alpha$ and $w_i$ is not always important. For the SASIR algorithm,  for FISTA, which is how \cite{girard2015sparse} used the starlet transform for regularization, shrinkage on $w_i$ without convolution.
+
+For FISTA, this is irrelevant, but for Coordinate descent it is important. note on the shrinkage
+
+
+the original starlet people \cite{starck2015starlet} does not differentiate between $\alpha$ and $w_i$, and neither did \cite{girard2015sparse}. For the Coordinate Descent implementation it is relevant for handling the positivity constraint.
+
+\subsubsection{Handling the positivity constraint}
+As mentioned in section \ref{cd}, image reconstruction algorithms for radio astronomy typically constrain the image to be non-negative\cite{mcewen2011compressed}.
 
 
 \subsection{Coordinate Descent Implementation}
+We have the starlet regularization, let us put it into an algorithm. Start with the 
+
+\begin{equation}\label{cd:starlet}
+\underset{\alpha}{minimize} \: \left \| V - FD\alpha \right \|_2^2 + \lambda \left \| \alpha \right \|_1 \\
+\end{equation}
+
 Proof of concept implementation. There are many ways to improve the efficiency and the convergence speed. It is here to show  the general if it is possible of the approach and if we can truly only calculate a subset of $F^{-1}$ columns.
 
 The objective function \eqref{cd:starlet} minimizes the starlet components $\alpha$. This objective leads again to a parabola in the one dimensional case, and we can analytically find the optimum for a single component when all others are fixed. 
 
-\begin{equation}\label{cd:starlet}
-\underset{\alpha}{minimize} \: \left \| V - F^{-1}D\alpha \right \|_2^2 + \lambda \left \| \alpha \right \|_1 \\
-\end{equation}
+
 
 There are still a few problems to solve, like how to handle the matrix product $F^{-1}D$, 
 With the active set heuristic, we iterate over a limited number of starlet components at a time. 
@@ -150,7 +164,7 @@ How to iterate over the image in detail.
 
 
 
-\subsubsection{Iteration scheme}
+\subsection{Iteration scheme}
 Many ways to iterate over the image. A simple scheme was used here. 
 
 Active set heuristic, find the starlets which are 

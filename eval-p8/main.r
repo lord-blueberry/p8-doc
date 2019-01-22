@@ -129,7 +129,10 @@ png("./points/cd_points.png",
     height = 4.0,
     units = "in",
     res = 400)
-WriteMap2(cd, at=seq(min(cd), max(cd), length.out=200), scales)
+cd_copy <- cd
+cd_copy[cd_copy > 0.02] = 0.02 
+colorbreaks <- seq(min(cd_copy), max(cd_copy), length.out=200)
+WriteMap2(cd_copy, at=colorbreaks, scales)
 dev.off()
 
 
