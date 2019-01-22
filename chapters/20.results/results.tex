@@ -1,10 +1,15 @@
-\section{Coordinate Descent reconstructions on Simulated Data}\label{results}
-Here we test the Coordinate Descent algorithm on two simulated datasets and show we indeed only need a subset of the Fourier Transform Matrix' columns $F^{-1}$. The datasets contain idealized MeerKAT observations. Compared to the real world, the two simulated datasets contain few Visibilities and not representative of the real data volume. Also, more realistic simulations which contain pointing-, calibration-, and thermal noise are out of scope for this project. The simulations are used to isolate the two fundamental issues in radio interferometer image reconstruction: Non-uniform sampling and incomplete measurements.
+\section{Test on Simulated Data}\label{results}
+In this section, we test our new approach with Coordinate Descent on simulated MeerKAT data. We show that our approach does not need to calculate the whole Fourier Transform matrix $F$. Instead, we use a heuristic to only use relevant columns. As mentioned in section \ref{cd}, it is unknown if our approach will converge to the true optimum. Nevertheless, we compare our results with CASA's CLEAN implementation, and demonstrate super-resolution performance of Coordinate descent together with accurate total flux modelling.
 
-We compare the reconstruction quality to CASA's CLEAN implementation. Coordinate Descent was able to produce a super-resolved version of the simulated measurements, reconstructing point sources above the accuracy limit of MeerKAT.
+The two simulated datasets contains idealized MeerKAT observations. Compared to the real world, the two simulated datasets contain few Visibilities and not representative of the real data volume. Also, more realistic simulations which contain pointing-, calibration-, and thermal noise are out of scope for this project. The simulations are used to isolate the two fundamental issues in radio interferometer image reconstruction: Non-uniform sampling and incomplete measurements.
 
 \subsection{Super-resolution of two point sources}
-The first simulated observation contains two non-zero pixels, i.e. point sources, with intensity of 2.5 and 1.4 Jansky/Beam, with a resolution of 0.5 arc-seconds per pixel. The resolution of the image is therefore higher than MeerKAT. An ideal compressed sensing reconstruction would create an image where all pixels are zero except for the two point sources. Figure \ref{results:points} shows the reconstructed images of CLEAN and Coordinate Descent.
+The first simulated observation contains two non-zero pixels, i.e. point sources, with intensity of 2.5 and 1.4 Jansky/Beam each. The image has a size of $256^2$ at a resolution of 0.5 arc-seconds per pixel. The 
+
+, at a resolution of 0.5 arc-seconds per pixel.
+
+
+ The resolution of the image is therefore higher than MeerKAT. An ideal compressed sensing reconstruction would create an image where all pixels are zero except for the two point sources. Figure \ref{results:points} shows the reconstructed images of CLEAN and Coordinate Descent.
 
 CLEAN reconstructs the image \ref{results:points:tclean} at the accuracy limit of the instrument. It essentially reconstructs a blurred version of the observed image, where the blurring represents the accuracy of the instrument. With compressed sensing, we aim to reconstruct a de-blurred image. The image \ref{results:points:cd} shows the Coordinate Descent reconstruction, which creates two much narrower peaks than CLEAN. This is an example of super resolution. Coordinate Descent located structures smaller than the accuracy of MeerKAT would allow.
 
@@ -49,7 +54,7 @@ The last issue it has that the flux is still not correct. It is close and seems 
 Look at the flux in a more complex environment
 
 
-\subsection{Flux reconstruction of mixed sources}
+\subsection{Super resolution of mixed sources}
 
 Dataset of three gaussian extended emissions and sixteen point sources at varying intensities.
 
