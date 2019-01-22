@@ -37,19 +37,9 @@ In practice, Coordinate Descent can be improved with heuristics. Since we assume
 
 However, it turns out we do not need to if we imitate CLEAN: For CLEAN, the non-uniform FFT approximates the 'dirty' image, which is corrupted by the effects of incomplete measurements. CLEAN then subtracts a fraction of the PSF at the largest pixel value. In other words, the largest pixel value in the dirty image is the most likely non-zero pixel. We can use the dirty image approximation for a 'probability distribution' of non-zero pixels. It does not need to be accurate, since the actual reconstruction is done with the direct Fourier Transform.
 
-This is, in principle, how this proof-of-concept algorithm works. Instead of reconstructing an image, it reconstructs in the starlet space. Instead of using the dirty image approximation, it uses the starlet transform to find likely non-zero components. Coordinate Descent is used to optimize single starlets. A proof-of-concept version of this algorithm was developed in python.
+This is, in principle, how the proof-of-concept algorithm works. Instead of reconstructing an image, it reconstructs in the starlet space. It uses the starlet transform of the dirty image to find likely non-zero components. Coordinate Descent is used to optimize single starlets. A proof-of-concept version of this algorithm was developed in python.
 
-Although the algorithm produces super-resolved images in section \ref{results}, it is currently not known if it actually converges to the true optimum. Finding all relevant non-zero starlets is left to the heuristic, there may be conditions under which it never includes relevant components. Further analysis of the convergence was outside the scope of the project.
-
- does not find  
-
-How accurate the dirty image has to be was not investigated in this project.
-
-Unclear, if it just 
-
-
-
-
+Although the algorithm produces super-resolved images in section \ref{results}, it is currently not known if it actually converges to the true optimum. Finding all relevant non-zero starlets is left to the heuristic, there may be conditions under which it never includes relevant components. Further convergence analysis was outside the scope of the project. Also note that for this implementation, every time likely non-zero components are searched, it simply uses the non-uniform FFT for the dirty image approximation. This was done for simplicity's sake and can be improved.
 
 
 \subsection{Starlet Transform} \label{cd:starlets}
