@@ -1,4 +1,43 @@
-\section{Compressed Sensing with direct Fourier Transform and Coordinate Descent}\label{cd}
+\section{Compressed Sensing with direct Fourier Transform\\ and Coordinate Descent}\label{cd}
+Instead of using the Major Cycle architecture and approximate the non-uniform FFT approximation, we directly use the Fourier transform matrix $F$. We show the principle of our approach and of Compressed Sensing reconstructions in general at a simplified example. Let us minimize the objective function \eqref{cd:clean}.
+
+\begin{equation}\label{cd:clean}
+\underset{x}{minimize} \: \left \| V - Fx \right \|_2^2 + \lambda \left \| x \right \|_1 \\
+\end{equation}
+
+The data term $\left \| V - F^{-1}x \right \|_2^2$ forces our image to be similar to the measurements, and the regularization term $\left \| x \right \|_1$ tells us how likely the current reconstruction is to be the true image. With our term we assume our image contains only a limited number of non-zero pixels, or that it only contains a few stars, which fill only a single pixel. The parameter $\lambda$ weights the trade-off between the data and the regularization term. 
+
+Note in the one dimensional case, where we only have one pixel, the data term of the objective \eqref{cd:clean} forms a parabola and the regularization term a shrink operation\footnote{The shrink operation reduces the magnitude of the pixel by $\lambda$. For example: Pixel $x = -12.4$, $\lambda = 0.6$. The new pixel value after shrinkage follows as $shrink(-12.4, 0.6) = -11.9$}. The optimum for a single pixel can be calculated by solving for the minimum of the parabola first, followed by a shrink operation. With Coordinate Descent we can exploit this property. We fix all pixels except for one and iteratively find the current minimum of each pixel. Now when we continually iterate over all pixels several times, we eventually converge to a solution. The full Coordinate Descent algorithm can be implemented in a few lines of python code:
+
+\begin{lstlisting} 
+def coordinate_descent(V_residual, x, lambda, max_iter):
+	for k in range(0, max_iter):
+		for i in pixels_row:
+			for j in pixels_column:
+				x_old = x[i, j]
+				fourier_column = calculate_fourier_transform(i, j)
+				fr = real(fourier_column)
+				fi = imag(fourier_column)
+				rr = real(V_residual)
+				ri = imag(V_residual)
+				
+				#find apex
+				a = sum(fr**2 + 2*fr*fi + fi**2)
+				b = sum(fr*rr + fr*ri + fi*rr + fi*ri)
+				x_new = b / a + x_old
+				
+				x_new = shrink(x_new, lambda)
+				x[i, j] = x_new
+				V_residual = V_residual - fourier_column * (x_new - x_old)
+\end{lstlisting}\label{cd:basic}
+
+Coordinate Descent has to iterate over every pixels possibly several times. How quickly Coordinate Descent converges in theory is not well understood. Optimizing our function \eqref{cd:clean} falls in the class of quadratic programming, with a strictly convex objective. In this case, Coordinate Descent is guaranteed to converge at least linearly\cite{luo1992convergence}. Sadly, real-world objective functions for image reconstruction are often not strictly convex. Usually our image is constrained to have only positive pixels, which breaks the strictly convex property of our objective. In our environment, the convergence guarantees of Coordinate Descent are not well understood in theory.
+
+In practice, Coordinate Descent can be improved with heuristics. Since we assume our image contains only a few stars, a few non-zero pixels, the simple Coordinate Descent algorithm wastes resources checking if the pixel is still zero. A better scheme would be the active set heuristic: We iterate over every pixel once. Then, for a given number of iterations, we only check the pixels that have changed. This is an improvement, but impossible in the context of MeerKAT. We have too many pixels and Visibilities, iterating over every pixel once is too expensive. 
+
+However, it turns out we do not need to if we imitate CLEAN. For CLEAN, the non-uniform FFT approximates the 'dirty' image, which is corrupted by the effects of incomplete measurements. Then, it subtracts a fraction of the PSF at the largest pixel value. In other words, the largest pixel value in the dirty image is the most likely non-zero pixel.
+
+
 
 
 simple implementation using the L1 norm. But most of the pixels will be zero, so it does not need to iterate over them.
@@ -31,36 +70,18 @@ The idea behind compressed sensing is we use prior information about the image, 
 The regularization is responsible for an accurate reconstruction. In this work, two regularizations are used. The L1 pixel regularization is used to demonstrate a simple version of the coordinate descent algorithm. For the actual algorithm starlet regularization is used. Starlets have been used as regularization for the LOFAR interferometer\cite{girard2015sparse}, which was able to produce super-resolved reconstructions.
 
 First, let us look at the coordinate descent algorithm in its simplest form, and discuss its properties. we want to minimize the objective \eqref{cd:clean}, where the data term $\left \| V - F^{-1}x \right \|_2^2$ forces the image to be close to the Visibilities $V$, and the regularization term $\left \| x \right \|_1$ forces the image to have as few non-zero pixels as possible. The parameter $\lambda$ represents our trade-off between reconstruction accuracy and regularization. 
- 
-\begin{equation}\label{cd:clean}
-	\underset{x}{minimize} \: \left \| V - F^{-1}x \right \|_2^2 + \lambda \left \| x \right \|_1 \\
-\end{equation}
 
-The objective function \eqref{cd:clean} has a property, which we can exploit with Coordinate Descent: The optimum for a single pixel, if we keep all others fixed, turns out to be a parabola. The optimum for a single pixel of \eqref{cd:clean} is simply finding the apex of a parabola, followed by a shrink operation\footnote{The shrink operation reduces the magnitude of the pixel by $\lambda$. For example: Pixel $x = -12.4$, $\lambda = 0.6$. The new pixel value after shrinkage follows as $shrink(-12.4, 0.6) = -11.9$}. Sadly, the pixels are not independent of each other, and we need multiple iterations over all pixels to converge. This leads to the following reconstruction algorithm, written in python code:
 
-\begin{lstlisting} 
-def coordinate_descent(V_residual, x, lambda, max_iter):
-	for k in range(0, max_iter):
-		for i in pixels_row:
-			for j in pixels_column:
-				x_old = x[i, j]
-				fourier_column = calculate_fourier_transform(i, j)
-				fr = real(fourier_column)
-				fi = imag(fourier_column)
-				rr = real(V_residual)
-				ri = imag(V_residual)
-				
-				#find apex
-				a = sum(fr**2 + 2*fr*fi + fi**2)
-				b = sum(fr*rr + fr*ri + fi*rr + fi*ri)
-				x_new = b / a + x_old
-				
-				x_new = shrink(x_new, lambda)
-				x[i, j] = x_new
-				V_residual = V_residual - fourier_column * (x_new - x_old)
-\end{lstlisting}\label{cd:basic}
 
-The simple version of coordinate descent converges to a solution which is similar to CLEAN. The convergence rate of coordinate descent is not well understood. Our image reconstruction problem falls in the class of quadratic programming, in coordinate descent converges at least linearly\cite{luo1992convergence}. (Strict convex function, may not be true in this section. This a lose bound given by the theory). In practice, the convergence rate can be sped up with heuristics like active set\cite{activeset} and $\lambda$\cite{lambda}. Furthermore, coordinate descent is robust, even when the residual vector is only approximated, which is useful for distributing the algorithm.
+The objective function \eqref{cd:clean} has a property, which we can exploit with Coordinate Descent: The optimum for a single pixel, if we keep all others fixed, turns out to be a parabola. The optimum for a single pixel of \eqref{cd:clean} is simply finding the apex of a parabola,  . Sadly, the pixels are not independent of each other, and we need multiple iterations over all pixels to converge. This leads to the following reconstruction algorithm, written in python code:
+
+
+
+
+
+
+
+The simple version of coordinate descent converges to a solution which is similar to CLEAN. . (Strict convex function, may not be true in this section. This a lose bound given by the theory). In practice, the convergence rate can be sped up with heuristics like active set\cite{activeset} and $\lambda$\cite{lambda}. Furthermore, coordinate descent is robust, even when the residual vector is only approximated, which is useful for distributing the algorithm.
 
 The simple approach calculates the whole Fourier Transform Matrix $F^{-1}$ explicitly. The upside is that we do an exact $w$-term correction. The downside is $F^{-1}$ is too large to keep in memory, and too expensive to calculate on the fly for the scale of MeerKAT reconstructions. 
 

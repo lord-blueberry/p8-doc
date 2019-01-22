@@ -12,7 +12,8 @@ WriteMap2 <- function(x, at, scales, zlog=FALSE, xunits="arc seconds") {
             at = at,
             margin=FALSE,
             zscaleLog = zlog,
-            col.regions=colorRampPalette(brewer.pal(n =11, name="RdYlGn")),
+            col.regions= colorRampPalette(c("gray40","royalblue4", "dodgerblue4", "darkgreen", "darkolivegreen4" ,"darkgoldenrod", "orchid", "plum", "lightblue","lightcyan", "white"), bias = 1),
+            #col.regions=colorRampPalette(brewer.pal(n =11, name="RdYlGn")),
             scales=list(x=scales, y=scales),
             xlab=xunits,
             ylab=""

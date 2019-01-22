@@ -101,9 +101,18 @@ Intuitively, the major cycle reduces the costs, if we have a lot fewer Pixels th
 
 As it is, our approach does not lead to a runtime cost reduction. However, our apporach is too accurate, we calculate the fourier transform in the area of mere floating-point inaccuracies. Not necessary, the instrument is more inaccurate than that. The Major Cycle exploits this with the non-uniform FFT approximation. Currently, we do it precisely.
 
-Furthermore, we may not need all the Visibilities. Redundant information, can reconstruct the image with a subset of Visibilities.
+Furthermore, we may not need all the Visibilities. Redundant information, can reconstruct the image with a subset of Visibilities. HOpefully self-calibration does not kill this idea.
 
-With both 
+With both, maybe there is a way to use this approach. It might be end up easier to distribute, because we do not need
+
+Approach with other priors possible.
+
+
+
+
+
+
+
 
 
 
