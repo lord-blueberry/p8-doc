@@ -106,7 +106,6 @@ names <- c("Ground Truth", "CLEAN", "Coordinate Descent")
 interpolation <- 10000
 df <- calcLineDF(matrices, names, p0, p1, interpolation)
 df$points <- df$points / interpolation* 0.5 * 256
-
 png(paste("./points/contour_points", ".png",sep=""),
     width = 10.0,
     height = 4.0,
@@ -123,7 +122,6 @@ print(ggplot(data = df, aes(x=points, y=values, colour=Legend)) +
               legend.title=element_text(size=13)))
 dev.off()
 
-
 scales = list(at=c(1, 65, 129, 197, 255))
 img.out("./points/tclean_points.png")
 WriteMap2(tclean, at=seq(min(tclean), max(tclean), length.out=200), scales)
@@ -133,6 +131,14 @@ cd_copy <- cd
 cd_copy[cd_copy > 0.02] = 0.02 
 colorbreaks <- seq(min(cd_copy), max(cd_copy), length.out=200)
 WriteMap2(cd_copy, at=colorbreaks, scales)
+dev.off()
+png("./points/skymodel.png",
+    width = 4.0,
+    height = 4.0,
+    units = "in",
+    res = 200)
+colorbreaks <- seq(min(skymodel), max(skymodel), length.out=200)
+WriteMap2(skymodel, at=colorbreaks, scales)
 dev.off()
 
 
@@ -207,8 +213,7 @@ print(ggplot(data = df, aes(x=df$points, y=df$values, colour=Legend)) +
         geom_polygon(aes(fill=Legend), alpha=0.1) +
         xlab("arc seconds") +
         ylab("Jansky/beam") +
-        theme(legend.position="bottom",
-              legend.text=element_text(size=11), 
+        theme(legend.text=element_text(size=11), 
               legend.title=element_text(size=13)))
 dev.off()
 
@@ -247,8 +252,7 @@ print(ggplot(data = df, aes(x=df$points, y=df$values, colour=Legend)) +
         geom_polygon(aes(fill=Legend), alpha=0.1) +
         xlab("arc seconds") +
         ylab("Jansky/beam") +
-        theme(legend.position="bottom",
-              legend.text=element_text(size=11), 
+        theme(legend.text=element_text(size=11), 
               legend.title=element_text(size=13)))
 dev.off()
 png("./mixed/mixed_cut_model2.png",

@@ -89,6 +89,7 @@ Increasing the number of pixels is only useful to a limit. Decreasing the number
 
 Indeed, the direct Fourier transform may not be cost effective partly because it does not use approximations. Our architecture calculates the Fourier transform up to the limit of floating-point precision. The Major Cycle on the other hand, uses the non-uniform FFT approximation and stops at the noise limit of the measurements. For our new architecture, introducing back approximations may be the key to reduce runtime costs.
 
+Major Cycle approximations are hard to distribute on many machines. It is still an open problem. This architecture without approximations has potential to be distributed. However it is too expensive as is to be viable.
 Coordinate descent is easy to distribute, but currently just too expensive. 
 Currently, our algorithm and architecture
 Distribution
