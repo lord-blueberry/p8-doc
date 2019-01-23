@@ -30,17 +30,14 @@ terabytes of measurements. Large image size 32k squared are the obvious problems
 
 
 \subsection{Wide Field of View Imaging and the third Fourier Component} \label{meerkat:wof}
-The measurement equation of radio interferometers contains a third fourier component, the $w$ component. This leads to the following wide field of view measurement equation \eqref{meerkat:ftsphere}.
+In wide field of view imaging, the simplifications we could make from the basic measurement equation \eqref{intro:basic} do not hold. The Visibility space of an interferometer actually has a third $w$-component. This leads us to the wide field of view measurement equation \eqref{meerkat:ftsphere}
 
 \begin{equation}\label{meerkat:ftsphere}
 V(u, v, w) = \int\int \frac{I(x, y)}{\sqrt{1 - x^2 - y ^2}} e^{2 \pi i [ux+vy+ w(\sqrt{1 - x^2 - y ^2} - 1)]} \: dx \: dy
 \end{equation}
 
-For small field of view observations, the term $\sqrt{1 - x^2 - y ^2} \approx 1$, and we arrive at the basic measurement equation \eqref{intro:basic}. For small field of view, the $w$ term can be ignored, and the image can be calculated with the inverse two dimensional non-uniform FFT. For wide field of view measurements, the $w$ term breaks the two dimensional Fourier relationship. The measurement equation \eqref{meerkat:ftsphere} can still be inverted, but the resulting algorithm has a quadratic runtime and is not feasible in practice.
+For a small field of view, the term  $\sqrt{1 - x^2 - y ^2} \approx 1$, which simplifies to our original \eqref{intro:basic}, we can ignore the $w$-term and use the two dimensional Fourier transform. For wide field of view however, the $w$-component cannot be ignored. The figure \ref{meerkat:wcorrection} shows the effect of ignoring $w$. The image gets continually more distorted away from the center. Emissions at the edges of the image get "torn" apart.
 
-Note that the image $I(x,y)$ of the wide field of view the measurement equation \eqref{meerkat:ftsphere} is still two dimensional, even though the Visibilities $V(u, v, w)$ have three. The relationship between Visibilities and image is neither the two, nor the three dimensional Fourier transform. The Visibilities represents an image on the celestial sphere. This means the image is naturally curved, and the $w$ component represents the distortion introduced by the curvature.
-
-One can simply ignore the $w$ component, ignore the curvature and use the two dimensional Fourier Transform. The image then does not lie on a sphere, but on a tangent plane. At the tangent point (where $\sqrt{1 - x^2 - y ^2} \approx 1$, typically the image center in radio astronomy) the two reconstructions are identical. But the distortion gets more severe away from the tangent point. The image \ref{meerkat:2dfft} shows a tangent plane reconstruction over a large field of view, while \ref{meerkat:wcorrection} shows the same reconstruction but $w$ corrected. Close to the tangent point, the image center, the reconstructions both locate the point sources. At the image edges, the distortion gets severe enough to decorrelate the Visibilities and the point sources get 'torn' apart.
 
 \begin{figure}[h]
 	\centering
@@ -58,14 +55,13 @@ One can simply ignore the $w$ component, ignore the curvature and use the two di
 	\label{meerkat:wdistortion}
 \end{figure}
 
-Image reconstructions for MeerKAT need to account for the $w$ component efficiently. In the Major Cycle framework, this is part of the non-uniform FFT. The first approach was to image facets, creating several tangent planes for the celestial sphere. A more efficient approach came in the form of the $w$-projection algorithm\cite{cornwell2008noncoplanar}. It uses convolution on the Visibilities during the non-uniform FFT. MeerKAT currently uses the $w$-stacking algorithm, which more efficient than $w$-projection on MeerKAT's data volume and is simple to distribute.
+We find the reason for why it distorts the edges, if we look at the measurement equation \eqref{meerkat:ftsphere} in detail. We see that the image $I(x,y)$ still two dimensional, even with a three dimensions in Visibility space. The observed image of the interferometer is not on a flat plane, but on a curved surface(hence the $w$-component). More precisely, the instrument looks at the inside wall of the celestial sphere. The two dimensional Fourier transform approximates the sphere with a flat plane, where the tangent point is typically the image center. The further away we move from the tangent point, the more distortion gets added by the curvature, represented by the term $\sqrt{1 - x^2 - y ^2}$. The curve adds a phase shift the further away we move from the tangent point. If the reconstruction algorithm ignores the $w$-component for a wide field of view, the phase-shift gets severe enough to decorrelate the Visibilities, "tearing" apart the image structures of \eqref{meerkat}.
+
+In the context of MeerKAT, the reconstruction algorithm has to handle the $w$-term in an efficient manner. The third Fourier breaks the two dimensional relationship between image and Visibilities, which keeps us from using the non-uniform FFT. In the Major Cycle architecture, $w$-stacking is the state-of-the-art way of correcting for the $w$-component efficiently. Since this project explores different architecture, we may need to find another way of correcting for the $w$-term.
 
 
-This is still an active field of research. The latest work as of time of writing is a hybrid approach\cite{pratley2018fast} with both $w$-stacking and $w$-projection. As of time of writing, it was not yet adapted.
-
-
-\subsubsection{State of the art: $w$-stacking algorithm}
-The $w$-stacking algorithm is used in the WSCLEAN implementation, which is the current go to reconstruction algorithm for MeerKAT data.
+\subsubsection{State of the art: $w$-stacking algorithm and WSCLEAN}
+$w$-stacking\cite{pratley2018fast} is the current state-of-the-art approach for $w$-corrections. It is implemented in the WSCLEAN software package and is the current go-to algorithm for MeerKAT reconstructions. With $w$-stacking, we can again use the two dimensional non-uniform FFT for efficient transformations between image and Visibilities.
 
 \begin{wrapfigure}{r}{0.7\textwidth}
 	\centering
@@ -76,7 +72,13 @@ The $w$-stacking algorithm is used in the WSCLEAN implementation, which is the c
 	\vspace{-10pt}
 \end{wrapfigure}
 
-It replaces the non-uniform FFT operation from figure \ref{intro:major} with the $w$-stacking algorithm, shown in figure \ref{meerkat:w-stacks}. The Visibilities are grouped by their $w$-component into stacks. For each stack, the $w$-correction is performed for the center $w$-component. Then, the the non-uniform FFT is used to calculate a dirty image for each stack. Summing over all stacked dirty images gives us the final dirty image.
+$w$-stacking, shown in figure \ref{meerkat:w-stacks} replaces the non-uniform FFT operation from figure \ref{intro:major}. It groups the Visibilities with similar $w$-term into the same layer. Multiple layers are then stacked and transformed independently with the non-uniform FFT. For each stack, the $w$-correction is performed for the center $w$-component. The last step is summing over all stacked dirty images, giving us the final dirty image. At this point a deconvolution algorithm like CLEAN can deconvolve the dirty image, which is $w$-corrected. 
+
+$w$-stacking approximates the $w$-correction with the number of stacks it choses. If it uses as many stacks as Visibilities, we end up with an exact $w$-corrections. In pracice, many Visibilities have a similar $w$-term. Grouping them together in a stack is an efficient way of approximating the $w$-correction.
+
+Backwards pass
+
+
 
 If the number of stacks is equal the number of Visibilities, $w$-stacking performs an exact $w$-correction. In practice, the number of stacks is far smaller than the number of Visibilities, and each stack does one $w$-correction for similar Visibilities. 
 
