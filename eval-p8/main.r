@@ -92,6 +92,8 @@ asinh <- scales::trans_new(name = 'asinh', transform = function(x) asinh(x*1000)
 folder <- "./sim01/"
 tclean <- read(paste(folder, "tclean.csv", sep=""), 256, 0.5) - read(paste(folder,"tclean.residual.csv", sep=""), 256, 0.5)
 cd <- read(paste(folder, "image0", sep=""), 256, 0.5)
+dirty <-read(paste(folder, "dirty", sep=""), 256, 0.5)
+starlet0 <-read(paste(folder, "starlets0", sep=""), 256, 0.5)
 
 skymodel <- t(read(paste(folder,"skymodel.csv", sep=""), 512, 0.5))
 skymodel <- skymodel[129:384, 129:384]
@@ -139,6 +141,14 @@ png("./points/skymodel.png",
     res = 200)
 colorbreaks <- seq(min(skymodel), max(skymodel), length.out=200)
 WriteMap2(skymodel, at=colorbreaks, scales)
+dev.off()
+img.out("./points/dirty.png")
+colorbreaks <- seq(min(dirty), max(dirty), length.out=200)
+WriteMap2(dirty, at=colorbreaks, scales)
+dev.off()
+img.out("./points/starlet0.png")
+colorbreaks <- seq(min(starlet0), max(starlet0), length.out=200)
+WriteMap2(starlet0, at=colorbreaks, scales)
 dev.off()
 
 
@@ -248,6 +258,7 @@ p0 <- c(544-271, 586-251)
 p1 <- c(531-271, 501-251)
 #p1 <- c(513-271, 551-251)
 df <- calcLineDF(matrices, names, p0, p1, interpolation)
+df$points <- resol*252 + df$points / interpolation* resol * 512
 png("./mixed/mixed_cut2.png",
     width = 8.0,
     height = 4.0,
