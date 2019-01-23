@@ -4,14 +4,7 @@ In this section, we test our new approach with Coordinate Descent on simulated M
 The two simulated datasets contains idealized MeerKAT observations. Compared to the real world, the two simulated datasets contain few Visibilities and not representative of the real data volume. Also, more realistic simulations which contain pointing-, calibration-, and thermal noise are out of scope for this project. The simulations are used to isolate the two fundamental issues in radio interferometer image reconstruction: Non-uniform sampling and incomplete measurements.
 
 \subsection{Super-resolution of two point sources}
-The first simulated observation contains two non-zero pixels, i.e. point sources, with intensity of 2.5 and 1.4 Jansky/Beam each. The image has a size of $256^2$ at a resolution of 0.5 arc-seconds per pixel. The 
-
-, at a resolution of 0.5 arc-seconds per pixel.
-
-
- The resolution of the image is therefore higher than MeerKAT. An ideal compressed sensing reconstruction would create an image where all pixels are zero except for the two point sources. Figure \ref{results:points} shows the reconstructed images of CLEAN and Coordinate Descent.
-
-CLEAN reconstructs the image \ref{results:points:tclean} at the accuracy limit of the instrument. It essentially reconstructs a blurred version of the observed image, where the blurring represents the accuracy of the instrument. With compressed sensing, we aim to reconstruct a de-blurred image. The image \ref{results:points:cd} shows the Coordinate Descent reconstruction, which creates two much narrower peaks than CLEAN. This is an example of super resolution. Coordinate Descent located structures smaller than the accuracy of MeerKAT would allow.
+The first simulated observation contains two non-zero pixels, i.e. point sources, with intensity of 2.5 and 1.4 Jansky/Beam. The image has a size of $256^2$ at a resolution of 0.5 arc-seconds per pixel. The integral, the total Flux of the image, is 3.9 Jansky/beam.
 
 \begin{figure}[h]
 	\centering
@@ -26,11 +19,13 @@ CLEAN reconstructs the image \ref{results:points:tclean} at the accuracy limit o
 		\label{results:points:cd}
 	\end{subfigure}
 	
-	\caption{Image reconstruction of two point sources.}
+	\caption{Image reconstruction of two simulated point sources.}
 	\label{results:points}
 \end{figure}
 
-The total Flux of the image, the sum of all emissions, is 3.9 Jansky/Beam in this simulation. CLEAN reconstructs the right peak intensities, both ending up at 2.5 and 1.4 respectively. Since CLEAN reconstructs a blurred version, the total Flux of the image is off by magnitudes. Figure \ref{results:points:contour} compares the intensity profile of CLEAN, Coordinate Descent and the Ground Truth. Note the logarithmic y scale. For a correct total flux, the integrals should be equal. 
+The figure \ref{results:points} shows the CLEAN and the Coordinate Descent reconstruction. CLEAN reconstructs the image \ref{results:points:tclean} at the accuracy limit of the instrument. It essentially reconstructs a blurred version of the observed image, where the blurring represents the accuracy of the instrument. With compressed sensing, we aim to reconstruct the de-blurred image, increasing the effective accuracy of the instrument. 
+
+Coordinate Descent in image \ref{results:points:cd} shows a super-resolved reconstruction of the two point sources. It reconstructs two narrow peaks surrounded,by a low-intensity Gaussian emission. Also, the total Flux of image \ref{results:points:cd} results in 3.92 Jansky/beam. The total flux of the CLEAN reconstruction \ref{results:points:tclean} overshoots the 3.9 figure by a factor of 1400. This gets obvious when we compare the intensity profile of CLEAN, Coordinate Descent and the ground truth in figure \ref{results:points:contour}.
 
 \begin{figure}[h]
 	\centering
@@ -38,6 +33,21 @@ The total Flux of the image, the sum of all emissions, is 3.9 Jansky/Beam in thi
 	\caption{Intensity profile of the two point sources.}
 	\label{results:points:contour}
 \end{figure}
+
+Note that Coordinate Descent in figure \ref{results:points:contour} seems to have both point sources shifted by approximately a pixel. It looks suspiciously like an off-by one error. Sadly in the timeframe of this project, no error was found or an explanation for this behaviour.
+
+, at a resolution of 0.5 arc-seconds per pixel.
+
+
+ The resolution of the image is therefore higher than MeerKAT. An ideal compressed sensing reconstruction would create an image where all pixels are zero except for the two point sources. Figure \ref{results:points} shows the reconstructed images of CLEAN and Coordinate Descent.
+
+ The image \ref{results:points:cd} shows the Coordinate Descent reconstruction, which creates two much narrower peaks than CLEAN. This is an example of super resolution. Coordinate Descent located structures smaller than the accuracy of MeerKAT would allow.
+
+
+
+The total Flux of the image, the sum of all emissions, is 3.9 Jansky/Beam in this simulation. CLEAN reconstructs the right peak intensities, both ending up at 2.5 and 1.4 respectively. Since CLEAN reconstructs a blurred version, the total Flux of the image is off by magnitudes. Figure \ref{results:points:contour} compares the intensity profile of CLEAN, Coordinate Descent and the Ground Truth. Note the logarithmic y scale. For a correct total flux, the integrals should be equal. 
+
+
 
 In the contour plot, the Coordinate Descents narrow contours become apparent.
 

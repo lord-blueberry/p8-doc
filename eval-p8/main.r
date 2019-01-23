@@ -163,9 +163,10 @@ png("./mixed/mixed_cd.png",
     height = 5.0,
     units = "in",
     res = 400)
-colorbreaks <- seq(min(cd), 5, length.out=200)
-colorbreaks <- c(colorbreaks, max(cd))
-print(WriteMap2(cd, at=colorbreaks, scales, xunits="arc minutes"))
+cd_copy <- cd
+cd_copy[cd_copy > 1] = 1
+colorbreaks <- seq(min(cd_copy), max(cd_copy), length.out=200)
+print(WriteMap2(cd_copy, at=colorbreaks, scales, xunits="arc minutes"))
 dev.off()
 
 pix = 256
@@ -188,9 +189,10 @@ png("./mixed/mixed_cut_model.png",
     height = 5.0,
     units = "in",
     res = 400)
-colorbreaks <- seq(min(cut.model), 0.6, length.out=200)
-colorbreaks <- c(colorbreaks, max(cut.model))
-print(WriteMap2(cut.model, at=colorbreaks, scales, xunits="arc minutes"))
+cut.model_copy <- cut.model
+cut.model_copy[cut.model_copy > 0.6] = 0.6
+colorbreaks <- seq(min(cut.model_copy), max(cut.model_copy), length.out=200)
+print(WriteMap2(cut.model_copy, at=colorbreaks, scales, xunits="arc minutes"))
 dev.off()
 
 matrices <- list(cut.model, cut.tclean, cut.cd)
@@ -210,7 +212,8 @@ print(ggplot(data = df, aes(x=df$points, y=df$values, colour=Legend)) +
         geom_polygon(aes(fill=Legend), alpha=0.1) +
         xlab("arc seconds") +
         ylab("Jansky/beam") +
-        theme(legend.text=element_text(size=11), 
+        theme(legend.position="bottom",
+              legend.text=element_text(size=11), 
               legend.title=element_text(size=13)))
 dev.off()
 
@@ -246,15 +249,23 @@ png("./mixed/mixed_cut2.png",
 print(ggplot(data = df, aes(x=df$points, y=df$values, colour=df$Legend)) + 
         geom_line() +
         scale_y_continuous(trans=asinh, breaks=c(0, 0.001, 0.01, 0.1, 1, 10, 100,1000)) +
+        geom_polygon(aes(fill=Legend), alpha=0.1) +
         xlab("arc seconds") +
         ylab("Jansky/beam") +
-        labs(colour='Legend:') +
-        scale_colour_brewer(palette = "Dark2"))
+        theme(legend.position="bottom",
+              legend.text=element_text(size=11), 
+              legend.title=element_text(size=13)))
 dev.off()
-colorbreaks <- seq(min(cut.model), 0.7, length.out=200)
-colorbreaks <- c(colorbreaks, max(cut.model))
-print(WriteMap2(cut.model, at=colorbreaks, scales, xunits="arc minutes"))
-
+png("./mixed/mixed_cut_model2.png",
+    width = 5.0,
+    height = 5.0,
+    units = "in",
+    res = 400)
+cut.model_copy <- cut.model
+cut.model_copy[cut.model_copy > 0.7] = 0.7
+colorbreaks <- seq(min(cut.model_copy), max(cut.model_copy), length.out=200)
+print(WriteMap2(cut.model_copy, at=colorbreaks, scales, xunits="arc minutes"))
+dev.off()
 
 
 
