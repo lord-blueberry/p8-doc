@@ -76,56 +76,25 @@ The issue with Coordinate Descent's runtime complexity lies in the term $I_{CD} 
 Indeed, the runtime of our Coordinate Descent algorithm could be improved by using the major cycle architecture, essentially replacing $M$ with $N$ and we arrive at the term $I_{CD} * [S * 4N +\ldots]$. By using the Major Cycle architecture, Coordinate Descent can afford more iterations and more non-zero components in the image for the same runtime complexity. Furthermore $N$ lies on a uniformly sampled grid. We may be able to use the FFT instead of caching columns of $F$, and reduce the memory requirement at the same time.
 
 
-\subsection{Necessary approximations for large scale reconstructions}
-In this project, we created a new architecture for Compressed Sensing reconstructions. Instead of using the non-uniform FFT, we directly use the relevant columns of the Fourier transform matrix. We showed that the likely-relevant columns can be retrieved with a heuristic, and we can reconstruct images without ever calculating all columns of the matrix. This architecture naturally extends to the wide field of view measurement equation \eqref{meerkat:ftsphere}. It can handle the $w$-term explicitly and does not need any approximations. 
+\subsection{Approximations as key for going large scale}
+In this project, we created a new architecture for Compressed Sensing reconstructions. Instead of using the non-uniform FFT approximation, we directly use the relevant columns of the Fourier transform matrix. We showed that the likely-relevant columns can be retrieved with a heuristic, and we can reconstruct images without ever calculating all columns of the matrix. This architecture naturally extends to the wide field of view measurement equation \eqref{meerkat:ftsphere}. It can handle the $w$-term explicitly and does not need any approximations. 
 
-We created a proof-of-concept algorithm in this architecture, with Coordinate Descent as the optimizer and starlets as regularization. 
-Can use other regularization schemes.
+We created a proof-of-concept algorithm in this architecture, with Coordinate Descent as the optimizer and starlets as regularization.
+ 
+Exploited the starlet for a heuristic scheme, which we can use to find likely relevant columns of the Fourier transform matrix. Our algorithm is not fixed to starlet regularization. The same starlet heuristic could be used with different regularizations, for example a Gaussian mixture model.
 Not clear if it converges to the true optimum. It uses a greedy heuristic, but seems to work well enough.
 We showed super-resolution performance of Coordinate Descent on simulated MeerKAT data together with accurate total flux modelling compared to CLEAN. 
 
 
+Major Cycle Compressed Sensing algorithms have also shown super-resolution performance on real-world observations, but also at a higher runtime cost compared to CLEAN. The main goal of this project was to find a new architecture which reduces the runtime cost of Compressed Sensing reconstructions. In the context of MeerKAT, this was not possible. Ironically, for MeerKAT reconstructions the runtime costs of Coordinate Descent can be improved by using the Major Cycle architecture and reduce its memory requirement.
 
+That does not mean the new architecture cannot beat CLEAN or the Major Cycle. It scales independently of the image size. The cost difference of the two Architectures boils down to the ratio between Visibilities and pixels. For MeerKAT reconstructions, the ratio is skewed towards Visibilities. If we increase the number of pixels in the reconstruction, we increase the cost-effectiveness of our direct Fourier transform architecture.
 
-Major Cycle Compressed Sensing algorithms however did the
+Increasing the number of pixels is only useful to a limit. Decreasing the number of Visibilities however, might yield better results: The large number of Visibilities are virtually guaranteed to have redundant information. A portion of the total runtime is spent for Visibilities, which do not contain any new information for the image. An algorithm may be able to reconstruct an approximate image from a fraction of the total Visibilities. In this environment, our new architecture may become viable for reducing runtime costs.
 
+Our new architecture with Coordinate Descent has the trouble of being too precise. We do not need the Fourier transform calculated up to the limit of floating point accuracy. The instrument will have more noise than that. The Major Cycle has the right idea with using an approximate Fourier transform. The key for our approach is bringing back approximations and try to keep the costs down.
 
-The question is if this approach has the potential to be cheaper than CLEAN. Can compressed sensing reconstructions reduce the runtime costs by getting rid of the Major Cycle. We extrapolated the minimum theoretical costs of our approach to a real-world MeerKAT observation and compared them with WSCLEAN. Sadly, our minimum estimate is approximately twice as expensive as WSCLEAN. 
-With this approach, we did not improve upon the runtime costs of Compressed Sensing on large scale reconstructions.
-
-Coordinate Descent costs scale the ratio between Visibilities and pixels. It is more cost effective, the more pixels we have per visibility.
-Intuitively, the major cycle reduces the costs, if we have a lot fewer Pixels than Visibilities. In our case, we have approximately 32 more Visibilities than pixels. Our approach scales independently of the image size, but the image size is a far smaller number in the MeerKAT reconstruction problem, which makes the Major Cycle architecture a sensible way to reduce costs. Indeed, our approach can potentially be reduced in costs by using the major cycle, even brush over the large memory requirement.
-
-As it is, our approach does not lead to a runtime cost reduction. However, our apporach is too accurate, we calculate the fourier transform in the area of mere floating-point inaccuracies. Not necessary, the instrument is more inaccurate than that. The Major Cycle exploits this with the non-uniform FFT approximation. Currently, we do it precisely.
-
-Furthermore, we may not need all the Visibilities. Redundant information, can reconstruct the image with a subset of Visibilities. HOpefully self-calibration does not kill this idea.
-
-With both, maybe there is a way to use this approach. It might be end up easier to distribute, because we do not need
-
-Approach with other priors possible.
-
-
-
-
-
-
-
-
-
-
-That does not mean our approach is useless. If we have a reconstruction problem, where 
-
-Scales with the ratio between Visibilities and 
-
-Question if this is the way to scale to large scale reconstruction. Our way is potentially easier to distribute, because it has plain matrix multiplications instead of approximation algorithms.
-
-used an idealized algorithm to estimate the minimum runtime complexity. Turns out it is not competitive to other Major Cycle reconstructions. Each column of the Fourier Matrix has the length of the Visibilities. Massive Memory requirement on top of it.  Sparsity depends on the prior. We could use different priors for reconstruction which may be more sparse, reducing the runtime and need for caching columns. However, the major cycle is just too competitive, we would need a VERY sparse prior in order to have a chance against Major Cycle reconstructions.
-
-Indeed, even our Coordinate Descent algorithm can potentially be sped up with the Major Cycle, potentially getting rid of the massive memory requirement.
-
-
-
-
+The hope of finding approximations which are easy to distribute. The ultimate goal.
 
 
 
