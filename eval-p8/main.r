@@ -152,7 +152,7 @@ cd <- read(paste(folder, "image1", sep=""), 1080, resol)
 cache <- read(paste(folder, "full_cache_debug", sep=""), 1080, resol)
 
 skymodel <- t(read(paste(folder,"skymodel.csv", sep=""), 1080, resol))
-model.axis <- round(0:(1079) * resol, digits=1)
+model.axis <- round(0:(1079) * resol, digits=2)
 colnames(skymodel) = model.axis
 rownames(skymodel) = model.axis
 pix = 1080
@@ -176,7 +176,7 @@ pix = 256
 cut.row.names <- round(463:718*resol, digits=2)
 cut.col.names <- round(round(752:1007*resol, digits=2))
 cut.row <- 464:719
-cut.col <- 753:1008
+cut.col <- 464:1008
 scales = list(at=c(1, pix/8+1, pix/4+1, pix/8*3+1 ,pix/2+1, pix/8*5+1, pix/4*3+1, pix/8*7+1, pix))
 cut.model <- skymodel[cut.row, cut.col]
 rownames(cut.model) =cut.row.names
@@ -194,16 +194,15 @@ colorbreaks <- seq(min(cut.model_copy), max(cut.model_copy), length.out=200)
 print(WriteMap2(cut.model_copy, at=colorbreaks, scales, xunits="arc minutes"))
 dev.off()
 
-
-
 matrices <- list(cut.model, cut.tclean, cut.cd)
 names <- c("Ground Truth", "CLEAN", "Coordinate Descent")
 interpolation <- 10000
 p0 <- c(63+64, 60+64)
 p1 <- c(67+64,65+64)
 df <- calcLineDF(matrices, names, p0, p1, interpolation)
+df$points <- resol*464 + df$points / interpolation* resol * 256
 png("./mixed/mixed_cut0.png",
-    width = 10.0,
+    width = 8.0,
     height = 4.0,
     units = "in",
     res = 400)
@@ -216,6 +215,14 @@ print(ggplot(data = df, aes(x=df$points, y=df$values, colour=Legend)) +
         theme(legend.text=element_text(size=11), 
               legend.title=element_text(size=13)))
 dev.off()
+
+
+
+
+
+
+
+
 
 pix = 512
 cut.row.names <- round(271:782*resol, digits=2)
@@ -242,7 +249,7 @@ p1 <- c(531-271, 501-251)
 #p1 <- c(513-271, 551-251)
 df <- calcLineDF(matrices, names, p0, p1, interpolation)
 png("./mixed/mixed_cut2.png",
-    width = 10.0,
+    width = 8.0,
     height = 4.0,
     units = "in",
     res = 400)

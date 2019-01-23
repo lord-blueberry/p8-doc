@@ -1,4 +1,4 @@
-\section{Test on Simulated Data}\label{results}
+\section{Test on simulated data}\label{results}
 In this section, we test our new approach with Coordinate Descent on simulated MeerKAT data. We show that our approach does not need to calculate the whole Fourier Transform matrix $F$. Instead, we use a heuristic to only use relevant columns. As mentioned in section \ref{cd}, it is unknown if our approach will converge to the true optimum. Nevertheless, we compare our results with CASA's CLEAN implementation, and demonstrate super-resolution performance of Coordinate descent together with accurate total flux modelling.
 
 The two simulated datasets contains idealized MeerKAT observations. Compared to the real world, the two simulated datasets contain few Visibilities and not representative of the real data volume. Also, more realistic simulations which contain pointing-, calibration-, and thermal noise are out of scope for this project. The simulations are used to isolate the two fundamental issues in radio interferometer image reconstruction: Non-uniform sampling and incomplete measurements.
@@ -25,7 +25,7 @@ The first simulated observation contains two non-zero pixels, i.e. point sources
 
 The figure \ref{results:points} shows the CLEAN and the Coordinate Descent reconstruction. CLEAN reconstructs the image \ref{results:points:tclean} at the accuracy limit of the instrument. It essentially reconstructs a blurred version of the observed image, where the blurring represents the accuracy of the instrument. With compressed sensing, we aim to reconstruct the de-blurred image, increasing the effective accuracy of the instrument. 
 
-Coordinate Descent in image \ref{results:points:cd} shows a super-resolved reconstruction of the two point sources. It reconstructs two narrow peaks surrounded,by a low-intensity Gaussian emission. Also, Coordinate Descent manages to capture the total flux more accurately than CLEAN.  The total flux of image \ref{results:points:cd} results in 3.92 Jansky/beam, compared to CLEAN which overshoots the number by a factor of a 1400. The total flux of the CLEAN reconstruction \ref{results:points:tclean} overshoots the 3.9 figure by a factor of 1400. This gets obvious when we compare the intensity profile of CLEAN, Coordinate Descent and the ground truth in figure \ref{results:points:contour}.
+Coordinate Descent in image \ref{results:points:cd} shows a super-resolved reconstruction of the two point sources. It reconstructs two narrow peaks surrounded,by a low-intensity Gaussian emission. Also, Coordinate Descent manages to capture the total flux more accurately than CLEAN.  The total flux of image \ref{results:points:cd} results in 3.92 Jansky/beam, compared to CLEAN which overshoots the number by a factor of 1400. The total flux of the CLEAN reconstruction \ref{results:points:tclean} overshoots the 3.9 figure by a factor of 1400. This gets obvious when we compare the intensity profile of CLEAN, Coordinate Descent and the ground truth in figure \ref{results:points:contour}.
 
 \begin{figure}[h]
 	\centering
@@ -50,12 +50,12 @@ Lets look closer at the flux reconstruction of extended emissions
 \begin{figure}[h]
 	\centering
 	\begin{subfigure}[b]{0.4\linewidth}
-		\includegraphics[width=\linewidth, trim={0.2in, 0.2in, 0, 0.2in}, clip]{./chapters/20.results/mixed/mixed_clean.png}
+		\includegraphics[width=\linewidth, trim={0.2in, 0.2in, 0, 0.2in}, clip]{./chapters/20.results/mixed/mixed_clean_boxed.png}
 		\caption{CLEAN reconstruction}
 		\label{results:mixed:tclean}
 	\end{subfigure}
 	\begin{subfigure}[b]{0.4\linewidth}
-		\includegraphics[width=\linewidth, trim={0.2in, 0.2in, 0, 0.2in}, clip]{./chapters/20.results/mixed/mixed_cd.png}
+		\includegraphics[width=\linewidth, trim={0.2in, 0.2in, 0, 0.2in}, clip]{./chapters/20.results/mixed/mixed_cd_boxed.png}
 		\caption{Coordinate Descent Reconstruction}
 		\label{results:mixed:cd}
 	\end{subfigure}
@@ -70,33 +70,33 @@ Question of Flux reconstruction
 \begin{figure}[h]
 	\centering
 	\begin{subfigure}[b]{0.3\linewidth}
-		\includegraphics[width=\linewidth, trim={0.2in, 0.8in, 3.2in, 1.8in}, clip]{./chapters/20.results/mixed/mixed_cut_model_line.png}
+		\includegraphics[width=\linewidth, trim={0.4in, 0.9in, 3.2in, 1.8in}, clip]{./chapters/20.results/mixed/mixed_cut_model_line.png}
 		\caption{Ground truth.}
 		\label{results:mixed:cut0:img}
 	\end{subfigure}
 	\begin{subfigure}[b]{0.6\linewidth}
-		\includegraphics[width=\linewidth, trim={0, 0, 1in, 0.2in}, clip]{./chapters/20.results/mixed/mixed_cut0.png}
+		\includegraphics[width=\linewidth, trim={0, 0, 0.2in, 0.2in}, clip]{./chapters/20.results/mixed/mixed_cut0.png}
 		\caption{Intensity profile.}
 		\label{results:mixed:cut0:profile}
 	\end{subfigure}
-	\caption{Intensity profile.}
-	\label{results:mixed:contour}
+	\caption{Intensity profile of region 1.}
+	\label{results:mixed:cut0:contour}
 \end{figure}
 
 \begin{figure}[h]
 	\centering
 	\begin{subfigure}[b]{0.3\linewidth}
-		\includegraphics[width=\linewidth, trim={0.2in, 0.2in, 3.2in, 0.2in}, clip]{./chapters/20.results/mixed/mixed_cut_model2_line.png}
+		\includegraphics[width=\linewidth, trim={0.4in, 0.9in, 3.2in, 1.8in}, clip]{./chapters/20.results/mixed/mixed_cut_model2_line.png}
 		\caption{ground truth}
-		\label{results:mixed:cut0}
+		\label{results:mixed:cut1:img}
 	\end{subfigure}
 	\begin{subfigure}[b]{0.6\linewidth}
-		\includegraphics[width=\linewidth, trim={0.2in, 0.2in, 0, 0.2in}, clip]{./chapters/20.results/mixed/mixed_cut2.png}
+		\includegraphics[width=\linewidth, trim={0, 0, 0.2in, 0.2in}, clip]{./chapters/20.results/mixed/mixed_cut2.png}
 		\caption{ground truth}
-		\label{results:mixed:cut0}
+		\label{results:mixed:cut1:profile}
 	\end{subfigure}
-	\caption{Reconstruction on mixed sources}
-	\label{results:mixed:contour}
+	\caption{Intensity profile of region 2.}
+	\label{results:mixed:cut1:contour}
 \end{figure}
 
 
