@@ -65,7 +65,20 @@ This is still an active field of research. The latest work as of time of writing
 
 
 \subsubsection{State of the art: $w$-stacking algorithm}
-Here a short explanation of the w-stacking algorithm is provided. It is a surprisingly simple algorithm that seems to be here to stay. It is a modification of the nuFFT operation displayed in figure \ref{intro:major}. 
+The $w$-stacking algorithm is used in the WSCLEAN implementation, which is the current go to reconstruction algorithm for MeerKAT data.
+
+\begin{wrapfigure}{r}{0.7\textwidth}
+	\centering
+	\vspace{-10pt}
+	\includegraphics[width=1.0\linewidth]{./chapters/03.challenges/w-stacks.png}
+	\caption{The Major Cycle Framework}
+	\label{meerkat:w-stacks}
+	\vspace{-10pt}
+\end{wrapfigure}
+
+It replaces the non-uniform FFT operation from figure \ref{intro:major} with the $w$-stacking algorithm, shown in figure \ref{meerkat:w-stacks}. The Visibilities are grouped by their $w$-component into stacks. For each stack, the $w$-correction is performed for the center $w$-component. Then, the the non-uniform FFT is used to calculate a dirty image for each stack. Summing over all stacked dirty images gives us the final dirty image.
+
+If the number of stacks is equal the number of Visibilities, $w$-stacking performs an exact $w$-correction. In practice, the number of stacks is far smaller than the number of Visibilities, and each stack does one $w$-correction for similar Visibilities. 
 
 
 \textit{Inverse nuFFT with w-stacking}:
