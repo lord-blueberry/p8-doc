@@ -20,6 +20,14 @@ WriteMap2 <- function(x, at, scales, zlog=FALSE, xunits="arc seconds") {
   )
 }
 
+img.out <- function(name) {
+  png(name,
+      width = 5.0,
+      height = 5.0,
+      units = "in",
+      res = 400)
+}
+
 read <- function(img, pixels, resolution) {
   axis <- round(0:(pixels-1) * resolution, digits=1)
   data <- read.table(img, header = FALSE, sep = ",")
@@ -117,18 +125,10 @@ dev.off()
 
 
 scales = list(at=c(1, 65, 129, 197, 255))
-png("./points/tclean_points.png",
-    width = 4.0,
-    height = 4.0,
-    units = "in",
-    res = 400)
+img.out("./points/tclean_points.png")
 WriteMap2(tclean, at=seq(min(tclean), max(tclean), length.out=200), scales)
 dev.off()
-png("./points/cd_points.png",
-    width = 4.0,
-    height = 4.0,
-    units = "in",
-    res = 400)
+img.out("./points/cd_points.png")
 cd_copy <- cd
 cd_copy[cd_copy > 0.02] = 0.02 
 colorbreaks <- seq(min(cd_copy), max(cd_copy), length.out=200)
@@ -143,6 +143,7 @@ folder <- "./sim00/"
 resol <- 0.5/60
 tclean <- read(paste(folder, "tclean.csv", sep=""), 1080, resol) - read(paste(folder,"tclean.residual.csv", sep=""), 1080, resol)
 cd <- read(paste(folder, "image1", sep=""), 1080, resol)
+cache <- read(paste(folder, "full_cache_debug", sep=""), 1080, resol)
 
 skymodel <- t(read(paste(folder,"skymodel.csv", sep=""), 1080, resol))
 model.axis <- round(0:(1079) * resol, digits=1)
@@ -150,23 +151,19 @@ colnames(skymodel) = model.axis
 rownames(skymodel) = model.axis
 pix = 1080
 scales = list(at=c(1, pix/8+1, pix/4+1, pix/8*3+1 ,pix/2+1, pix/8*5+1, pix/4*3+1, pix/8*7+1, pix))
-png("./mixed/mixed_clean.png",
-    width = 5.0,
-    height = 5.0,
-    units = "in",
-    res = 400)
+img.out("./mixed/mixed_clean.png")
 colorbreaks <- seq(min(tclean), max(tclean), length.out=200)
 print(WriteMap2(tclean, at=colorbreaks, scales, xunits="arc minutes"))
 dev.off()
-png("./mixed/mixed_cd.png",
-    width = 5.0,
-    height = 5.0,
-    units = "in",
-    res = 400)
+img.out("./mixed/mixed_cd.png")
 cd_copy <- cd
 cd_copy[cd_copy > 1] = 1
 colorbreaks <- seq(min(cd_copy), max(cd_copy), length.out=200)
 print(WriteMap2(cd_copy, at=colorbreaks, scales, xunits="arc minutes"))
+dev.off()
+img.out("./mixed/mixed_cache.png")
+colorbreaks <- seq(min(cache), max(cache), length.out=200)
+print(WriteMap2(cache, at=colorbreaks, scales, xunits="arc minutes"))
 dev.off()
 
 pix = 256
@@ -184,16 +181,14 @@ colnames(cut.tclean) =cut.col.names
 cut.cd <- cd[cut.row, cut.col]
 rownames(cut.cd) =cut.row.names
 colnames(cut.cd) =cut.col.names
-png("./mixed/mixed_cut_model.png",
-    width = 5.0,
-    height = 5.0,
-    units = "in",
-    res = 400)
+img.out("./mixed/mixed_cut_model.png")
 cut.model_copy <- cut.model
 cut.model_copy[cut.model_copy > 0.6] = 0.6
 colorbreaks <- seq(min(cut.model_copy), max(cut.model_copy), length.out=200)
 print(WriteMap2(cut.model_copy, at=colorbreaks, scales, xunits="arc minutes"))
 dev.off()
+
+
 
 matrices <- list(cut.model, cut.tclean, cut.cd)
 names <- c("Ground Truth", "CLEAN", "Coordinate Descent")
@@ -246,7 +241,7 @@ png("./mixed/mixed_cut2.png",
     height = 4.0,
     units = "in",
     res = 400)
-print(ggplot(data = df, aes(x=df$points, y=df$values, colour=df$Legend)) + 
+print(ggplot(data = df, aes(x=df$points, y=df$values, colour=Legend)) + 
         geom_line() +
         scale_y_continuous(trans=asinh, breaks=c(0, 0.001, 0.01, 0.1, 1, 10, 100,1000)) +
         geom_polygon(aes(fill=Legend), alpha=0.1) +

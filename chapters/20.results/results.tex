@@ -25,7 +25,7 @@ The first simulated observation contains two non-zero pixels, i.e. point sources
 
 The figure \ref{results:points} shows the CLEAN and the Coordinate Descent reconstruction. CLEAN reconstructs the image \ref{results:points:tclean} at the accuracy limit of the instrument. It essentially reconstructs a blurred version of the observed image, where the blurring represents the accuracy of the instrument. With compressed sensing, we aim to reconstruct the de-blurred image, increasing the effective accuracy of the instrument. 
 
-Coordinate Descent in image \ref{results:points:cd} shows a super-resolved reconstruction of the two point sources. It reconstructs two narrow peaks surrounded,by a low-intensity Gaussian emission. Also, the total Flux of image \ref{results:points:cd} results in 3.92 Jansky/beam. The total flux of the CLEAN reconstruction \ref{results:points:tclean} overshoots the 3.9 figure by a factor of 1400. This gets obvious when we compare the intensity profile of CLEAN, Coordinate Descent and the ground truth in figure \ref{results:points:contour}.
+Coordinate Descent in image \ref{results:points:cd} shows a super-resolved reconstruction of the two point sources. It reconstructs two narrow peaks surrounded,by a low-intensity Gaussian emission. Also, Coordinate Descent manages to capture the total flux more accurately than CLEAN.  The total flux of image \ref{results:points:cd} results in 3.92 Jansky/beam, compared to CLEAN which overshoots the number by a factor of a 1400. The total flux of the CLEAN reconstruction \ref{results:points:tclean} overshoots the 3.9 figure by a factor of 1400. This gets obvious when we compare the intensity profile of CLEAN, Coordinate Descent and the ground truth in figure \ref{results:points:contour}.
 
 \begin{figure}[h]
 	\centering
@@ -34,35 +34,9 @@ Coordinate Descent in image \ref{results:points:cd} shows a super-resolved recon
 	\label{results:points:contour}
 \end{figure}
 
-Note that Coordinate Descent in figure \ref{results:points:contour} seems to have both point sources shifted by approximately a pixel. It looks suspiciously like an off-by one error. Sadly in the timeframe of this project, no error was found or an explanation for this behaviour.
+CLEAN essentially places a Gaussian function with correct peak intensity at the point source location, but it does not respect the total flux of the image. Coordinate Descent keeps the total flux in mind. The pixels in each area of the point sources sum up to the correct values of 2.5 and 1.4 respectively. However, note that Coordinate Descent in figure \ref{results:points:contour} seems to have both point sources shifted by approximately a pixel. It looks suspiciously like an off-by one error. Sadly in the time frame of this project, no error was found or an explanation for this behaviour.
 
-, at a resolution of 0.5 arc-seconds per pixel.
-
-
- The resolution of the image is therefore higher than MeerKAT. An ideal compressed sensing reconstruction would create an image where all pixels are zero except for the two point sources. Figure \ref{results:points} shows the reconstructed images of CLEAN and Coordinate Descent.
-
- The image \ref{results:points:cd} shows the Coordinate Descent reconstruction, which creates two much narrower peaks than CLEAN. This is an example of super resolution. Coordinate Descent located structures smaller than the accuracy of MeerKAT would allow.
-
-
-
-The total Flux of the image, the sum of all emissions, is 3.9 Jansky/Beam in this simulation. CLEAN reconstructs the right peak intensities, both ending up at 2.5 and 1.4 respectively. Since CLEAN reconstructs a blurred version, the total Flux of the image is off by magnitudes. Figure \ref{results:points:contour} compares the intensity profile of CLEAN, Coordinate Descent and the Ground Truth. Note the logarithmic y scale. For a correct total flux, the integrals should be equal. 
-
-
-
-In the contour plot, the Coordinate Descents narrow contours become apparent.
-
-The flux is sadly not correct, it seeems to be too large by a factor of two
-
-The larger source was well reconstructed. The second, smaller emissions however has a few issues.
-
-note that the smaller emission is shifted by a pixel and the contour is wider than it's larger cousin. 
-
-The last issue it has that the flux is still not correct. It is close and seems to bigger than a factor of two.
-
-
-
-Look at the flux in a more complex environment
-
+%Possible 
 
 \subsection{Super resolution of mixed sources}
 
@@ -95,14 +69,42 @@ Question of Flux reconstruction
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=0.8\linewidth]{./chapters/20.results/mixed/mixed_cut0.png}
+	\begin{subfigure}[b]{0.3\linewidth}
+		\includegraphics[width=\linewidth, trim={0.2in, 0.2in, 0, 0.2in}, clip]{./chapters/20.results/mixed/mixed_cut_model.png}
+		\caption{Ground truth.}
+		\label{results:mixed:cut0}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.6\linewidth}
+		\includegraphics[width=\linewidth, trim={0.2in, 0.2in, 0, 0.2in}, clip]{./chapters/20.results/mixed/mixed_cut0.png}
+		\caption{ground truth}
+		\label{results:mixed:cut0}
+	\end{subfigure}
+	\caption{Intensity profile.}
+	\label{results:mixed:contour}
+\end{figure}
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.3\linewidth}
+		\includegraphics[width=\linewidth, trim={0.2in, 0.2in, 0, 0.2in}, clip]{./chapters/20.results/mixed/mixed_cut_model2.png}
+		\caption{ground truth}
+		\label{results:mixed:cut0}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.6\linewidth}
+		\includegraphics[width=\linewidth, trim={0.2in, 0.2in, 0, 0.2in}, clip]{./chapters/20.results/mixed/mixed_cut2.png}
+		\caption{ground truth}
+		\label{results:mixed:cut0}
+	\end{subfigure}
 	\caption{Reconstruction on mixed sources}
 	\label{results:mixed:contour}
 \end{figure}
 
+
 Coordinate Descent did not reconstruct all point sources. How many starlets are non-zero is the major point for runtime. It depends on how many areas of the image are non-zero. Starlet has a representation for extended emission, how many starlets are needed for modelling is hard.
 
 Runtime problems
-1900 non-zero starlets, 
+244 non-zero starlets, 
+
+show the areas
 
 

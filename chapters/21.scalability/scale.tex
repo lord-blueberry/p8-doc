@@ -1,7 +1,7 @@
 \section{Runtime cost comparison on a real-world MeerKAT reconstruction}
-Current Compressed Sensing reconstructions produce images at a higher quality than CLEAN. However, CLEAN is significantly cheaper to compute. MeerKAT's large scale reconstruction problems, CLEAN is still the go-to algorithm. In this project, we developed for a new architecture which hopefully reduces the cost of Compressed Sensing algorithms. The previous section \ref{results} demonstrated super-resolution capabilities of our Coordinate Descent algorithm, which does not use the common Major Cycle architecture. The question, if our new approach can lower the runtime cost of Compressed Sensing reconstructions, is still open. 
+Current Compressed Sensing reconstructions produce images at a higher quality than CLEAN. However, CLEAN is significantly cheaper to compute. MeerKAT's large scale reconstruction problems, CLEAN is still the go-to algorithm. In this project, we developed for a new architecture, which uses the relevant columns of the Fourier Transform Matrix directly. We developed a Coordinate Descent algorithm with this architecture and demonstrated in section \ref{results} super-resolution performance on simulated data. The question, if we can lower the runtime costs with our new architecture, is still open. 
 
-In this section, we compare the costs of our approach and WSCLEAN, which is the algorithm of choice for MeerKAT reconstructions. We create cost functions for each algorithm, counting the number of operations depending on the input size. WSCLEAN was executed on a real-world MeerKAT dataset, shown in image \ref{scale:wsclean}. Our proof-of-concept implementation was not able to handle the large dataset. Instead, we extrapolate the best-case costs of our approach and compare them to WSCLEAN on the MeerKAT dataset.
+In this section, we compare the costs of Coordinate Descent with WSCLEAN, which is the reconstruction algorithm of choice for MeerKAT reconstructions. We create cost functions for each algorithm, which estimate the number of operations depending on the input size. WSCLEAN was executed on a real-world MeerKAT dataset shown in image \ref{scale:wsclean}. Our proof-of-concept implementation was not able to handle the large amount of data. Instead, we extrapolate the best-case costs of our approach and compare them to WSCLEAN on the MeerKAT dataset.
 
 
 \subsection{Cost function of an idealized Coordinate Descent}
@@ -66,32 +66,29 @@ Our real-world MeerKAT observation has been calibrated and averaged in frequency
 	\label{scale:wsclean}
 \end{figure}
 
-Set $J=8$
-For Coordinate Descent we need estimates for $S$ and $I_{CD}$. We under-estimate the true values use them from our reconstruction of simulated MeerKAT data \ref{results:mixed:cd}. We it converges within $I_{CD}=10$ iterations, our approach uses $10*J$ iterations.
-Favourable assumption for Coordinate Descent. The reconstruction of the MeerKAT image \ref{scale:wsclean} has complex-shaped extended emissions. Approximating those with gaussian-like starlets likely leads to more non-zero starlets than 250.
+For Coordinate Descent's costs, we need an estimate for $J$, $S$ and $I_{CD}$. We set $J=8$, which lets the largest structure span over half the image, enough to capture any large scale structures. For $S$ and $I_{CD}$, we simply use the values from our simulated reconstruction \ref{results:mixed:cd} and set $S=250$ and 
+$I_{CD}=10$. This is an under-estimation of the true values. The image \ref{scale:wsclean} shows complex-shaped extended emissions, which likely needs a larger number of starlets for representation than the Gaussian emissions from our simulation. 
 
-When we put all values into our cost functions \eqref{results:cd:omega} and \eqref{results:clean:o}, CLEAN arrives at 1.9 times the costs of WSCLEAN. Mind you this is only when we can keep all necessary columns of $F^{-1}$ in our memory, eating up 1.1 terabytes\footnote{If we assume 64 bit floating point accuracy for the real and complex values of the Visibilities.} in our case. If not, the columns have to be re-calculated on the fly, increasing the runtime costs considerably.
+When we put all values into our cost functions \eqref{results:cd:omega} and \eqref{results:clean:o}, Coordinate Descent with the direct Fourier transform arrives at 1.9 times the costs of WSCLEAN in the best case scenario. Our approach has not reduced the runtime costs compared to WSCLEAN. But what about Major Cycle Compressed Sensing algorithms? We have not developed a cost function for other Major Cycle approaches, but we can get a very rough estimate by changing $I_{Major}$ of the WSCLEAN cost function. Pratley et al.\cite{pratley2018fast} reported 10 Major Cycles for a Compressed Sensing reconstruction on simulated data. If we plug in 10 Major Cycles for WSCLEAN, Coordinate Descent ends up taking roughly 1.2 times the cost of the Major Cycle algorithm. Mind you these costs are only valid when we can keep all necessary columns of $F$ in memory, eating up 1.1 terabytes\footnote{If we assume 64 bit floating point accuracy for the real and complex values of the Visibilities.} in our case. If not, the columns have to be re-calculated on the fly, increasing the runtime costs by factors. 
 
-Other compressed Sensing approaches. \cite{pratley2018fast} reported 10 Major Cycles for a Compressed Sensing reconstruction on simulated data. If we plug in 10 Major Cycles in the WSCLEAN cost function for a rough estimate, we arrive at Coordinate Descent needing 1.2 the times of other compressed sensing approaches.
+The issue with Coordinate Descent's runtime complexity lies in the term $I_{CD} * [S * 4M +\ldots]$ of \eqref{results:cd:omega}, which scales with the "content" of the image $S$, multiplied with the Visibilities. Coordinate Descent cannot afford many iterations nor many non-zero components, because both of these numbers get multiplied together with $M$, the largest number in the problem. With the Major Cycle architecture, WSCLEAN is able to get around this limitation, and scales any content dependent factors on $N$ instead of $M$. 
 
-Coordinate Descent scales independently of image size.
-Pixel to Visibility ratio
-Note that the costs scale roughly linear to the pixels per Visibility ratio.
-The uncalibrated dataset contains 8 times more Visibilities. Due hardware limitations
-
-The issue with Coordinate Descent's runtime complexity lies in the term $I_{CD} * [S * 4M +\ldots]$ of \eqref{results:cd:omega}, which scales with the "content" of the image $S$, multiplied with the Visibilities. Coordinate Descent cannot afford many iterations nor many non-zero components, because both of these numbers get multiplied together with $M$, the largest number in the problem. With the Major Cycle, WSCLEAN is able to get around this limitation, and scales any content dependant factors on $N$ instead of $M$. 
-
-Indeed, the runtime of our Coordinate Descent algorithm could be improved by using the major cycle architecture, essentially replacing $M$ with $N$ and we arrive at the term $I_{CD} * [S * 4N +\ldots]$. By using the Major Cycle architecture, Coordinate Descent can afford more iterations and more non-zero components in the image for the same runtime complexity. Furthermore $N$ lies on a uniformly sampled grid. We may be able to use the FFT instead of caching columns of $F^{-1}$, and reduce the memory requirement at the same time.
+Indeed, the runtime of our Coordinate Descent algorithm could be improved by using the major cycle architecture, essentially replacing $M$ with $N$ and we arrive at the term $I_{CD} * [S * 4N +\ldots]$. By using the Major Cycle architecture, Coordinate Descent can afford more iterations and more non-zero components in the image for the same runtime complexity. Furthermore $N$ lies on a uniformly sampled grid. We may be able to use the FFT instead of caching columns of $F$, and reduce the memory requirement at the same time.
 
 
+\subsection{Necessary approximations for large scale reconstructions}
+In this project, we created a new architecture for Compressed Sensing reconstructions. Instead of using the non-uniform FFT, we directly use the relevant columns of the Fourier transform matrix. We showed that the likely-relevant columns can be retrieved with a heuristic, and we can reconstruct images without ever calculating all columns of the matrix. This architecture naturally extends to the wide field of view measurement equation \eqref{meerkat:ftsphere}. It can handle the $w$-term explicitly and does not need any approximations. 
 
-\subsection{Embracing the Major Cycle}
-In this project, we created a Compressed Sensing reconstruction which works outside the Major Cycle architecture. With Coordinate Descent as optimization algorithm and starlets as regularization, it does not need the non-uniform FFT during reconstruction. Instead, it uses the relevant columns of the Fourier Transform matrix.  We exploited the starlet regularization for estimating which columns are likely necessary for the reconstruction. This approach naturally extends to the wide field of view measurement equation \eqref{meerkat:ftsphere}. It can handle the $w$-term explicitly and does not need any $w$-term approximation algorithm. To our knowledge, this approach has not been explored previously for radio interferometer image reconstruction. 
+We created a proof-of-concept algorithm in this architecture, with Coordinate Descent as the optimizer and starlets as regularization. 
+Can use other regularization schemes.
+Not clear if it converges to the true optimum. It uses a greedy heuristic, but seems to work well enough.
+We showed super-resolution performance of Coordinate Descent on simulated MeerKAT data together with accurate total flux modelling compared to CLEAN. 
 
 
-Proof-of-concept-implementation, as it is it may not converge to the true minimum. 
-On Simulated dataset, it has 
-Coordinate Descent created super-resolved point sources on simulated MeerKAT data. Compared to CLEAN, our reconstruction recovered the total flux accurately.
+
+
+Major Cycle Compressed Sensing algorithms however did the
+
 
 The question is if this approach has the potential to be cheaper than CLEAN. Can compressed sensing reconstructions reduce the runtime costs by getting rid of the Major Cycle. We extrapolated the minimum theoretical costs of our approach to a real-world MeerKAT observation and compared them with WSCLEAN. Sadly, our minimum estimate is approximately twice as expensive as WSCLEAN. 
 With this approach, we did not improve upon the runtime costs of Compressed Sensing on large scale reconstructions.
