@@ -72,30 +72,11 @@ $w$-stacking\cite{pratley2018fast} is the current state-of-the-art approach for 
 	\vspace{-10pt}
 \end{wrapfigure}
 
-$w$-stacking, shown in figure \ref{meerkat:w-stacks} replaces the non-uniform FFT operation from figure \ref{intro:major}. It groups the Visibilities with similar $w$-term into the same layer. Multiple layers are then stacked and transformed independently with the non-uniform FFT. For each stack, the $w$-correction is performed for the center $w$-component. The last step is summing over all stacked dirty images, giving us the final dirty image. At this point a deconvolution algorithm like CLEAN can deconvolve the dirty image, which is $w$-corrected. 
+$w$-stacking, shown in figure \ref{meerkat:w-stacks} replaces the non-uniform FFT operation from figure \ref{intro:major}. It groups the Visibilities with similar $w$-term into the same layer. Multiple layers are then stacked and transformed independently with the non-uniform FFT. For each stack, the $w$-correction is performed for the center $w$-component. The last step is summing over all stacked images, giving us the final dirty image. At this point a deconvolution algorithm like CLEAN can deconvolve the dirty image. 
 
-$w$-stacking approximates the $w$-correction with the number of stacks it choses. If it uses as many stacks as Visibilities, we end up with an exact $w$-corrections. In pracice, many Visibilities have a similar $w$-term. Grouping them together in a stack is an efficient way of approximating the $w$-correction.
+After the deconvolution, the whole process is reversed. The image gets copied back into the stacks, the $w$-correction gets reversed and the non-uniform FFT calculates the Visibilities per stack.
 
-Backwards pass
-
-
-
-If the number of stacks is equal the number of Visibilities, $w$-stacking performs an exact $w$-correction. In practice, the number of stacks is far smaller than the number of Visibilities, and each stack does one $w$-correction for similar Visibilities. 
-
-
-\textit{Inverse nuFFT with w-stacking}:
-Visibilities get grouped into stacks by their $w$-term. Every visibility inside a stack has a similar $w$-term. The more stacks, the more accurately you can handle the $w$ component. The figure displays the relation
-
-The nuFFT gets called on each stack separately, and a constant $w$ correction factor applied. Since $w$-term is constant, we can use the two dimensional nuFFT again. At the end, all the stacks are summed together to form the dirty image. 
-
-\textit{nuFFT with w-stacking}:
-The inverse is done in a similar fashion. The sum cannot be re-separated, so the image gets copied into each stack. The constant $w$ factor gets divided out. The nuFFT gets applied.
-
-the runtime
-
-(talking about more recent hybrid approach, limiting the total number of ?w-stacks?)
-
-
+If we choose uses as many stacks as Visibilities, we end up with an exact $w$-corrections. In pracice, many Visibilities have a similar $w$-term. $w$-stacking approximates the correction and allows the Major Cycle to distribute the forward- and backwards Fourier transform to a certain extend.
 
 \subsection{Self-Calibration}
 Complex gain term. Corrects amplitude and phase. 
