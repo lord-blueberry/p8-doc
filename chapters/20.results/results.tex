@@ -64,27 +64,11 @@ Lets look closer at the flux reconstruction of extended emissions
 \end{figure}
 
 
-\begin{figure}[h]
-	\centering
-	\begin{subfigure}[b]{0.2\linewidth}
-		\includegraphics[width=\linewidth]{./chapters/20.results/mixed/problems/point1.png}
-	\end{subfigure}
-	\begin{subfigure}[b]{0.2\linewidth}
-		\includegraphics[width=\linewidth]{./chapters/20.results/mixed/problems/point0.png}
-	\end{subfigure}
-	\begin{subfigure}[b]{0.2\linewidth}
-		\includegraphics[width=\linewidth]{./chapters/20.results/mixed/problems/point2.png}
-	\end{subfigure}
-	\begin{subfigure}[b]{0.2\linewidth}
-		\includegraphics[width=\linewidth]{./chapters/20.results/mixed/problems/point3.png}
-	\end{subfigure}
-	\caption{Point Sources}
-	\label{results:mixed}
-\end{figure}
+
 
 Question of Flux reconstruction
 
- $\lambda$ for different starlet layers like in \cite{girard2015sparse}
+
 
 \begin{figure}[h]
 	\centering
@@ -102,6 +86,8 @@ Question of Flux reconstruction
 	\label{results:mixed:cut0:contour}
 \end{figure}
 
+More accurate total flux reconstruction, but no
+
 \begin{figure}[h]
 	\centering
 	\begin{subfigure}[b]{0.3\linewidth}
@@ -118,10 +104,36 @@ Question of Flux reconstruction
 	\label{results:mixed:cut1:contour}
 \end{figure}
 
+More complex source. We see a super resolution and again more accurate flux. Point sources on the other hand, do become problematic. We see one point souce split up in two very narrow peak. When we look at other point sources of figure \ref{results:mixed:points}, we see mixed results. Some point sources are reconstructed as we would wish, with one high peak in the center, locating the point source, and a small starlet artifact which is the low intensity "glow" around it. The first point source is what we would wish for. We show a few failure modes of point source reconstruction. A lower intensity "trail" in the second image and a split into two point sources of images three and four.
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[b]{0.2\linewidth}
+		\includegraphics[width=\linewidth]{./chapters/20.results/mixed/problems/point1.png}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.2\linewidth}
+		\includegraphics[width=\linewidth]{./chapters/20.results/mixed/problems/point0.png}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.2\linewidth}
+		\includegraphics[width=\linewidth]{./chapters/20.results/mixed/problems/point2.png}
+	\end{subfigure}
+	\begin{subfigure}[b]{0.2\linewidth}
+		\includegraphics[width=\linewidth]{./chapters/20.results/mixed/problems/point3.png}
+	\end{subfigure}
+	\caption{Different point source reconstructions of Coordinate Descent.}
+	\label{results:mixed:points}
+\end{figure}
+
+Two things could be made to improve it: This project uses the same $\lambda$ for all starlet layers. Girard et al.\cite{girard2015sparse} used a different $\lambda$ for each layer. 
+
+The trail issue of point sources can be an artifact of how positivity is handled in our algorithm.
+
+different way of handling positivity. 
+
+
 
 Coordinate Descent did not reconstruct all point sources. How many starlets are non-zero is the major point for runtime. It depends on how many areas of the image are non-zero. Starlet has a representation for extended emission, how many starlets are needed for modelling is hard.
 
-Runtime problems
 244 non-zero starlets, 
 
 show the areas
