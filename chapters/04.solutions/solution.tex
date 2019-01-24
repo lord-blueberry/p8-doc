@@ -1,13 +1,25 @@
 \section{Eliminating the Major Cycle}\label{killmajor}
-There is little research in exploring a different architecture for Compressed Sensing. The closest to this work was done by Pratley et al\cite{pratley2017robust}, which optimizes the non-uniform FFT in the context of compressed sensing. The Major cycle is still used. On the upside, progress in w-term accuracy and runtime. 
+Although Compressed Sensing algorithms produce higher quality reconstructions, the CLEAN algorithm so far has lower runtime costs. Both use a version of the Major Cycle architecture for efficient transformation of Visibilities to image space, and to correct the effects of wide field of view imaging. This project explores different architectures for Compressed Sensing, with the goal to decrease the runtime costs in the context of MeerKAT.
 
-There are ways to form a different architecture. However, the advent of self-calibration pushes a forward-backward kind of architecture on the reconstruction. 
+To our knowledge, there is little published research in this area. Many Compressed Sensing reconstructions use the Major Cycle architecture\cite{girard2015sparse}\cite{mcewen2011compressed}\cite{pratley2018fast}\cite{dabbech2018cygnus} and do not discuss alternatives. Pratley et al\cite{pratley2017robust} optimized the non-uniform FFT in the context of Compressed Sensing reconstructions. 
+
+Similar works with: Hardy et al.\cite{hardy2013direct} removed the non-uniform FFT approximation with the explicit Fourier Transform Matrix and reported an easy framework for distribution
+\cite{dabbech2017wEffect} is the recent work which introduces 
+
+In this section, we discuss three possible alternatives to the Major Cycle: Separating the Major Cycle in two Optimization problems, using Spherical Harmonics,
+
+
+
+For new architectures, we need to handle the $w$ term and self calibration
+
+
+
 
 \subsection{Separating the Major Cycle into two Optimization Problems}
 The major cycle reduces two errors simultaneously. The error introduced by the non-uniform FFT approximation, and the error introduced by the deconvolution approximation. In a sense, the major cycle is a simple optimization algorithm: It iteratively calls the non-uniform FFT and deconvolution approximations with the error from the last iteration, until the error is below a certain threshold.
 
 \begin{alignat}{1}
-FT:\: \underset{I_{dirty}}{minimize} \:& \left \|  V - A^{-1}I_{dirty} \right \|_2^2\label{killmajor:sep:major}\\
+FT:\: \underset{I_{dirty}}{minimize} \:& \left \|  V - AI_{dirty} \right \|_2^2\label{killmajor:sep:major}\\
 deconvolution:\: \underset{x}{minimize} \:& \left \| I_{dirty} - x \star PSF \right \|_2^2 + \lambda \left \| P(x) \right \|_1 \label{killmajor:sep:deconv}
 \end{alignat}
 

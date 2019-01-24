@@ -1,4 +1,4 @@
-N = (2048) * (2048) *2
+N = (2048) * (2048) 
 M = 75 * 4060770
 
 W = 32
@@ -13,7 +13,7 @@ J=8
 ld.N = log(N, base=2)
 ld.2N = log(2*N, base=2)
 clean = I.major * 2 * (M + W*(2*N*ld.2N+2*N) + N * ld.N)
-clean = clean + I.major * (I.clean * 2 * N)
+clean = clean + (I.clean * 2 * N)
 
 CD <- function(S,M, I.cd, J) {
   return(S * 7 * M + I.cd * (S * 4*M + J*2*M) + J*(M + 2*N*ld.2N))
