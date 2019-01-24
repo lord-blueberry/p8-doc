@@ -39,13 +39,7 @@ CLEAN essentially places a Gaussian function with correct peak intensity at the 
 %Possible 
 
 \subsection{Super resolution of mixed sources}
-
-Dataset of three gaussian extended emissions and sixteen point sources at varying intensities.
-
-Parameters of Coordinate Descent
-
-super resolution of CD. However, it did not find all point sources
-Lets look closer at the flux reconstruction of extended emissions
+This dataset contains a mixture of three Gaussian emissions and sixteen point sources of varying intensities. At the center of the image, it has three point sources underlying a weak extended emission. The image center and one Gaussian emissions are analysed in detail. Coordinate Descent was run for two full iterations, using again a $\lambda=0.01$ and $J=7$ starlet layers. The CLEAN and Coordinate Descent reconstructions are shown in figure \ref{results:mixed}. Our algorithm was able to locate the point sources below the accuracy limit of MeerKAT. However, some point sources were reconstructed with artefacts.
 
 \begin{figure}[h]
 	\centering
@@ -62,6 +56,8 @@ Lets look closer at the flux reconstruction of extended emissions
 	\caption{Reconstruction on mixed sources}
 	\label{results:mixed}
 \end{figure}
+
+The number of Fourier columns scales with the number of non-zero components
 
 
 
@@ -124,15 +120,16 @@ More complex source. We see a super resolution and again more accurate flux. Poi
 	\label{results:mixed:points}
 \end{figure}
 
-Two things could be made to improve it: This project uses the same $\lambda$ for all starlet layers. Girard et al.\cite{girard2015sparse} used a different $\lambda$ for each layer. 
+problem of an error, since Coordinate Descent should have converged on the two point sources.
 
-The trail issue of point sources can be an artifact of how positivity is handled in our algorithm.
+Two things could be made to improve it: This project uses the same $\lambda$ for all starlet layers. Girard et al.\cite{girard2015sparse} used a different $\lambda$ for each layer. 
 
 different way of handling positivity. 
 
+The trail issue of point sources can be an artifact of how positivity is handled in our algorithm. 
 
+Starlet reconstruction with negative parts, but leads to a solution with far more non-zero components, [since it has to counter-act the negativity]. The reconstruction \ref{results:mixed:cd} is the result of 244 non-zero, strictly non-negative starlets. Letting the starlet have its negative 'dip' results in a reconstruction with more than ten times the components. 
 
-Coordinate Descent did not reconstruct all point sources. How many starlets are non-zero is the major point for runtime. It depends on how many areas of the image are non-zero. Starlet has a representation for extended emission, how many starlets are needed for modelling is hard.
 
 244 non-zero starlets, 
 
