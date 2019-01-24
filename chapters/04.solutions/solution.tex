@@ -1,12 +1,9 @@
 \section{Eliminating the Major Cycle}\label{killmajor}
 Although Compressed Sensing algorithms produce higher quality reconstructions, the CLEAN algorithm so far has lower runtime costs. Both use a version of the Major Cycle architecture for efficient transformation of Visibilities to image space, and to correct the effects of wide field of view imaging. This project explores different architectures for Compressed Sensing, with the goal to decrease the runtime costs in the context of MeerKAT.
 
-To our knowledge, there is little published research in this area. Many Compressed Sensing reconstructions use the Major Cycle architecture\cite{girard2015sparse}\cite{mcewen2011compressed}\cite{pratley2018fast}\cite{dabbech2018cygnus} and do not discuss alternatives. Pratley et al\cite{pratley2017robust} optimized the non-uniform FFT in the context of Compressed Sensing reconstructions. 
+To our knowledge, there is little published research in this area. Many Compressed Sensing reconstructions use the Major Cycle architecture\cite{girard2015sparse}\cite{dabbech2018cygnus}\cite{mcewen2011compressed}\cite{pratley2018fast} and do not discuss alternatives. Pratley et al\cite{pratley2017robust} optimized the non-uniform FFT in the context of Compressed Sensing reconstructions. Dabbech et al.\cite{dabbech2017wEffect} investigated $w$-term approximations for reducing runtime costs of Compressed Sensing reconstructions, but still used the Major Cycle architecture. Hardy et al.\cite{hardy2013direct} explored an alternative to the Major Cycle. They replaced the non-uniform FFT approximation with an explicit Fourier Transform Matrix.
 
-Similar works with: Hardy et al.\cite{hardy2013direct} removed the non-uniform FFT approximation with the explicit Fourier Transform Matrix and reported an easy framework for distribution
-\cite{dabbech2017wEffect} is the recent work which introduces 
-
-In this section, we discuss three possible alternatives to the Major Cycle: Separating the Major Cycle in two Optimization problems, using Spherical Harmonics,
+The work of Hardy et al. asked a similar question to this work. We want to extend it. In this section, we discuss three possible alternatives to the Major Cycle: Separating the Major Cycle in two Optimization problems, using Spherical Harmonics,
 
 
 
@@ -27,7 +24,7 @@ The major cycle can also be separated into two objectives \eqref{killmajor:sep:m
 
 By separating the two objectives, the hope is we can use specialized optimization algorithms that overall converge faster than several major cycles. Also, after the first objective was minimized, we can drop the Visibilities, which can be magnitudes larger than the image. 
 
-At first glance, this is a sensible idea, but the devil is in the objective \eqref{killmajor:sep:deconv}. Namely in the $PSF$ is not constant, it varies over the image. In the Major Cycle Architecture, a constant $PSF$\footnote{CLEAN implementations in Radio Astronomy typically use a constant $PSF$. This is not strictly necessary, one can also implement CLEAN with a varying $PSF$.} is sufficient: It only needs to approximate the deconvolution. The error introduced by a constant $PSF$ can be reduced in the next Major Cycle. By eliminating the Major Cycle, we also eliminated the chance to approximate the deconvolution with a constant $PSF$. In the worst case, we would need to estimate the $PSF$ for each pixel in the image.
+At first glance, this is a sensible idea, but the devil is in the objective \eqref{killmajor:sep:deconv}. Namely in the $PSF$ is not constant, it varies over the image. In the Major Cycle Architecture, a constant $PSF$\footnote{CLEAN implementations in Radio Astronomy typically use a constant $PSF$. This is not necessary, one can also implement CLEAN with a varying $PSF$.} is sufficient: It only needs to approximate the deconvolution. The error introduced by a constant $PSF$ can be reduced in the next Major Cycle. By eliminating the Major Cycle, we also eliminated the chance to approximate the deconvolution with a constant $PSF$. In the worst case, we would need to estimate the $PSF$ for each pixel in the image.
 
 In the worst case, these many $PSF$s may stop us from using this approach. It is plausible that can use fewer $PSF$s and be close enough. No known work done in the radio astronomy. The Major Cycle is ubiquitous. But it is plausible.
 
