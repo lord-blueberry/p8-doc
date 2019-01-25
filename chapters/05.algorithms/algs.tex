@@ -73,6 +73,10 @@ Let us look at the lowest starlet layer first, how it is calculated from the ima
 
 $w_0$  has the same dimensions as the input image. It contains the point sources of the image convolved with the starlet wavelet \ref{cd:starlets:wavelet}. The last step for finding the point sources $\alpha_0$, is to deconvolve $w_0$.
 
+$w_0$ is not sparse. $\alpha_0$ is sparse.
+
+Coordinate descent uses the $w_0$ to see what $\alpha_0$ is likely to be non-zero.
+
 This is difficult. However we can approximate it with a shrink operation. FISTA scheme of \cite{girard2015sparse}.
 We use the soft thresholding operation as a probability distribution. We take the $w_0$ image and see likely relevant pixels and use Coordinate Descent to find its optimum value. A visual example \ref{cd:heuristic:figure}.
 
@@ -133,19 +137,19 @@ The starlet decomposition is over-complete dictionary.
 
 We can use the decomposition as a heuristic, and we do not need to use starlet as reconstruction wavelet. We could also use for example Gaussian functions, and use the starlet decomposition to find out likely locations of what size of Gaussian.
 
-In this work, we did not simply use the starlet wavelet for reconstruction, we modified it to be non-negative. Our images have to be non-zero.
+In this work, we did not simply use the starlet wavelet for reconstruction, we modified it to be non-negative. 
 
 \subsubsection{Handling the non-negativity constraint}
-As mentioned in section \ref{cd}, image reconstruction algorithms for radio astronomy typically constrain the image to be non-negative\cite{mcewen2011compressed}.
+Reconstruction algorithms for radio astronomy typically constrain the image to be non-negative\cite{mcewen2011compressed}. This work orientates itself after the SASIR algorithm\cite{girard2015sparse}. It used the starlet transform together with the FISTA algorithm. Handling the non-negativity constraint in this setting is easier, and we have a translation issue in the context of Coordinate Descent.
 
-This work orientates itself after the 
+The SASIR algorithm decomposes the image into starlet layers as in equation \eqref{cd:starlet:decomposition}. It never needs to calculate $\alpha_i$. Instead, it uses the shrink operation on the individual starlet layers $w_i$, essentially using it as a constraint on pixels. In this setting, the shrink operator can simply set every negative pixel of $w_i$ to zero. The reconstructed image results from the addition of the individual layers as shown in equation \ref{cd:starlet:backwards}, $x$ is also non-negative.
 
-The difference between $\alpha$ and $w_i$ is not always important. For the SASIR algorithm,  for FISTA, which is how \cite{girard2015sparse} used the starlet transform for regularization, shrinkage on $w_i$ without convolution.
-
-For FISTA, this is irrelevant, but for Coordinate descent it is important. note on the shrinkage
-
-
-the original starlet people \cite{starck2015starlet} does not differentiate between $\alpha$ and $w_i$, and neither did \cite{girard2015sparse}. For the Coordinate Descent implementation it is relevant for handling the positivity constraint.
+Coordinate Descent reconstructs $\alpha_i$. $\alpha_i$ is constrained to be non negative. However, since we convolve $\alpha_i$ with the starlet, which has negative sections, the resulting $w_i$ also has negative pixels. We have three ways to resolve this:
+\begin{enumerate}
+	\item cutting the image $x$
+	\item cutting the starlet layers $w_i$
+	\item cutting the starlet wavelet
+\end{enumerate}
 
 
 
