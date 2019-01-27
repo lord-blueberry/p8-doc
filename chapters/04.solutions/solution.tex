@@ -24,15 +24,10 @@ The first objective \eqref{killmajor:sep:major} uses the non-uniform FFT approxi
 
 The downside of this architecture lies in the $PSF$ of the second objective. The $PSF$ varies over the image. For the most accurate result, we would need a $PSF$ for each pixel. A single $PSF$ is calculated from our Visibilities, where all amplitudes are 1 and phase-shifted to the desired position. For every $PSF$ calculation we need another non-uniform FFT approximation, leading to a quadratic runtime.
 
-CLEAN gets away with a constant $PSF$\footnote{CLEAN implementations in Radio Astronomy typically use a constant $PSF$. This is not necessary, one can also implement CLEAN with a varying $PSF$.}, because of the Major Cycle architecture. In each cycle, it can reduce the error it introduced in the previous cycle, leading to a more accurate reconstruction. In the new architecture, we need several $PSF$s for a comparable accuracy to the Major Cycle, and this number dictates whether we can reduce the runtime costs. How many $PSF$s are necessary seems currently unknown in the Radio Astronomy community, as the question becomes irrelevant for the Major Cycle. It is unknown if this architecture leads to reduced runtime costs.
+CLEAN gets away with a constant $PSF$\footnote{CLEAN implementations in Radio Astronomy typically use a constant $PSF$. This is not necessary, one can also implement CLEAN with a varying $PSF$.}, because of the Major Cycle architecture. In each cycle, it can reduce the error it introduced in the previous cycle, leading to a more accurate reconstruction. In the new architecture, we need several $PSF$s for a comparable accuracy to the Major Cycle, and this number dictates whether we can reduce the runtime costs. The question, how many $PSF$s are necessary, seems currently unknown in the Radio Astronomy community, as it becomes irrelevant for the Major Cycle. As of the time of writing, we do not know of any published research into this area. We do not have good estimates on the viability of this architecture.
 
+The main advantage for this architecture is that it reduces the problem to a uniformly-sampled grid, and ignore the original Visibilities in later steps. However, in the context of self-calibration, we cannot ignore the non-uniformly sampled Visibilities. We need a transformation from the image back to the original Visibilities and improve the calibration parameters. Self-calibration negates the main advantage of the architecture. Unless we find a way to map the Visibilities together with their calibration parameters on a uniformly-sampled grid, this architecture does not seem practical for MeerKAT.
 
-How many are necessary is not a trivial question, and at least in Radio Astronomy, there are no known works into this area.
-
-
-
-
-For calibrated data, this approach may be potentially faster. but since MeerKAT will be difficult to calibrate correctly, this is unlikely.
 
 \subsection{Spherical Harmonics}
 Spherical Harmonics are a different way to represent the measurements of an interferometer. Carozzi\cite{carozzi2015imaging} derived a measurement equation based on the fact that the Visibilities fulfils the Helmholtz equation. In practical terms, Carozzi showed we can replace the non-uniform FFT with the Spherical Harmonics Transform in the Major Cycle architecture.
