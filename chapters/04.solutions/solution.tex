@@ -1,71 +1,53 @@
 \section{Eliminating the Major Cycle}\label{killmajor}
 Although Compressed Sensing algorithms produce higher quality reconstructions, the CLEAN algorithm so far has lower runtime costs. Both use a version of the Major Cycle architecture for efficient transformation of Visibilities to image space, and to correct the effects of wide field of view imaging. This project explores different architectures for Compressed Sensing, with the goal to decrease the runtime costs in the context of MeerKAT.
 
-To our knowledge, there is little published research in this area. Many Compressed Sensing reconstructions use the Major Cycle architecture\cite{girard2015sparse}\cite{dabbech2018cygnus}\cite{mcewen2011compressed}\cite{pratley2018fast} and do not discuss alternatives. Pratley et al\cite{pratley2017robust} optimized the non-uniform FFT in the context of Compressed Sensing reconstructions. Dabbech et al.\cite{dabbech2017wEffect} investigated $w$-term approximations for reducing runtime costs of Compressed Sensing reconstructions, but still used the Major Cycle architecture. Hardy et al.\cite{hardy2013direct} explored an alternative to the Major Cycle. They replaced the non-uniform FFT approximation with an explicit Fourier Transform Matrix.
+Many Compressed Sensing reconstructions use the Major Cycle architecture\cite{girard2015sparse, dabbech2018cygnus, mcewen2011compressed, pratley2018fast}  and do not discuss alternatives. Runtime improvements are explored in the context of the Major Cycle. Pratley et al\cite{pratley2017robust} optimized the non-uniform FFT in the context of Compressed Sensing reconstructions. Dabbech et al.\cite{dabbech2017wEffect} investigated $w$-term approximations for reducing runtime costs of Compressed Sensing reconstructions. 
 
-The work of Hardy et al. asked a similar question to this work. We want to extend it. In this section, we discuss three possible alternatives to the Major Cycle: Separating the Major Cycle in two Optimization problems, using Spherical Harmonics,
+An alternative to the Major Cycle was investigated by Hardy et al.\cite{hardy2013direct}. They replaced the non-uniform FFT with the direct Fourier transform and distributed the problem.
 
+We
 
-
-For new architectures, we need to handle the $w$ term and self calibration
-
+We want explore further and discuss. why they don't work.
+In this section, we discuss three possible alternatives to the Major Cycle: Separating the Major Cycle in two Optimization problems, using Spherical Harmonics,
 
 
 
 \subsection{Separating the Major Cycle into two Optimization Problems}
-The major cycle reduces two errors simultaneously. The error introduced by the non-uniform FFT approximation, and the error introduced by the deconvolution approximation. In a sense, the major cycle is a simple optimization algorithm: It iteratively calls the non-uniform FFT and deconvolution approximations with the error from the last iteration, until the error is below a certain threshold.
+In each iteration, the Major Cycle reduces the error from both, the non-uniform FFT approximation, and from incomplete measurements. Here, we discuss the potentials and problems of separating the problem into two optimization objectives \eqref{killmajor:sep:major} \eqref{killmajor:sep:deconv} and solve each after the other. This architecture only needs the dirty image for further processing, which is several times smaller than the Visibility measurements.
 
 \begin{alignat}{1}
-FT:\: \underset{I_{dirty}}{minimize} \:& \left \|  V - AI_{dirty} \right \|_2^2\label{killmajor:sep:major}\\
-deconvolution:\: \underset{x}{minimize} \:& \left \| I_{dirty} - x \star PSF \right \|_2^2 + \lambda \left \| P(x) \right \|_1 \label{killmajor:sep:deconv}
+\underset{I_{dirty}}{minimize} \:& \left \|  V - \tilde{F}I_{dirty} \right \|_2^2\label{killmajor:sep:major}\\
+\underset{x}{minimize} \:& \left \| I_{dirty} - x \star PSF \right \|_2^2 + \lambda \left \| P(x) \right \|_1 \label{killmajor:sep:deconv}
 \end{alignat}
 
-The major cycle can also be separated into two objectives \eqref{killmajor:sep:major} and \eqref{killmajor:sep:deconv}, and solved in sequence. The first objective \eqref{killmajor:sep:major} tries to find the best uniformly spaced image $I_{dirty}$ matching the observation. $A^{-1}$ represents the non-uniform inverse FFT approximation ($A^{-1}I_{dirty} \approx F^{-1}I_{dirty}$). When this is solved, the original Visibility measurements are not needed any more. Then, the second objective \eqref{killmajor:sep:deconv} searches for the deconvolved image $x$ regularized by some prior $P()$.
+The first objective \eqref{killmajor:sep:major} uses the non-uniform FFT approximation $\tilde{F}$ and searches for the optimal dirty image matching the Visibilities. The optimization algorithm for the first objective looks similar to the Major Cycle architecture. It still uses the non-uniform FFT approximation, and iteratively transforms the Visibilities to image space and back. In this architecture however, we can use specialized optimization algorithms potentially uses fewer non-uniform FFT approximations to converge to the dirty image. At this point, we can drop the original Visibility measurements and only use the dirty image for further processing. We reconstruct the observed image $x$ by minimizing a the second objective \eqref{killmajor:sep:deconv}, which just needs the dirty image and the $PSF$.
 
-By separating the two objectives, the hope is we can use specialized optimization algorithms that overall converge faster than several major cycles. Also, after the first objective was minimized, we can drop the Visibilities, which can be magnitudes larger than the image. 
+The downside of this architecture lies in the $PSF$ of the second objective. The $PSF$ varies over the image. For the most accurate result, we would need a $PSF$ for each pixel. A single $PSF$ is calculated from our Visibilities, where all amplitudes are 1 and phase-shifted to the desired position. For every $PSF$ calculation we need another non-uniform FFT approximation, leading to a quadratic runtime.
 
-At first glance, this is a sensible idea, but the devil is in the objective \eqref{killmajor:sep:deconv}. Namely in the $PSF$ is not constant, it varies over the image. In the Major Cycle Architecture, a constant $PSF$\footnote{CLEAN implementations in Radio Astronomy typically use a constant $PSF$. This is not necessary, one can also implement CLEAN with a varying $PSF$.} is sufficient: It only needs to approximate the deconvolution. The error introduced by a constant $PSF$ can be reduced in the next Major Cycle. By eliminating the Major Cycle, we also eliminated the chance to approximate the deconvolution with a constant $PSF$. In the worst case, we would need to estimate the $PSF$ for each pixel in the image.
+CLEAN gets away with a constant $PSF$\footnote{CLEAN implementations in Radio Astronomy typically use a constant $PSF$. This is not necessary, one can also implement CLEAN with a varying $PSF$.}, because of the Major Cycle architecture. In each cycle, it can reduce the error it introduced in the previous cycle, leading to a more accurate reconstruction. In the new architecture, we need several $PSF$s for a comparable accuracy to the Major Cycle. 
 
-In the worst case, these many $PSF$s may stop us from using this approach. It is plausible that can use fewer $PSF$s and be close enough. No known work done in the radio astronomy. The Major Cycle is ubiquitous. But it is plausible.
 
-However, the problem is that the imaging algorithm should also be able to calibrate. With this approach, there is a strict one way flow from measurements to image. For calibration, a backwards flow from image to measurements is necessary.
 
 For calibrated data, this approach may be potentially faster. but since MeerKAT will be difficult to calibrate correctly, this is unlikely.
 
-Fourier Transform for PSF
+\subsection{Spherical Harmonics}
+Spherical Harmonics are a different way to represent the measurements of an interferometer. Carozzi\cite{carozzi2015imaging} derived a measurement equation based on the fact that the Visibilities fulfils the Helmholtz equation. In practical terms, Carozzi showed we can replace the non-uniform FFT with the Spherical Harmonics Transform in the Major Cycle architecture.
 
-\subsection{Reconstruction on the Sphere}
-The signal naturally lives on the celestial sphere.
+Deconvolution algorithms like CLEAN are still possible, but the true potential is reconstructing on the sphere directly. MCewen et al.\cite{mcewen2008simulating} showed how to do wavelets on the sphere and used it to speed up the simulation of Visibilities.
 
-Not that much used in Radio Astronomy reconstructions. Work that uses to project on the sphere and looks at the reconstruction quality \cite{mcewen2011compressed}.
+This is the only work in that area. The rest is focussed on improving the reconstruction quality instead of speed.\cite{mcewen2011compressed}
 
-The wide field of view measurement equation \eqref{meerkat:ftsphere} can be expanded into spherical harmonics.
+It is unknown, maybe there is a way to improve the runtime, but so far nobody has published anything.
 
-\cite{carozzi2015imaging} measurement equation with spherical harmonics. Essentially replaces the non-uniform FFT from the Major cycle with a new approach based on the fact that it has a solution to the Helmholtz equation.
-, see \cite{carozzi2015imaging} for further detail. It can be used as a different way to arrive at a dirty image from wide field of view interferometers. It is useful in full sky image, because it fulfills the (property from paper) and the full sky dirty image does not have artifacts. It does not gain any complexity advantage, quite the contrary.
+If there is, it may be difficult to translate calibration, ionosphere and the stuff to the spherical harmonics measurement equation. 
 
-Even if the spherical harmonics transform would gain a speed advantage, used in the way of \cite{carozzi2015imaging} it would still be the same major cycle architecture, just with spherical harmonics transform.
-
-However there is the possibility to just do everything on the sphere.
-
-Spherical haar wavelets used for simulating visibilities from a known image, essentially the opposite operation from imaging. \cite{mcewen2008simulating}
-
-based on the spherical harmonic transform. Doing a Spherical harmonic transform efficiently is still an active field of research \cite{schaeffer2013efficient}
-
-transform
-. The wide field of view measurement equation \eqref{meerkat:ftsphere} can be factorized into spherical harmonics. This means spherical harmonics are equivalent, calculating an image from the measurements with the three dimensional fourier transform is the same as using the spherical harmonics transform. \cite{shaw2014all}
-
-\cite{mcewen2013sparse}sampling theorem on a sphere
+We have had decades of Fourier-related experience and what effects they do. RIME
 
 
-
-Spherical harmonics were researched in the context of Compressed Sensing image reconstructions (cite wiaux). They improved the quality of the image reconstruction, but no speed advantage.
-
-The push on solving on the sphere directly. Using spherical haar wavelets, (cite) was able to speed up the simulation problem. Simulation tries to solve to problem of finding the measurements corresponding to a given image $x$. However, this has so far not been used for imaging.
+\subsection{Direct Fourier Transform improvement}
 
 
-\subsection{Direct Fourier Transform}
-Hardy et al\cite{hardy2013direct} handled the whole inverse Fourier Transform as an explicit matrix $F^{-1}$ of size  $M*N$. They dropped the non-uniform FFT and $w$-stacking approximations. This is trivially to distribute later. The only problem is of Course that for MeerKAT data sizes $M*N$ is too large (4gb of visibilities times $1$ Billion Pixels).
+Hardy et al\cite{hardy2013direct} handled the whole inverse Fourier Transform as an explicit matrix $F^{-1}$ of size  $M*N$. They dropped the non-uniform FFT and $w$-stacking approximations. This is trivially to distribute later. The only problem is of Course that for MeerKAT data sizes $M*N$ is too large ().
 
 However there is potential for improvement: Only a limited number of pixels in a reconstruction are not zero. We spent a lot of processing power on pixels which do not matter in the reconstruction. If we could predict which pixels are not zero, we would only need to calculate a subset of $F^{-1}$ columns to reconstruct the image. The starlet transform\cite{starck2015starlet} has a way to predict its non-zero components. We represent the image as a combination of starlets, and estimate which starlets are likely non-zero from the Visibilities directly.
 

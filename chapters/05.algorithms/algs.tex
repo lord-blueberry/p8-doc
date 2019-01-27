@@ -1,4 +1,4 @@
-\section{Compressed Sensing with direct Fourier Transform\\ and Coordinate Descent}\label{cd}
+\section{Compressed Sensing with Coordinate Descent\\ and the direct Fourier Transform}\label{cd}
 Instead of using the Major Cycle architecture and approximate the non-uniform FFT approximation, we directly use the Fourier transform matrix $F$. We show the principle of our approach and of Compressed Sensing reconstructions in general at a simplified example. Let us minimize the objective function \eqref{cd:clean}.
 
 \begin{equation}\label{cd:clean}
@@ -69,7 +69,9 @@ The starlet transform is an Isotropic Undecimated Wavelet Transform (IUWT) with 
 \end{aligned}
 \end{equation}
 
-Let us look at the lowest starlet layer first, how it is calculated from the image, and how we use it for image reconstruction. The starlet layer $w_0$ gets calculated in two steps, shown in \eqref{cd:starlet:w0}. First, we take the scaling function, shown in image \ref{cd:starlets:scaling} and denoted ad $B_0$, and convolve the image with it, resulting in the convolved image of layer 0 $c_0$. The final step is subtracting $c_0$ from $x$. This removes larger structures from the image and the starlet layer $w_0$ is left with only the smaller structures. 
+Let us look at the lowest starlet layer first, how it is calculated from the image, and how we use it for image reconstruction. The starlet layer $w_0$ gets calculated in two steps, shown in \eqref{cd:starlet:w0}. First, we take the scaling function(image \ref{cd:starlets:scaling}) denoted ad $B_0$, and convolve the image with it. The resulting convolved image is denoted as $c_0$. The final step is subtracting $c_0$ from $x$. This removes larger structures from the image and the starlet layer $w_0$ is left with only point sources of $x$.
+
+The layer $w_0$ contains 
 
 $w_0$  has the same dimensions as the input image. It contains the point sources of the image convolved with the starlet wavelet \ref{cd:starlets:wavelet}. The last step for finding the point sources $\alpha_0$, is to deconvolve $w_0$.
 
