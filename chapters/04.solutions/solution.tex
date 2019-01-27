@@ -13,18 +13,22 @@ In this section, we discuss three possible alternatives to the Major Cycle: Sepa
 
 
 \subsection{Separating the Major Cycle into two Optimization Problems}
-In each iteration, the Major Cycle reduces the error from both, the non-uniform FFT approximation, and from incomplete measurements. Here, we discuss the potentials and problems of separating the problem into two optimization objectives \eqref{killmajor:sep:major} \eqref{killmajor:sep:deconv} and solve each after the other. This architecture only needs the dirty image for further processing, which is several times smaller than the Visibility measurements.
+In each iteration, the Major Cycle reduces the error from both, the non-uniform FFT approximation, and from incomplete measurements. Here, we discuss the potentials and problems of separating the problem into two optimization objectives \eqref{killmajor:sep:major} \eqref{killmajor:sep:deconv} and solve each after the other. This architecture only needs the dirty image for further processing, which is several times smaller than the original Visibility measurements.
 
 \begin{alignat}{1}
 \underset{I_{dirty}}{minimize} \:& \left \|  V - \tilde{F}I_{dirty} \right \|_2^2\label{killmajor:sep:major}\\
 \underset{x}{minimize} \:& \left \| I_{dirty} - x \star PSF \right \|_2^2 + \lambda \left \| P(x) \right \|_1 \label{killmajor:sep:deconv}
 \end{alignat}
 
-The first objective \eqref{killmajor:sep:major} uses the non-uniform FFT approximation $\tilde{F}$ and searches for the optimal dirty image matching the Visibilities. The optimization algorithm for the first objective looks similar to the Major Cycle architecture. It still uses the non-uniform FFT approximation, and iteratively transforms the Visibilities to image space and back. In this architecture however, we can use specialized optimization algorithms potentially uses fewer non-uniform FFT approximations to converge to the dirty image. At this point, we can drop the original Visibility measurements and only use the dirty image for further processing. We reconstruct the observed image $x$ by minimizing a the second objective \eqref{killmajor:sep:deconv}, which just needs the dirty image and the $PSF$.
+The first objective \eqref{killmajor:sep:major} uses the non-uniform FFT approximation $\tilde{F}$ and searches for the optimal dirty image matching the Visibilities. The optimization algorithm for the first objective looks similar to the Major Cycle architecture. It still uses the non-uniform FFT approximation, and iteratively transforms the Visibilities to image space and back. In this architecture, we can use specialized optimization algorithms potentially uses fewer non-uniform FFT approximations to converge to the dirty image. At this point, we can drop the original Visibility measurements and only use the dirty image for further processing. The error introduced by the incomplete set of Visibilities can be represented as a convolution in image space with a Point Spread Function. The second objective \eqref{killmajor:sep:deconv} therefore can minimized to reconstruct the observed image $x$, which just needs the dirty image and the $PSF$.
 
 The downside of this architecture lies in the $PSF$ of the second objective. The $PSF$ varies over the image. For the most accurate result, we would need a $PSF$ for each pixel. A single $PSF$ is calculated from our Visibilities, where all amplitudes are 1 and phase-shifted to the desired position. For every $PSF$ calculation we need another non-uniform FFT approximation, leading to a quadratic runtime.
 
-CLEAN gets away with a constant $PSF$\footnote{CLEAN implementations in Radio Astronomy typically use a constant $PSF$. This is not necessary, one can also implement CLEAN with a varying $PSF$.}, because of the Major Cycle architecture. In each cycle, it can reduce the error it introduced in the previous cycle, leading to a more accurate reconstruction. In the new architecture, we need several $PSF$s for a comparable accuracy to the Major Cycle. 
+CLEAN gets away with a constant $PSF$\footnote{CLEAN implementations in Radio Astronomy typically use a constant $PSF$. This is not necessary, one can also implement CLEAN with a varying $PSF$.}, because of the Major Cycle architecture. In each cycle, it can reduce the error it introduced in the previous cycle, leading to a more accurate reconstruction. In the new architecture, we need several $PSF$s for a comparable accuracy to the Major Cycle, and this number dictates whether we can reduce the runtime costs. How many $PSF$s are necessary seems currently unknown in the Radio Astronomy community, as the question becomes irrelevant for the Major Cycle. It is unknown if this architecture leads to reduced runtime costs.
+
+
+How many are necessary is not a trivial question, and at least in Radio Astronomy, there are no known works into this area.
+
 
 
 
@@ -43,9 +47,11 @@ If there is, it may be difficult to translate calibration, ionosphere and the st
 
 We have had decades of Fourier-related experience and what effects they do. RIME
 
+Proof of concept implementations. Not a reconstruction algorithm with Spherical Harmonics transform which handles a realitic instrument.
 
 \subsection{Direct Fourier Transform improvement}
 
+Simplify realistic
 
 Hardy et al\cite{hardy2013direct} handled the whole inverse Fourier Transform as an explicit matrix $F^{-1}$ of size  $M*N$. They dropped the non-uniform FFT and $w$-stacking approximations. This is trivially to distribute later. The only problem is of Course that for MeerKAT data sizes $M*N$ is too large ().
 
