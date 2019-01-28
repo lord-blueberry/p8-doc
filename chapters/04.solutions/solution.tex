@@ -44,10 +44,6 @@ Although there seems untapped potential for new, cheaper reconstruction algorith
 \subsection{Direct Fourier Transform on a large scale}
 The direct Fourier Transform does not use the non-uniform FFT approximation. It uses the full $F$ matrix in \eqref{intro:cs}. It naturally extends to wide field of view imaging, and can handle the $w$-term without any approximation algorithms. Using the direct Fourier Transform simplifies the architecture of the reconstruction. Without the approximation algorithm. The drawback is either a large memory requirement for caching, or high runtime costs for continually calculating the transform matrix. For MeerKAT reconstructions where we reconstruct millions of pixels from several billions of Visibilities, the matrix becomes too large for any practical application.
 
-However, the full Fourier matrix is not needed.
+However, the full Fourier matrix is not needed. Remember that CLEAN assumes the image is sparse, meaning only a few pixels are non-zero. In practice, even with extended emissions in the image, large regions of pixels are zero. They do not contribute to the reconstruction. Other Compressed Sensing reconstructions showed that the reconstructed image can be more sparsely represented in an over-complete wavelet basis. Girard et al.\cite{girard2015sparse} used the over-complete starlet transform, and Dabbech et al.\cite{dabbech2018cygnus} represent the image in several Daubechies frames. In a sparse reconstruction space, we only need to calculate the direct Fourier Transform for non-zero components of our basis, reducing the memory and runtime costs of the direct Fourier Transform.
 
-Sparse in the image domain. Only Columns necessary of non-zero pixels.
-
-Even more sparse in a different domain, for example Starlets \cite{girard2015sparse}. or Daubechies Frames\cite{dabbech2018cygnus}.
-
-If we can estimate which columns are likely non-zero, we just need to calculate a subset of the Fourier matrix $F$.
+In this project, we leverage the starlet transform and create an algorithm which uses the direct Fourier Transform for a few non-zero starlet components.

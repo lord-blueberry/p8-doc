@@ -93,9 +93,9 @@ The second region in figure \ref{results:mixed:cut1:contour} is more complex. It
 	\label{results:mixed:cut1:contour}
 \end{figure}
 
-Indeed, 
+Compared to CLEAN, Coordinate Descent with the modified starlet regularization reconstructed the image with a more accurate total flux, and located the point sources below the accuracy of the instrument. The quality of the point source reconstruction varies. The figure \ref{results:mixed:points} shows four different point sources of the image \ref{results:mixed:cd} in detail. 
 
-More complex source. We see a super resolution and again more accurate flux. Point sources on the other hand, do become problematic. We see one point souce split up in two very narrow peak. When we look at other point sources of figure \ref{results:mixed:points}, we see mixed results. Some point sources are reconstructed as we would wish, with one high peak in the center, locating the point source, and a small starlet artifact which is the low intensity "glow" around it. The first point source is what we would wish for. We show a few failure modes of point source reconstruction. A lower intensity "trail" in the second image and a split into two point sources of images three and four.
+The left image shows a good reconstruction.
 
 \begin{figure}[h]
 	\centering
@@ -114,6 +114,11 @@ More complex source. We see a super resolution and again more accurate flux. Poi
 	\caption{Different point source reconstructions of Coordinate Descent.}
 	\label{results:mixed:points}
 \end{figure}
+
+
+More complex source. We see a super resolution and again more accurate flux. Point sources on the other hand, do become problematic. We see one point souce split up in two very narrow peak. When we look at other point sources of figure \ref{results:mixed:points}, we see mixed results. Some point sources are reconstructed as we would wish, with one high peak in the center, locating the point source, and a small starlet artifact which is the low intensity "glow" around it. The first point source is what we would wish for. We show a few failure modes of point source reconstruction. A lower intensity "trail" in the second image and a split into two point sources of images three and four.
+
+
 
 problem of an error, since Coordinate Descent should have converged on the two point sources.
 
