@@ -127,17 +127,11 @@ In this work, we do not use the wavelet shown in image \ref{cd:starlets:wavelet}
 
 
 \subsubsection{Starlet Wavelet Modification}
-Reconstruction algorithms for Radio Astronomy typically constrain the image to be non-negative\cite{mcewen2011compressed}. This work orientates itself after the SASIR algorithm\cite{girard2015sparse}. It used the starlet transform together with the FISTA algorithm. Handling the non-negativity constraint in this setting is easier, and we have a translation issue in the context of Coordinate Descent.
+Reconstruction algorithms for Radio Astronomy typically constrain the image to be non-negative\cite{mcewen2011compressed}. We can constrain the starlet components $\alpha_i$ to be non-negative, but the starlet wavelet has negative sections. Which leads to negative areas in the layers $w_0$, and negative pixel values in the reconstructed image $x$.
 
-The SASIR algorithm decomposes the image into starlet layers as in equation \eqref{cd:starlet:decomposition}. It never needs to calculate $\alpha_i$. Instead, it uses the shrink operation on the individual starlet layers $w_i$, essentially using it as a constraint on pixels. In this setting, the shrink operator can simply set every negative pixel of $w_i$ to zero. The reconstructed image results from the addition of the individual layers as shown in equation \ref{cd:starlet:backwards}, $x$ is also non-negative.
+The simple fix is to either set all negative pixels of $x$ to zero, or to set negative values of $w_i$ to zero. Both lead to slightly different artefacts in the $x$, and both do not lead to significantly better results.
 
-Coordinate Descent reconstructs $\alpha_i$. $\alpha_i$ is constrained to be non negative. However, since we convolve $\alpha_i$ with the starlet, which has negative sections, the resulting $w_i$ also has negative pixels. We have three ways to resolve this:
-\begin{enumerate}
-	\item cutting the image $x$
-	\item cutting the starlet layers $w_i$
-	\item cutting the starlet wavelet
-\end{enumerate}
-
+For reconstruction, we modify the starlet wavelet and set all negative sections to zero. At this point, the reconstruction starlet is arguably not a wavelet any more, since its integral is larger than zero. But now the Coordinate Descent algorithm can reconstruct a non-negative image which has led to a more sparse representation of images in the next section.
 
 
 \subsection{Coordinate Descent Implementation}
