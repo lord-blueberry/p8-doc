@@ -120,7 +120,8 @@ print(ggplot(data = df, aes(x=points, y=values, colour=Legend)) +
         xlab("arc seconds") +
         ylab("Jansky/beam") +
         
-        theme(legend.text=element_text(size=11), 
+        theme(
+              legend.text=element_text(size=11), 
               legend.title=element_text(size=13)))
 dev.off()
 
@@ -186,7 +187,7 @@ pix = 256
 cut.row.names <- round(463:718*resol, digits=2)
 cut.col.names <- round(round(752:1007*resol, digits=2))
 cut.row <- 464:719
-cut.col <- 464:1008
+cut.col <- 753:1008
 scales = list(at=c(1, pix/8+1, pix/4+1, pix/8*3+1 ,pix/2+1, pix/8*5+1, pix/4*3+1, pix/8*7+1, pix))
 cut.model <- skymodel[cut.row, cut.col]
 rownames(cut.model) =cut.row.names
@@ -222,7 +223,8 @@ print(ggplot(data = df, aes(x=df$points, y=df$values, colour=Legend)) +
         geom_polygon(aes(fill=Legend), alpha=0.1) +
         xlab("arc seconds") +
         ylab("Jansky/beam") +
-        theme(legend.text=element_text(size=11), 
+        theme(legend.position="bottom",
+              legend.text=element_text(size=11), 
               legend.title=element_text(size=13)))
 dev.off()
 
@@ -270,7 +272,8 @@ print(ggplot(data = df, aes(x=df$points, y=df$values, colour=Legend)) +
         geom_polygon(aes(fill=Legend), alpha=0.1) +
         xlab("arc seconds") +
         ylab("Jansky/beam") +
-        theme(legend.text=element_text(size=11), 
+        theme(legend.position="bottom",
+              legend.text=element_text(size=11), 
               legend.title=element_text(size=13)))
 dev.off()
 png("./mixed/mixed_cut_model2.png",
