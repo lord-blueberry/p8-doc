@@ -20,6 +20,10 @@ Real world radio interferometers have complicated measurement equations. They be
 V(u, v) = \int\int I(x, y) e^{2 \pi i (ux+vy)} \: dx \: dy
 \end{equation}
 
+\begin{equation}\label{intro:cs}
+\underset{x}{minimize} \: \left \| V - Fx \right \|_2^2 + \lambda \left \| x \right \|_1
+\end{equation}
+
 An interferometer measures Fourier Components $V$ (called Visibilities in Radio Astronomy) from the sky image $I$ at position $x$ and $y$. The term $e^{2 \pi i (ux+vy)}$ represents the two dimensional Fourier Transform. The task is to reconstruct the observed image $I$ from the measured Visibilities $V$. In theory this task is trivial: Since the inverse Fourier Transform exists, we can reconstruct the image $I$ by calculating the inverse Fourier Transform of $V$. However, two properties of the Visibilities make this task challenging in practice:
 
 \begin{enumerate}
@@ -38,6 +42,11 @@ CLEAN represents the instrumental effect with a Point Spread Function (PSF). Aft
 
 \subsection{The Major Cycle Architecture}
 Major cycle was created with CLEAN in mind. Compressed sensing reconstructions use essentially the same architecture with minor modifications. 
+
+\begin{equation}\label{intro:clean}
+\underset{x}{minimize} \: \left \|  I_{Dirty} - x \star PSF \right \|_2^2 + \lambda \left \| x \right \|_1 \quad, \quad I_{Dirty} = \hat{F}^{-1} V
+\end{equation}
+
 
 A CLEAN image reconstruction for radio interferometers consists of two different steps: A non-uniform FFT, which approximates the inverse Fourier Transform efficiently and an deconvolution algorithm, which approximates the instrumental effects on the image (typically based on CLEAN). These two approximations are an error source of the reconstruction. The major cycle architecture \ref{intro:major} therefore tries to iteratively minimize the errors of the non-uniform FFT and the deconvolution over several iterations.
 

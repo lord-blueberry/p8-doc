@@ -22,7 +22,7 @@ In each iteration, the Major Cycle reduces the error from both, the non-uniform 
 
 The first objective \eqref{killmajor:sep:major} uses the non-uniform FFT approximation $\tilde{F}$ and searches for the optimal dirty image matching the Visibilities. The optimization algorithm for the first objective looks similar to the Major Cycle architecture. It still uses the non-uniform FFT approximation, and iteratively transforms the Visibilities to image space and back. In this architecture, we can use specialized optimization algorithms potentially uses fewer non-uniform FFT approximations to converge to the dirty image. At this point, we can drop the original Visibility measurements and only use the dirty image for further processing. The error introduced by the incomplete set of Visibilities can be represented as a convolution in image space with a Point Spread Function. The second objective \eqref{killmajor:sep:deconv} therefore can minimized to reconstruct the observed image $x$, which just needs the dirty image and the $PSF$.
 
-The downside of this architecture lies in the $PSF$ of the second objective. The $PSF$ varies over the image. For the most accurate result, we would need a $PSF$ for each pixel. A single $PSF$ is calculated from our Visibilities, where all amplitudes are 1 and phase-shifted to the desired position. For every $PSF$ calculation we need another non-uniform FFT approximation, leading to a quadratic runtime.
+The downside of this architecture lies in the $PSF$ of the second objective. The $PSF$ varies over the image. For the most accurate result, we would need a $PSF$ for each pixel. The naive way to calculate a $PSF$ for a pixel is to set all amplitudes of our Visibilities to 1, shift the phase to the desired pixel, and calculate the Fourier Transform. The naive way to calculate a $PSF$ for each pixel leads to a quadratic runtime.
 
 CLEAN gets away with a constant $PSF$\footnote{CLEAN implementations in Radio Astronomy typically use a constant $PSF$. This is not necessary, one can also implement CLEAN with a varying $PSF$.}, because of the Major Cycle architecture. In each cycle, it can reduce the error it introduced in the previous cycle, leading to a more accurate reconstruction. In the new architecture, we need several $PSF$s for a comparable accuracy to the Major Cycle, and this number dictates whether we can reduce the runtime costs. The question, how many $PSF$s are necessary, seems currently unknown in the Radio Astronomy community, as it becomes irrelevant for the Major Cycle. As of the time of writing, we do not know of any published research into this area. We do not have good estimates on the viability of this architecture.
 
@@ -30,17 +30,21 @@ The main advantage for this architecture is that it reduces the problem to a uni
 
 
 \subsection{Spherical Harmonics}
-Spherical Harmonics are a different way to represent the measurements of an interferometer. Carozzi\cite{carozzi2015imaging} derived a measurement equation based on the fact that the Visibilities fulfils the Helmholtz equation. In practical terms, Carozzi showed we can replace the non-uniform FFT with the Spherical Harmonics Transform in the Major Cycle architecture.
+Spherical Harmonics are a different way to represent the measurements of an interferometer. Carozzi\cite{carozzi2015imaging} derived a measurement equation based on the fact that the Visibilities fulfils the Helmholtz equation. In practical terms, Carozzi showed we can replace the non-uniform FFT with the Spherical Harmonics Transform in the Major Cycle architecture. Although the Spherical Harmonics Transform has interesting properties for full-sky imaging, this change alone neither leads to a different architecture, nor to a runtime improvement\footnote{The fast Spherical Harmonics Transform is a generalization of the non-uniform FFT\cite{kunisnonequispaced} and is still an active field of research\cite{schaeffer2013efficient}.}
 
-Deconvolution algorithms like CLEAN are still possible, but the true potential is reconstructing on the sphere directly. MCewen et al.\cite{mcewen2008simulating} showed how to do wavelets on the sphere and used it to speed up the simulation of Visibilities.
+Compared to the Fourier domain, Spherical Harmonics naturally represent wide field of view interferometers and do not have a third dimension. This opens up new designs for Compressed Sensing reconstructions. For example, we can reconstruct the image by in-painting the missing Spherical Harmonics. Because they naturally represent curved surfaces, we can in-paint in a two dimensional space instead of three. Another direction is to image on the sphere directly. MCewen et al.\cite{mcewen2008simulating} showed a way to put two dimensional wavelets on the sphere. A Compressed Sensing reconstruction can use a spherical wavelet as regularization and may simplify the transformation between measurements and reconstruction space.
 
-This is the only work in that area. The rest is focussed on improving the reconstruction quality instead of speed.\cite{mcewen2011compressed}
+%Eigenvalue
 
-It is unknown, maybe there is a way to improve the runtime, but so far nobody has published anything.
+Sadly, there is little published research in this area for radio astronomy image reconstructions. MCewen et al.\cite{mcewen2008simulating} improved the runtime costs of simulations with the spherical Haar wavelet. Later work\cite{mcewen2011compressed} showed a proof-of-concept Compressed Sensing reconstruction projected on the sphere, which improved the image quality. However, it did not use Spherical Harmonics and \cite{mcewen2011compressed} is still based on the Fourier transform.
+
+ plane-wave 
+
+This is the only work in that area. The rest is focussed on improving the reconstruction quality instead of speed.
 
 If there is, it may be difficult to translate calibration, ionosphere and the stuff to the spherical harmonics measurement equation. 
 
-We have had decades of Fourier-related experience and what effects they do. RIME
+We have had decades of Fourier-related experience and what effects they do. RIME. Not based on the helmholtz equation, but on the plane wave.
 
 Proof of concept implementations. Not a reconstruction algorithm with Spherical Harmonics transform which handles a realitic instrument.
 
