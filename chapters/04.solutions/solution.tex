@@ -10,6 +10,8 @@ We
 We want explore further and discuss. why they don't work.
 In this section, we discuss three possible alternatives to the Major Cycle: Separating the Major Cycle in two Optimization problems, using Spherical Harmonics,
 
+Chosen to do direct fourier transform.
+
 
 
 \subsection{Separating the Major Cycle into two Optimization Problems}
@@ -36,12 +38,10 @@ Compared to the Fourier domain, Spherical Harmonics naturally represent wide fie
 
 Sadly, there is little published research in this area for Radio Astronomy image reconstructions. MCewen et al.\cite{mcewen2008simulating} improved the runtime costs of simulations with the spherical Haar wavelet. Later work\cite{mcewen2011compressed} showed a proof-of-concept Compressed Sensing reconstruction projected on the sphere, which improved the image quality. However, it did not use Spherical Harmonics and \cite{mcewen2011compressed} is still based on the Fourier transform. At this point we have not found a proof-of-concept reconstruction algorithm which uses Spherical Harmonics to reduce runtime costs. 
 
-Although there seems untapped potential for new, cheaper reconstruction algorithms with Spherical Harmonics, practical limitations may explain the lack of research in this area. The Fourier relationship, Calibration, the effect of the ionosphere, everything discussed in section \ref{meerkat} is based on the formalism of a plane wave arriving at the instrument\cite{thompson1986interferometry, smirnov2011revisiting}. Spherical Harmonics are not. They are derived from a different property of the signal. As such, how self-calibration works with Spherical Harmonics may not be a trivial question.
+Although there seems untapped potential for new, cheaper reconstruction algorithms with Spherical Harmonics, practical limitations may explain the lack of research in this area. The Fourier relationship, Calibration, the effect of the ionosphere, everything discussed in section \ref{meerkat} is based on a plane wave arriving at the instrument\cite{thompson1986interferometry, smirnov2011revisiting}. Spherical Harmonics are not. They are derived from a different property of the signal. The plane wave formalism may not translate to Spherical Harmonics. We may need to re-invent self-calibration, ionosphere distortion and more for Spherical Harmonic reconstructions.
 
 
-
-
-\subsection{Direct Fourier Transform improvement}
+\subsection{Direct Fourier Transform on a large scale}
 
 Simplify realistic
 
