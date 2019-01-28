@@ -34,15 +34,15 @@ The WSCLEAN algorithm uses the Major Cycle architecture. It uses the non-uniform
 \begin{alignat*}{1}
 	\text{non-uniform FFT} &: M + 2N*ld(2N)\\
 	\text{non-uniform FFT with} \:w\text{-stacking} &:M + W*(2N*ld(2N) + 2N) + N*ld(N)\\
-	I_{WSCLEAN}\: \text{deconvolutions} &: I_{WSCLEAN}*2N
+	I_{CLEAN}\: \text{deconvolutions} &: I_{WSCLEAN}*2N
 \end{alignat*}
 
-The overall cost function shown in \eqref{results:clean:o} can also be split into two parts. In each Major Cycle, the forward and backwards non-uniform FFTs gets calculated, and CLEAN deconvolves the image for a certain number of iterations.
+The overall cost function shown in \eqref{results:clean:o} can also be split into two parts. In each Major Cycle, the forward and backwards non-uniform FFTs gets calculated, and CLEAN deconvolves the image for a maximum number of $I_{CLEAN}$ deconvolutions.
 
 \begin{equation}\label{results:clean:o}
 \begin{aligned}
  WSCLEAN(I_{Major}, I_{CLEAN}, M, N,  W) =\: &I_{Major} * 2 * [M + W*(2N*ld(2N) + 2N) + N log N]\\
-	&+ I_{Major} * [I_{CLEAN}*2N]
+	&+ [I_{CLEAN}*2N]
 \end{aligned}
 \end{equation}
 

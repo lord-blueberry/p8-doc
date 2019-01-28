@@ -39,7 +39,7 @@ CLEAN essentially places a Gaussian function with correct peak intensity at the 
 %Possible 
 
 \subsection{Super resolution of mixed sources}
-This dataset contains a mixture of three Gaussian emissions and sixteen point sources of varying intensities. At the center of the image, it has three point sources underlying a weak extended emission. The image center and one Gaussian emissions are analysed in detail. Coordinate Descent was run for two full iterations, using  $\lambda=0.01$ and $J=7$ starlet layers. The CLEAN and Coordinate Descent reconstructions are shown in figure \ref{results:mixed}. Our algorithm was able to locate the point sources below the accuracy limit of MeerKAT. However, some point sources were reconstructed with artefacts. We analyse two areas of the image in more detail.
+This dataset contains a mixture of three Gaussian emissions and sixteen point sources of varying intensities. At the center of the image, it has three point sources underlying a weak extended emission. The image center and one Gaussian emissions are analysed in detail. Coordinate Descent was run for two full iterations, using  $\lambda=0.01$ and $J=7$ starlet layers. The CLEAN and Coordinate Descent reconstructions are shown in figure \ref{results:mixed}. Our algorithm was able to locate the point sources below the accuracy limit of MeerKAT. However, some point sources were reconstructed with artefacts. We analyse two regions of the image in more detail.
 
 \begin{figure}[h]
 	\centering
@@ -57,7 +57,7 @@ This dataset contains a mixture of three Gaussian emissions and sixteen point so
 	\label{results:mixed}
 \end{figure}
 
-Let us look at the intensity profile of first area in figure \ref{results:mixed:cut0:contour}. The Ground truth in image \ref{results:mixed:cut0:img} shows a Gaussian extended emission with an oval shape. The figure \ref{results:mixed:cut0:profile} compares the intensity profile of Coordinate Descent with CLEAN and the ground truth. The intensity profile on the logarithmic scale emphasises the artefacts of the starlet reconstructions. Coordinate Descent used three starlets at different scales to approximate the extended emission. It reconstructed the flux more accurately, but did not capture the shape of the extended emission. Instead, it approximated the oval shape with a uniform Gaussian-like emission. CLEAN on the other hand, did not again over-estimated the flux, but captured the oval shape more accurately.
+Let us look at the intensity profile of first region in figure \ref{results:mixed:cut0:contour}. The Ground truth in image \ref{results:mixed:cut0:img} shows a Gaussian extended emission with an oval shape. The figure \ref{results:mixed:cut0:profile} compares the intensity profile of Coordinate Descent with CLEAN and the ground truth. The intensity profile on the logarithmic scale emphasises the artefacts of the starlet reconstructions. Coordinate Descent used three starlets at different scales to approximate the extended emission. It reconstructed the flux more accurately, but did not capture the shape of the extended emission. Instead, it approximated the oval shape with a uniform Gaussian-like emission. CLEAN on the other hand, did not again over-estimated the flux, but captured the oval shape more accurately.
 
 \begin{figure}[h]
 	\centering
@@ -75,9 +75,7 @@ Let us look at the intensity profile of first area in figure \ref{results:mixed:
 	\label{results:mixed:cut0:contour}
 \end{figure}
 
-The second area in figure \ref{results:mixed:cut1:contour} is more complex. It is an extended emission with 
-
-More accurate total flux reconstruction, but no
+The second region in figure \ref{results:mixed:cut1:contour} is more complex. It contains an extended Gaussian emission with several point sources. The intensity profile is cut through the center and two point sources shown in the ground truth image \ref{results:mixed:cut1:img}. CLEAN again accurately reconstructs the peak intensity of the point sources, but over-estimates the total flux of the region. Coordinate Descent separates the point source from the extended emission. Sadly, the first point source seems again shifted by a pixel, while the second point source was reconstructed with three peaks at varying intensities.
 
 \begin{figure}[h]
 	\centering
@@ -94,6 +92,8 @@ More accurate total flux reconstruction, but no
 	\caption{Intensity profile of region 2.}
 	\label{results:mixed:cut1:contour}
 \end{figure}
+
+Indeed, 
 
 More complex source. We see a super resolution and again more accurate flux. Point sources on the other hand, do become problematic. We see one point souce split up in two very narrow peak. When we look at other point sources of figure \ref{results:mixed:points}, we see mixed results. Some point sources are reconstructed as we would wish, with one high peak in the center, locating the point source, and a small starlet artifact which is the low intensity "glow" around it. The first point source is what we would wish for. We show a few failure modes of point source reconstruction. A lower intensity "trail" in the second image and a split into two point sources of images three and four.
 
