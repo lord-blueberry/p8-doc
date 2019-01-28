@@ -43,6 +43,7 @@ Although the algorithm produces super-resolved images in section \ref{results}, 
 
 
 \subsection{The Starlet Transform} \label{cd:starlets}
+First we introduce the starlet transform, and then describe how we use it to estimate likely non-zero starlet components.
 
 \begin{figure}[h]
 	\centering
@@ -60,7 +61,7 @@ Although the algorithm produces super-resolved images in section \ref{results}, 
 	\label{cd:starlets:figure}
 \end{figure}
 
-The starlet transform is an Isotropic Undecimated Wavelet Transform (IUWT) with the starlet wavelet shown in figure \ref{cd:starlets:figure}. It defines two operations: The transformation from starlet into image space which is called synthesis, and the inverse which is called decomposition. The starlet space represents an image in multiple layers at different scales, where lower layers contain smaller objects and upper layers the extended emissions. The lowest starlet layer represents the stars, while the upper layer represents the largest hydrogen clouds in the image.
+The starlet transform is an Isotropic Undecimated Wavelet Transform (IUWT) with the starlet wavelet shown in figure \ref{cd:starlets:figure}. It defines two operations: The transformation from starlet into image space which is called synthesis, and the inverse which is called decomposition. The starlet space represents an image in multiple layers at different scales, where lower layers contain smaller objects and upper layers the extended emissions. The lowest starlet layer represents the stars, while the upper layer represents the widest hydrogen clouds in the image.
 
 \begin{equation}\label{cd:starlet:w0}
 \begin{aligned}
@@ -69,18 +70,9 @@ The starlet transform is an Isotropic Undecimated Wavelet Transform (IUWT) with 
 \end{aligned}
 \end{equation}
 
-Let us look at the lowest starlet layer first, how it is calculated from the image, and how we use it for image reconstruction. The starlet layer $w_0$ gets calculated in two steps, shown in \eqref{cd:starlet:w0}. First, we take the scaling function(image \ref{cd:starlets:scaling}) denoted ad $B_0$, and convolve the image with it. The resulting convolved image is denoted as $c_0$. The final step is subtracting $c_0$ from $x$. This removes larger structures from the image and the starlet layer $w_0$ is left with only point sources of $x$.
+Let us look at the lowest starlet layer first, how it is calculated from the image, and how we use it for image reconstruction. The starlet layer $w_0$ gets calculated in two steps, shown in \eqref{cd:starlet:w0}. First, we take the scaling function for the lowest layer $B_0$, and convolve the image with it, resulting in the blurred image $c_0$. The blurring removes the smaller structures of the image. In the last step, we subtract the blurred image $c_0$ from $x$ and arrive at the starlet layer 0, $w_0$. It contains the smallest structure of the image convolved with the starlet wavelet. 
 
-The layer $w_0$ contains 
-
-$w_0$  has the same dimensions as the input image. It contains the point sources of the image convolved with the starlet wavelet \ref{cd:starlets:wavelet}. The last step for finding the point sources $\alpha_0$, is to deconvolve $w_0$.
-
-$w_0$ is not sparse. $\alpha_0$ is sparse.
-
-Coordinate descent uses the $w_0$ to see what $\alpha_0$ is likely to be non-zero.
-
-This is difficult. However we can approximate it with a shrink operation. FISTA scheme of \cite{girard2015sparse}.
-We use the soft thresholding operation as a probability distribution. We take the $w_0$ image and see likely relevant pixels and use Coordinate Descent to find its optimum value. A visual example \ref{cd:heuristic:figure}.
+This is where the starlet transform ends. Note that we do not get the actual starlet components $\alpha_0$ for the layer. The transformation just decomposes the structures of the image into layers. The actual starlet components $\alpha_0$ would be the result of a deconvolution. 
 
 \begin{figure}[h]
 	\centering
@@ -94,55 +86,51 @@ We use the soft thresholding operation as a probability distribution. We take th
 		\caption{Layer $w_0$ of the starlet decomposition.}
 		\label{cd:heuristic:starlet}
 	\end{subfigure}
-	\caption{Dirty map and $w_0$ starlet layer after thresholding. $w_0$ can be interpreted as a probability distribution for point source locations.}
+	\caption{Dirty map and $w_0$ starlet layer after shrinkage. $w_0$ can be interpreted as a probability distribution for point source locations.}
 	\label{cd:heuristic:figure}
 \end{figure}
 
-The individual pixels are not independent. The image \ref{cd:heuristic:starlet} has a high probability for an area of pixels, although there are only two point sources in the image.
+It turns out we can estimate the starlet components $\alpha_0$ by simply shrinking the starlet layer $w_0$. Figure \ref{cd:heuristic:figure} shows an example of the process. Coordinate Descent will reconstruct the image with starlet components $\alpha_0$, but it does not need to try all components. We use the starlet transform as a heuristic and can estimate likely non-zero $\alpha_0$.
 
-Starlet coefficient $\alpha_0$ convolved with the starlet wavelet gets back to $w_0$
-
-On larger scale, we still look at pixels and set a starlet wavelet at the location and scale.
-
-The scaling function grows exponential in size. Each layer is responsible for ever larger structures. 
-
-The decomposition in total is chaining the blurring of the scaling function $B_i$ at different scales. Results in the decomposition shown in equation \eqref{cd:starlet:decomposition}
+The same process is repeated for all $J$ layers. We calculate the starlet decomposition shown in equation \eqref{cd:starlet:decomposition}. We continually blur the image with ever wider scaling functions $B_i$. We subtract the more heavily blurred image $ c_{J-1}$ from $c_{J-2}$ to arrive at the starlet layer, which contains the structures of the current size $w_{J-1}$. Note that the last starlet layer is the most blurred version of the image $c_J$. It contains all structures which were wider than the widest starlet.
 
 \begin{equation}\label{cd:starlet:decomposition}
-	\begin{split}
-		c_0 &= \bm{x} \star B_0 \\
-		\bm{w_0} &= \bm{x} - c_0
-	\end{split}
-	\qquad
-	\begin{split}
-		c_1 &= c_0 \star B_1 \\
-		\bm{w_1} &= c_0 - c_1
-	\end{split}
-	\qquad \ldots \qquad
-	\begin{split}
-		c_{J-1} &= c_{J-2} \star B_{J-1} \\
-		\bm{w_{J-1}} &= c_{J-2} - c_{J-1}
-	\end{split}
-	\qquad
-	\begin{split}
-		\bm{c_J} &= c_{J-1} \star B_J
-	\end{split}
+\begin{split}
+c_0 &= \bm{x} \star B_0 \\
+\bm{w_0} &= \bm{x} - c_0
+\end{split}
+\qquad
+\begin{split}
+c_1 &= c_0 \star B_1 \\
+\bm{w_1} &= c_0 - c_1
+\end{split}
+\qquad \ldots \qquad
+\begin{split}
+c_{J-1} &= c_{J-2} \star B_{J-1} \\
+\bm{w_{J-1}} &= c_{J-2} - c_{J-1}
+\end{split}
+\qquad
+\begin{split}
+\bm{c_J} &= c_{J-1} \star B_J
+\end{split}
 \end{equation}
 
-The synthesis transform however is easy. We simply add the starlet layers back together \eqref{cd:starlet:backwards}.
+We shrink all the starlet layers $w_i$ and $c_J$, and arrive at which components $\alpha_i$ are likely non-zero. Coordinate Descent converges on the optimal $\alpha_i$ for all layers. At this point, we can reconstruct the image by reversing the process. We convolve $\alpha_i$ with the starlet wavelet at scale i, which gives us $w_i$. Then, we sum them up to the final image \eqref{cd:starlet:backwards}.
 
 \begin{equation} \label{cd:starlet:backwards}
 \bm{x} = \bm{w_0} + \bm{w_1} + \ldots + \bm{w_{J-1}} + \bm{c_J}
 \end{equation}
 
-The starlet decomposition is over-complete dictionary.
+This is how we use the starlet transform for our
 
 We can use the decomposition as a heuristic, and we do not need to use starlet as reconstruction wavelet. We could also use for example Gaussian functions, and use the starlet decomposition to find out likely locations of what size of Gaussian.
 
-In this work, we did not simply use the starlet wavelet for reconstruction, we modified it to be non-negative. 
+In this work, we did not simply use the starlet wavelet for reconstruction, we modified it to be non-negative.
+
+ 
 
 \subsubsection{Handling the non-negativity constraint}
-Reconstruction algorithms for radio astronomy typically constrain the image to be non-negative\cite{mcewen2011compressed}. This work orientates itself after the SASIR algorithm\cite{girard2015sparse}. It used the starlet transform together with the FISTA algorithm. Handling the non-negativity constraint in this setting is easier, and we have a translation issue in the context of Coordinate Descent.
+Reconstruction algorithms for Radio Astronomy typically constrain the image to be non-negative\cite{mcewen2011compressed}. This work orientates itself after the SASIR algorithm\cite{girard2015sparse}. It used the starlet transform together with the FISTA algorithm. Handling the non-negativity constraint in this setting is easier, and we have a translation issue in the context of Coordinate Descent.
 
 The SASIR algorithm decomposes the image into starlet layers as in equation \eqref{cd:starlet:decomposition}. It never needs to calculate $\alpha_i$. Instead, it uses the shrink operation on the individual starlet layers $w_i$, essentially using it as a constraint on pixels. In this setting, the shrink operator can simply set every negative pixel of $w_i$ to zero. The reconstructed image results from the addition of the individual layers as shown in equation \ref{cd:starlet:backwards}, $x$ is also non-negative.
 
@@ -161,6 +149,10 @@ We have the starlet regularization, let us put it into an algorithm. Start with 
 \begin{equation}\label{cd:starlet}
 \underset{\alpha}{minimize} \: \left \| V - FD\alpha \right \|_2^2 + \lambda \left \| \alpha \right \|_1 \\
 \end{equation}
+
+The last question is how many columns we need of the Fourier Transform matrix $F$. Note that the relationship from starlet component $\alpha_i$ to image is a series of convolutions. We just need the Fourier transform for pixels, which are in the center of the non-zero starlet. Since a convolution in image space is a multiplication in the Fourier domain, we can 
+If we know the non-zero starlet components $\alpha_i$, 
+
 
 Proof of concept implementation. There are many ways to improve the efficiency and the convergence speed. It is here to show  the general if it is possible of the approach and if we can truly only calculate a subset of $F^{-1}$ columns.
 

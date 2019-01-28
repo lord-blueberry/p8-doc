@@ -42,13 +42,12 @@ Although there seems untapped potential for new, cheaper reconstruction algorith
 
 
 \subsection{Direct Fourier Transform on a large scale}
+The direct Fourier Transform does not use the non-uniform FFT approximation. It uses the full $F$ matrix in \eqref{intro:cs}. It naturally extends to wide field of view imaging, and can handle the $w$-term without any approximation algorithms. Using the direct Fourier Transform simplifies the architecture of the reconstruction. Without the approximation algorithm. The drawback is either a large memory requirement for caching, or high runtime costs for continually calculating the transform matrix. For MeerKAT reconstructions where we reconstruct millions of pixels from several billions of Visibilities, the matrix becomes too large for any practical application.
 
-Simplify realistic
+However, the full Fourier matrix is not needed.
 
-Hardy et al\cite{hardy2013direct} handled the whole inverse Fourier Transform as an explicit matrix $F^{-1}$ of size  $M*N$. They dropped the non-uniform FFT and $w$-stacking approximations. This is trivially to distribute later. The only problem is of Course that for MeerKAT data sizes $M*N$ is too large ().
+Sparse in the image domain. Only Columns necessary of non-zero pixels.
 
-However there is potential for improvement: Only a limited number of pixels in a reconstruction are not zero. We spent a lot of processing power on pixels which do not matter in the reconstruction. If we could predict which pixels are not zero, we would only need to calculate a subset of $F^{-1}$ columns to reconstruct the image. The starlet transform\cite{starck2015starlet} has a way to predict its non-zero components. We represent the image as a combination of starlets, and estimate which starlets are likely non-zero from the Visibilities directly.
+Even more sparse in a different domain, for example Starlets \cite{girard2015sparse}. or Daubechies Frames\cite{dabbech2018cygnus}.
 
-To my knowledge, such an algorithm has never been tried out.
-
-A proof-of-concept algorithm was developed that shows the prediction actually works in practice. It uses Coordinate Descent with the starlet transform, and only needs to calculate a subset of the matrix $F^{-1}$ for a reconstruction. The question remains how many columns of $F^{-1}$ are needed, and is it more efficient than an algorithm using the major cycle architecture.
+If we can estimate which columns are likely non-zero, we just need to calculate a subset of the Fourier matrix $F$.
