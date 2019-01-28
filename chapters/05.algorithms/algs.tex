@@ -121,15 +121,12 @@ We shrink all the starlet layers $w_i$ and $c_J$, and arrive at which components
 \bm{x} = \bm{w_0} + \bm{w_1} + \ldots + \bm{w_{J-1}} + \bm{c_J}
 \end{equation}
 
-This is how we use the starlet transform for our
+This is how we  leverage the starlet transform for our Coordinate Descent algorithm. Note that we can use the starlet transform as a heuristic without necessarily using the starlet components $\alpha_i$ for reconstructions. The starlet transform gives us likely locations of Gaussian-shaped emissions at different scales. We can for example use a Gaussian mixture model, and just use the starlets for likely non-zero locations. 
 
-We can use the decomposition as a heuristic, and we do not need to use starlet as reconstruction wavelet. We could also use for example Gaussian functions, and use the starlet decomposition to find out likely locations of what size of Gaussian.
+In this work, we do not use the wavelet shown in image \ref{cd:starlets:wavelet}. Instead, we modified the starlet to an extend where it arguably is not a wavelet any more. Still, the starlet transform with the correct wavelet as a heuristic, but reconstructed the image with a modified starlet to satisfy the non-negativity constraint. 
 
-In this work, we did not simply use the starlet wavelet for reconstruction, we modified it to be non-negative.
 
- 
-
-\subsubsection{Handling the non-negativity constraint}
+\subsubsection{Starlet Wavelet Modification}
 Reconstruction algorithms for Radio Astronomy typically constrain the image to be non-negative\cite{mcewen2011compressed}. This work orientates itself after the SASIR algorithm\cite{girard2015sparse}. It used the starlet transform together with the FISTA algorithm. Handling the non-negativity constraint in this setting is easier, and we have a translation issue in the context of Coordinate Descent.
 
 The SASIR algorithm decomposes the image into starlet layers as in equation \eqref{cd:starlet:decomposition}. It never needs to calculate $\alpha_i$. Instead, it uses the shrink operation on the individual starlet layers $w_i$, essentially using it as a constraint on pixels. In this setting, the shrink operator can simply set every negative pixel of $w_i$ to zero. The reconstructed image results from the addition of the individual layers as shown in equation \ref{cd:starlet:backwards}, $x$ is also non-negative.
