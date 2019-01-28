@@ -34,19 +34,12 @@ Spherical Harmonics are a different way to represent the measurements of an inte
 
 Compared to the Fourier domain, Spherical Harmonics naturally represent wide field of view interferometers and do not have a third dimension. This opens up new designs for Compressed Sensing reconstructions. For example, we can reconstruct the image by in-painting the missing Spherical Harmonics. Because they naturally represent curved surfaces, we can in-paint in a two dimensional space instead of three. Another direction is to image on the sphere directly. MCewen et al.\cite{mcewen2008simulating} showed a way to put two dimensional wavelets on the sphere. A Compressed Sensing reconstruction can use a spherical wavelet as regularization and may simplify the transformation between measurements and reconstruction space.
 
-%Eigenvalue
+Sadly, there is little published research in this area for Radio Astronomy image reconstructions. MCewen et al.\cite{mcewen2008simulating} improved the runtime costs of simulations with the spherical Haar wavelet. Later work\cite{mcewen2011compressed} showed a proof-of-concept Compressed Sensing reconstruction projected on the sphere, which improved the image quality. However, it did not use Spherical Harmonics and \cite{mcewen2011compressed} is still based on the Fourier transform. At this point we have not found a proof-of-concept reconstruction algorithm which uses Spherical Harmonics to reduce runtime costs. 
 
-Sadly, there is little published research in this area for radio astronomy image reconstructions. MCewen et al.\cite{mcewen2008simulating} improved the runtime costs of simulations with the spherical Haar wavelet. Later work\cite{mcewen2011compressed} showed a proof-of-concept Compressed Sensing reconstruction projected on the sphere, which improved the image quality. However, it did not use Spherical Harmonics and \cite{mcewen2011compressed} is still based on the Fourier transform.
+Although there seems untapped potential for new, cheaper reconstruction algorithms with Spherical Harmonics, practical limitations may explain the lack of research in this area. The Fourier relationship, Calibration, the effect of the ionosphere, everything discussed in section \ref{meerkat} is based on the formalism of a plane wave arriving at the instrument\cite{thompson1986interferometry, smirnov2011revisiting}. Spherical Harmonics are not. They are derived from a different property of the signal. As such, how self-calibration works with Spherical Harmonics may not be a trivial question.
 
- plane-wave 
 
-This is the only work in that area. The rest is focussed on improving the reconstruction quality instead of speed.
 
-If there is, it may be difficult to translate calibration, ionosphere and the stuff to the spherical harmonics measurement equation. 
-
-We have had decades of Fourier-related experience and what effects they do. RIME. Not based on the helmholtz equation, but on the plane wave.
-
-Proof of concept implementations. Not a reconstruction algorithm with Spherical Harmonics transform which handles a realitic instrument.
 
 \subsection{Direct Fourier Transform improvement}
 
