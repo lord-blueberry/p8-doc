@@ -39,7 +39,7 @@ CLEAN essentially places a Gaussian function with correct peak intensity at the 
 %Possible 
 
 \subsection{Super resolution of mixed sources}
-This dataset contains a mixture of three Gaussian emissions and sixteen point sources of varying intensities. At the center of the image, it has three point sources underlying a weak extended emission. The image center and one Gaussian emissions are analysed in detail. Coordinate Descent was run for two full iterations, using  $\lambda=0.01$ and $J=7$ starlet layers. The CLEAN and Coordinate Descent reconstructions are shown in figure \ref{results:mixed}. Our algorithm was able to locate the point sources below the accuracy limit of MeerKAT. However, some point sources were reconstructed with artefacts.
+This dataset contains a mixture of three Gaussian emissions and sixteen point sources of varying intensities. At the center of the image, it has three point sources underlying a weak extended emission. The image center and one Gaussian emissions are analysed in detail. Coordinate Descent was run for two full iterations, using  $\lambda=0.01$ and $J=7$ starlet layers. The CLEAN and Coordinate Descent reconstructions are shown in figure \ref{results:mixed}. Our algorithm was able to locate the point sources below the accuracy limit of MeerKAT. However, some point sources were reconstructed with artefacts. We analyse two areas of the image in more detail.
 
 \begin{figure}[h]
 	\centering
@@ -57,18 +57,7 @@ This dataset contains a mixture of three Gaussian emissions and sixteen point so
 	\label{results:mixed}
 \end{figure}
 
-Let us look at the intensity profile of the first extended emissions in figure \ref{results:mixed:cut0:contour}. The Ground truth in image \ref{results:mixed:cut0:img} shows a Gaussian extended emission with an oval shape. The figure \ref{results:mixed:cut0:profile} compares the intensity profile of Coordinate Descent with CLEAN and the ground truth.
-
-
-
-The number of Fourier columns scales with the number of non-zero components
-
-
-
-
-Question of Flux reconstruction
-
-
+Let us look at the intensity profile of first area in figure \ref{results:mixed:cut0:contour}. The Ground truth in image \ref{results:mixed:cut0:img} shows a Gaussian extended emission with an oval shape. The figure \ref{results:mixed:cut0:profile} compares the intensity profile of Coordinate Descent with CLEAN and the ground truth. The intensity profile on the logarithmic scale emphasises the artefacts of the starlet reconstructions. Coordinate Descent used three starlets at different scales to approximate the extended emission. It reconstructed the flux more accurately, but did not capture the shape of the extended emission. Instead, it approximated the oval shape with a uniform Gaussian-like emission. CLEAN on the other hand, did not again over-estimated the flux, but captured the oval shape more accurately.
 
 \begin{figure}[h]
 	\centering
@@ -78,13 +67,15 @@ Question of Flux reconstruction
 		\label{results:mixed:cut0:img}
 	\end{subfigure}
 	\begin{subfigure}[b]{0.6\linewidth}
-		\includegraphics[width=\linewidth, trim={0, 0, 0.2in, 0.2in}, clip]{./chapters/20.results/mixed/mixed_cut0.png}
+		\includegraphics[width=\linewidth, trim={0, 0, 0.2in, 0.05in}, clip]{./chapters/20.results/mixed/mixed_cut0.png}
 		\caption{Intensity profile.}
 		\label{results:mixed:cut0:profile}
 	\end{subfigure}
 	\caption{Intensity profile of region 1.}
 	\label{results:mixed:cut0:contour}
 \end{figure}
+
+The second area in figure \ref{results:mixed:cut1:contour} is more complex. It is an extended emission with 
 
 More accurate total flux reconstruction, but no
 
@@ -96,7 +87,7 @@ More accurate total flux reconstruction, but no
 		\label{results:mixed:cut1:img}
 	\end{subfigure}
 	\begin{subfigure}[b]{0.6\linewidth}
-		\includegraphics[width=\linewidth, trim={0, 0, 0.2in, 0.2in}, clip]{./chapters/20.results/mixed/mixed_cut2.png}
+		\includegraphics[width=\linewidth, trim={0, 0, 0.2in, 0.05in}, clip]{./chapters/20.results/mixed/mixed_cut2.png}
 		\caption{ground truth}
 		\label{results:mixed:cut1:profile}
 	\end{subfigure}
