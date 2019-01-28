@@ -1,5 +1,17 @@
 \section{Compressed Sensing reconstructions in the MeerKAT era}
-The MeerKAT interferometer poses the reconstruction problem on a large scale. Future expansions will lead to an even higher data volume.
+The MeerKAT interferometer poses a reconstruction problem on a large scale. Future expansions will lead to an even higher data volume. Compressed Sensing can increase the effective resolution of the instrument. But comes with a higher runtime costs. How to create a large scale Compressed Sensing reconstruction is still an open problem.
+
+We postulate that maybe we can reduce the overall runtime costs with a different architecture. We have looked at three alternatives to the common Major Cylce architecture: Projecting on a uniform grid, using Spherical Harmonics, and using the Direct Fourier Transform. We investigated the latter in more detail.. We created an algorithm using the direct Fourier Transform and improved upon current scalability. Created an algorithm which simplifies the whole pipeline, but overall could not reduce the runtime costs.
+
+The two other architectures do not have an easy way to reduce costs. Spherical Harmonics are a new way to represent radio interferometric measurements, but may lead to a re-invention of the whole pipeline. We need more research in how we can use Spherical Harmonics in reconstruction problems before we can think about using them in a realistic setting.
+
+Projecting on a uniform grid is way of potentially reducing the problem to a more manageable size. In this architecture, the first step is to use the optimal projection on a uniform grid. Later processing steps like reconstruction can be done on the uniform grid. Two problems in this architecture, self-calibration and the Point Spread Function. Self-calibration requires a transformation from uniform sampled grid back to the original measurements. It destroys the main advantage. Unless we find a way to approximate the self-calibration on a uniformly sampled grid, this architecture is not practical for MeerKAT.
+
+There is likely not a single step, a single algorithm, which leads to a scalable solution. Although our approach with the direct Fourier Transform did improve upon the runtime, we still can introduce approximations. Indeed, adding approximations and working with a reduced measurement set may be necessary for MeerKAT reconstructions. It is an over-determined problem. In a noiseless environment, we would be able to solve for the reconstructed image. But still inherently incomplete.
+
+
+
+
 
  Compressed Sensing approaches exist, they use the major cycle, but they all are slower to compute than CLEAN, for which the major cycle was developed. 
 
