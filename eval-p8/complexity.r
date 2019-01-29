@@ -2,7 +2,7 @@ N = (2048) * (2048)
 M = 75 * 4060770
 
 W = 32
-I.major = 6
+I.major = 10
 I.clean = 35000
 
 S = 250
@@ -23,7 +23,7 @@ print("memory")
 M*250*128/8/1024/1024/1024
 print("...")
 
-CD(250,M, 1, J)/clean
+CD(250,M, 10, J)/clean
 
 print(paste(round(clean/CD(1000,M, cd_cycles, J), 2), collapse=" & "))
 print(paste(round(clean/CD(2000,M, cd_cycles, J), 2), collapse=" & "))
