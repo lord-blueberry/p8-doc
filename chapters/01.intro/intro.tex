@@ -32,48 +32,30 @@ The objective \eqref{intro:cs} is split into two terms, the data and regularizat
 
 In theoretical terms, the reconstruction problem for Interferometers boils down to finding a good prior function $P()$ for Radio Astronomy images, and an efficient optimization algorithm to minimize \eqref{intro:cs}. For large scale reconstructions, the Fourier Transform Matrix $F$ becomes expensive to either compute or keep in memory. $F$ has the size of $M*N$, where $M$ is the number of Visibilities and $N$ the number of pixels. In MeerKAT reconstructions, we have millions of pixels and several billions of Visibilities. The explicit matrix $F$ is too large to be practical. We cannot use the Fast Fourier Transform, because the interferometer measures an incomplete and non-uniformly sampled set of Visibilities.
 
-The large Fourier Transform matrix is not unique to MeerKAT. 
-
-There are different ways of dealing with the large Fourier matrix. Depending on what we chose, we arrive at a different architecture.
-
-The common way of dealing with the matrix $F$ is to use an approximation instead of the full matrix. This leads to an iterative reconstruction architecture, where we cycle between Visibility and image space.
+The large Fourier Transform matrix is common for Radio Interferometric image reconstructions. MeerKAT just poses the same problem on a new scale. We use the word architecture to differentiate between how we deal with $F$, and what prior function the reconstruction algorithm uses. How we deal with the large matrix gives us certain advantages and disadvantages which do not seem to be explored in the Radio Astronomy community. The common way of dealing with $F$ is to use an approximation, which leads to the Major Cycle architecture. 
 
 
 \subsection{The Major Cycle Architecture}
-The Major Cycle architecture was created with CLEAN in mind. It uses the non-uniform FFT approximation to cycle between Visibility and image space. First, we describe the Major Cycle and CLEAN in detail, and then describe how current Compressed Sensing reconstructions use the same architecture.
-Major cycle was created with CLEAN in mind. Compressed sensing reconstructions use essentially the same architecture with minor modifications. 
+The Major Cycle architecture was created with CLEAN in mind. It uses the non-uniform FFT approximation to cycle between Visibility and image space. First, we describe the Major Cycle and CLEAN in detail, and then describe how current Compressed Sensing reconstructions use the same architecture with minor modifications.
 
 \begin{equation}\label{intro:clean}
 \underset{x}{minimize} \: \left \|  I_{Dirty} - x \star PSF \right \|_2^2 + \lambda \left \| x \right \|_1 \quad, \quad I_{Dirty} = \hat{F}^{-1} V
 \end{equation}
 
-%sparsity in the image domain.
+A CLEAN image reconstruction for radio interferometers consists of two different steps: A non-uniform FFT, and a CLEAN deconvolution. The non-uniform FFT approximates the inverse Fourier Transform and calculates the dirty image. The CLEAN deconvolution uses the Point Spread Function and deconvolves the dirty image. In the framework of Compressed Sensing, CLEAN approximately minimizes the objective \eqref{intro:clean}, where $\hat{F}$ is the non-uniform FFT approximation. Both, the non-uniform FFT and the CLEAN deconvolutions are approximations. To increase the overall accuracy of the reconstruction, CLEAN is used inside the Major Cycle architecture depicted in figure \ref{intro:major}. In each Cycle, the residual Visibilities get transformed by the non-uniform FFT, CLEAN approximates the deconvolution, and the new residual image gets transformed back to Visibilities. Over several Major Cycles the error from the non-uniform FFT and from the CLEAN deconvolutions get minimized. 
 
-
-A CLEAN image reconstruction for radio interferometers consists of two different steps: A non-uniform FFT, which approximates the inverse Fourier Transform efficiently and an deconvolution algorithm, which approximates the instrumental effects on the image (typically based on CLEAN). These two approximations are an error source of the reconstruction. The major cycle architecture \ref{intro:major} therefore tries to iteratively minimize the errors of the non-uniform FFT and the deconvolution over several iterations.
-
-\begin{wrapfigure}{r}{0.6\textwidth}
+\begin{figure}
 	\centering
-	\vspace{-10pt}
-	\includegraphics[width=1.0\linewidth]{./chapters/01.intro/Major-Minor.png}
+	\includegraphics[width=0.80\linewidth]{./chapters/01.intro/Major-Minor.png}
 	\caption{The Major Cycle Framework}
 	\label{intro:major}
-	\vspace{-10pt}
-\end{wrapfigure}
+\end{figure}
 
-The first major cycle uses the non-uniform inverse FFT to approximate the 'dirty' image from the Visibilities. The deconvolution algorithm decides parts which parts belong to the observed image and which are due to instrumental and other noise effects. It returns the noise part of the image, which gets transformed back into residual Visibilities. The next major cycle iteration continues with the residual Visibilities. The residual Visibilities get minimized until they contain only the instrumental effects and noise.
+The CLEAN objective \eqref{intro:clean} assumes that the observed image has few non-zero pixels, i.e. is sparse in the image domain. When the interferometer observed an image with only stars, which are concentrated on a single pixel, the observed image is at the minimum of the CLEAN objective. 
 
-After several major cycles the residual  on a regularly spaced image which has a small error from non-uniform samples, and a small error from incomplete measurements.
+Current Compressed Sensing reconstructions also use the non-uniform FFT and cycle between Visibility and image space\cite{girard2015sparse,dabbech2018cygnus}. Although they do not use a deconvolution on the image, one can make the argument that they do not use the Major Cycle architecture. One of the main reasons why Compressed Sensing reconstructions are more expensive is because they need more non-uniform FFT cycles. Current research is focused on reducing the number of cycles\cite{dabbech2018cygnus}. However, since the non-uniform FFT is central to the Major Cycle, many approximations for realistic Interferometers made in section \ref{meerkat} can be used by the Compressed Sensing approaches. They are functionally similar. In this work, we group CLEAN and Compressed Sensing reconstructions with the non-uniform FFT together in the Major Cycle architecture.
 
-Compressed sensing reconstructions essentially use the same architecture, although with minor alterations. In general, they keep a similar scheme of forward/backward non-uniform FFT, but do not use a deconvolution in image pace. Instead, they analyse constraints defined on the image (For example all pixels should be non-negative), and try to find the Visibilities that minimize the constraint violations.
-
-For CLEAN reconstructions, the forward/backward non-uniform FFT are the most expensive operations, while the deconvolution is negligible. The compressed sensing algorithms tend to require more major cycle iterations to converge and the image constraint analysis tends to be more expensive than CLEAN deconvolutions. Current research into compressed sensing reconstructions is focussed on reducing the number of major cycles\cite{dabbech2018cygnus}. 
-
-%Different architecture, but has to somehow handle all the difficulties that arise from imaging meerkat data.
-
-
-%compressed sensing got rid of the miinor cycle, but essentially kept the major cycle framework
-%have to handle own problems in a new architecture
+ 
 
 
 
