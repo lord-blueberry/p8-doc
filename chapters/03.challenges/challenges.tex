@@ -51,28 +51,15 @@ Afterwards, the whole process is reversed. The image gets copied back into the s
 If we choose uses as many stacks as Visibilities, we end up with an exact $w$-corrections. In practice, many Visibilities have a similar $w$-term. $w$-stacking approximates the correction and allows the Major Cycle to distribute the forward- and backwards non-uniform FFT to a certain extend.
 
 \subsection{Basic Calibration and Self-Calibration}
-The Visibilities measured by a Radio interferometer require calibration before an image can be reconstructed.
-Radio Interferometer require calibration of their complex valued Visibility measurements. The amplitude and phase of a Visibility is subject to 
+The Visibilities measured by a Radio interferometer require calibration before an image can be reconstructed. Calibration corrects the amplitude and phase of the measured Visibilities for instrumental differences and direction independent effects. For small field of view instruments, this includes distortions from the ionosphere and other sources. The basic calibration scheme used a second observation where the true image was known, and solved for the missing calibration parameters $C$, shown in equation \eqref{meerkat:calibration}.
 
-Before the advent of self-calibration, the calibration terms were 
-Complex gain term. Corrects amplitude and phase. 
+\begin{equation}\label{meerkat:calibration}
+\underset{C}{minimize} \: \left \| CV_2 - F(x_2 \star PSF) \right \|_2^2
+\end{equation}
 
-Traditional Calibration
+$V_2$ are the Visibilities from the calibration observation, and $x_2$ is the known image. The resulting calibration parameters are then used in the observation of interest. The number of calibration parameters depends on the instrument and the observation, but is a fraction of the total number of Visibilities. Again, wide field of view tends to increase the number of necessary calibration parameters. Furthermore the true calibration drifts with time. Note that the equation \eqref{meerkat:calibration} is essentially the reverse operation of image reconstruction. In this task, we want to find the calibration parameters from a known image.
 
-A calibration source close by, with a known brightness. Phase and amplitude calibration was done before image reconstruction. For older interferometers, there was a very limited number of calibration terms to solve.
-
-
-but again effects of wide field of view also increase the number of necessary calibration terms. The advent of self calibration, in which the image reconstruction was used to solve for both, the observed image and the calibration of the instrument.
-
-Self calibration with the major cycle algorithm and a CLEAN deconvolution.
-
-Initial phase calibration
-Shallow clean
-phase calibration
-deep clean
-phase and amplitude calibration
-deep clean
-reconstruction
+This has led rise to the self-calibration scheme, were the observed image is solved for together with the calibration parameters $C$. We iteratively reconstruct the image with the current calibration, and then improve the calibration from the current image.
 
 
 
