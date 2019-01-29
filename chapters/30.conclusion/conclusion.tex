@@ -1,15 +1,35 @@
 \section{Compressed Sensing reconstructions in the MeerKAT era}
+Similar to CLEAN, current Compressed Sensing approaches use the non-uniform FFT to cycle between Visibility and image space. But compared to CLEAN, Compressed Sensing algorithms need more cycles to converge, which is one reason why Compressed Sensing reconstructions have higher runtime costs. In this project, we postulated that one may reduce the runtime cost by replacing the non-uniform FFT approximation. 
+
+We discussed three alternatives: Optimal Projection on a uniform Grid, using Spherical Harmonics and the direct Fourier Transform. We created a proof-of-concept reconstruction using the direct Fourier Transform and Coordinate Descent. We leveraged the starlet transform and created an algorithm which scales with the number of non-zero basis functions. We demonstrated super-resolution performance on simulated MeerKAT data. We extrapolated the runtime costs of our algorithm on a real-world MeerKAT observation. Sadly, this approach is currently not competitive.
+
+Projecting on a uniform grid is way of potentially reducing the problem to a more manageable size. In this architecture, the first step is to use the optimal projection on a uniform grid. Later processing steps like reconstruction can be done on the uniform grid. Two problems in this architecture, self-calibration and the Point Spread Function. Self-calibration requires a transformation from uniform sampled grid back to the original measurements. It destroys the main advantage.
+
+Spherical Harmonics are a new way to represent radio interferometric measurements, but may lead to a re-invention of the whole pipeline. We need more research in how we can use Spherical Harmonics in reconstruction problems before we can think about using them in a realistic setting.
+
+At the current time, there is no clear advantage to replacing the non-uniform FFT.
+Push on distributed co
+
+
+
+
 The MeerKAT interferometer poses a reconstruction problem on a large scale. Future expansions will lead to an even higher data volume. Compressed Sensing can increase the effective resolution of the instrument. But comes with a higher runtime costs. How to create a large scale Compressed Sensing reconstruction is still an open problem.
+
+
+
+In this project, we created a new architecture for Compressed Sensing reconstructions. Instead of using the non-uniform FFT approximation, we directly use the relevant columns of the Fourier transform matrix. We showed that the likely-relevant columns can be retrieved with a heuristic, and we can reconstruct images without ever calculating the whole Fourier matrix. This architecture naturally extends to the wide field of view measurement equation and does not need any approximations. 
+
+We exploited the starlet for a greedy heuristic, locating the likely-relevant columns of the Fourier transform matrix. The same heuristic can be used with other regularizations. It locates the likely location of Gaussian-like objects at different scales. As such the same heuristic could be used for a Gaussian mixture model. 
+
+
 
 We postulate that maybe we can reduce the overall runtime costs with a different architecture. We have looked at three alternatives to the common Major Cylce architecture: Projecting on a uniform grid, using Spherical Harmonics, and using the Direct Fourier Transform. We investigated the latter in more detail.. We created an algorithm using the direct Fourier Transform and improved upon current scalability. Created an algorithm which simplifies the whole pipeline, but overall could not reduce the runtime costs.
 
-The two other architectures do not have an easy way to reduce costs. Spherical Harmonics are a new way to represent radio interferometric measurements, but may lead to a re-invention of the whole pipeline. We need more research in how we can use Spherical Harmonics in reconstruction problems before we can think about using them in a realistic setting.
 
-Projecting on a uniform grid is way of potentially reducing the problem to a more manageable size. In this architecture, the first step is to use the optimal projection on a uniform grid. Later processing steps like reconstruction can be done on the uniform grid. Two problems in this architecture, self-calibration and the Point Spread Function. Self-calibration requires a transformation from uniform sampled grid back to the original measurements. It destroys the main advantage. Unless we find a way to approximate the self-calibration on a uniformly sampled grid, this architecture is not practical for MeerKAT.
+
+
 
 There is likely not a single step, a single algorithm, which leads to a scalable solution. Although our approach with the direct Fourier Transform did improve upon the runtime, we still can introduce approximations. Indeed, adding approximations and working with a reduced measurement set may be necessary for MeerKAT reconstructions. It is an over-determined problem. In a noiseless environment, we would be able to solve for the reconstructed image. But still inherently incomplete.
-
-
 
 
 

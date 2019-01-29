@@ -92,7 +92,7 @@ This is where the starlet transform ends. Note that we do not get the actual sta
 
 It turns out we can estimate the starlet components $\alpha_0$ by simply shrinking the starlet layer $w_0$. Figure \ref{cd:heuristic:figure} shows an example of the process. Coordinate Descent will reconstruct the image with starlet components $\alpha_0$, but it does not need to try all components. We use the starlet transform as a heuristic and can estimate likely non-zero $\alpha_0$.
 
-The same process is repeated for all $J$ layers. We calculate the starlet decomposition shown in equation \eqref{cd:starlet:decomposition}. We continually blur the image with ever wider scaling functions $B_i$. We subtract the more heavily blurred image $ c_{J-1}$ from $c_{J-2}$ to arrive at the starlet layer, which contains the structures of the current size $w_{J-1}$. Note that the last starlet layer is the most blurred version of the image $c_J$. It contains all structures which were wider than the widest starlet.
+The same process is repeated for all $J$ layers. We calculate the starlet decomposition shown in equation \eqref{cd:starlet:decomposition}. We continually blur the image with ever wider scaling functions $B_i$. We subtract the more heavily blurred image $ c_{J-1}$ from $c_{J-2}$ to arrive at the starlet layer, which contains the structures of the current size $w_{J-1}$. The scaling function $B_i$ widens exponentially, and the top level starlet spans an area of $5*2^{J-1}$ pixels. Note that the last starlet layer is the most blurred version of the image $c_J$. It contains all structures which were wider than the widest starlet.
 
 \begin{equation}\label{cd:starlet:decomposition}
 \begin{split}
@@ -134,12 +134,39 @@ The simple fix is to either set all negative pixels of $x$ to zero, or to set ne
 For reconstruction, we modify the starlet wavelet and set all negative sections to zero. At this point, the reconstruction starlet is arguably not a wavelet any more, since its integral is larger than zero. But now the Coordinate Descent algorithm can reconstruct a non-negative image which has led to a more sparse representation of images in the next section.
 
 
+
 \subsection{Coordinate Descent Implementation}
-We have the starlet regularization, let us put it into an algorithm. Start with the 
+In this section, we put together the starlet transform and the Coordinate Descent algorithm to our solution. 
+
+Our target is to use as few columns from $F$ as possible. As we have seen in equation \eqref{cd:starlet:decomposition}, each starlet is a series of convolutions. We can also do the convolution in Fourier space, and we only need to calculate the columns of $F$ for non-zero starlets instead of non-zero pixels. This leads us to the following objective \eqref{cd:starlet:layer} for a single layer $i$.
+
+\begin{equation}\label{cd:starlet:layer}
+\underset{\alpha_i}{minimize} \: \left \| V - S_iF\alpha_i \right \|_2^2 + \lambda \left \| \alpha_i \right \|_1 \\
+\end{equation}
+
+The drawback is that we need to calculate all the convolutions for the starlets at layer $i$ in the non-uniformly sampled Fourier space. We used the non-uniform FFT approximation to calculate all $S_i$. This introduces an approximation again. In the future, one can find the optimal $S_i$ in the non-uniform Fourier space by solving an optimization problem similar to objective \eqref{killmajor:sep:major}. The starlet is constant for a given observation, which means we can pre-calculate all $S_i$ before the optimization. 
+
+We also use the non-uniform FFT for the heuristic. We transform the Visibilities to image, and calculate the starlet decomposition shown in equation \eqref{cd:starlet:decomposition}. 
+
+Our algorithm is split in two separate Coordinate Descent loops. The first loop iterates over the starlet components of a single layer. It is where we use the starlet transform as a heuristic for likely non-zero components. The second Coordinate Descent loop iterates over all non-zero components. In this step with the non-negative starlet, a lot of bases drop to zero and we arrive at a more sparse solution.
+
+\subsubsection{Iteration Scheme}
+
+We discuss the objective function and how we only need the columns of $F$ with a non-zero starlet component. Then, we show the heuristic , we discuss how The objective function \eqref{cd:starlet} reconstructs the image in the starlet space $\alpha$. The $D$ matrix represents all our starlet basis functions and the image can be reconstructed with $x =D\alpha$. 
 
 \begin{equation}\label{cd:starlet}
 \underset{\alpha}{minimize} \: \left \| V - FD\alpha \right \|_2^2 + \lambda \left \| \alpha \right \|_1 \\
 \end{equation}
+
+ Currently, the product $FD\alpha$ requires Fourier columns for every non-zero pixel. This can be improved. 
+
+
+
+
+
+
+
+
 
 The last question is how many columns we need of the Fourier Transform matrix $F$. Note that the relationship from starlet component $\alpha_i$ to image is a series of convolutions. We just need the Fourier transform for pixels, which are in the center of the non-zero starlet. Since a convolution in image space is a multiplication in the Fourier domain, we can 
 If we know the non-zero starlet components $\alpha_i$, 
@@ -162,43 +189,4 @@ How many layers are needed. starlets rise in pixels with $2^J$. Meaning if we wa
 
 How to iterate over the image in detail.
 
-
-
-\subsection{Iteration scheme}
-Many ways to iterate over the image. A simple scheme was used here. 
-
-Active set heuristic, find the starlets which are 
-
-\begin{lstlisting} 
-def coordinate_descent(V_residual, x, lambda, max_iter):
-	for k in range(0, max_iter):
-		for i in pixels_row:
-			for j in pixels_column:
-				x_old = x[i, j]
-				fourier_column = calculate_fourier_transform(i, j)
-				fr = real(fourier_column)
-				fi = imag(fourier_column)
-				rr = real(V_residual)
-				ri = imag(V_residual)
-				
-				#find apex
-				a = sum(fr**2 + 2*fr*fi + fi**2)
-				b = sum(fr*rr + fr*ri + fi*rr + fi*ri)
-				x_new = b / a + x_old
-				
-				x_new = shrink(x_new, lambda)
-				x[i, j] = x_new
-				V_residual = V_residual - fourier_column * (x_new - x_old)
-\end{lstlisting}\label{cd:implementation}
-
-coordinate descent with active set heuristic
-
-
-sub-zero pixels
-
-\subsubsection{Non-uniform FFT approximations}
-Non uniform FFT to calculate the convolution KERNELS!!
-
-
-Stupid approach with line search. Could be done more efficiently by using the histogram of the starlet level.
 

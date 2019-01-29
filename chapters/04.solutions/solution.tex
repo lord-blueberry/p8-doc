@@ -3,7 +3,7 @@ Many Compressed Sensing reconstructions use the Major Cycle architecture\cite{gi
 
 Although Compressed Sensing algorithms produce higher quality reconstructions, the CLEAN algorithm so far has lower runtime costs. Both use a version of the Major Cycle architecture for efficient transformation of Visibilities to image space, and to correct the effects of wide field of view imaging. This project explores three different ways of calculating the Fourier transform which leads to three different architectures. In this section we discuss the merits of each alternative in the context of reducing the cost for MeerKAT reconstructions.
 
-\subsection{Projection on a uniform grid}
+\subsection{Optimal projection on a uniform grid}
 In each iteration, the Major Cycle reduces the error from both, the non-uniform FFT approximation, and from incomplete measurements. Here, we discuss the potentials and problems of separating the problem into two optimization objectives \eqref{killmajor:sep:major} \eqref{killmajor:sep:deconv} and solve each after the other. This architecture first uses the optimal projection on a uniformly sampled grid, which is several times smaller than the original Visibility measurements.
 
 \begin{alignat}{1}

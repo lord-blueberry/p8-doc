@@ -1,8 +1,14 @@
 \section*{Abstract}
 The MeerKAT new Radio Interferometer poses an image reconstruction problem on a large scale. Measurements over terabytes in size should be reconstructed to an image. Compressed Sensing reconstructions have the potential to improve the effective accuracy of MeerKAT, but so far were more expensive than the state of the art CLEAN implementation.
 
-We investigate three competing architectures.
+current Compressed Sensing approaches use the non-uniform FFT to cycle between Visibility and image space. But compared to CLEAN, they need more cycles to converge, which is one reason why Compressed Sensing reconstructions have higher runtime costs.
 
-WE tried to improve the runtime performance by changing the architecture of the Compressed Sensing reconstructions. We created a new algorithm using the direct Fourier transform, which scales with the number of sparse basis. Sadly, this alone does not improve runtime performance. But maybe its a step to the future of distributed reconstruction algorithms.
+Creating a scalable image reconstruction algorithm for MeerKAT is still an open problem.
 
-Discuss the future of compressed sensing, and is in general still an open problem.
+In this project, we postulated that by replacing the non-uniform FFT approximation, we might get a Compressed Sensing algorithm with lower runtime costs.
+
+In the large scale MeerKAT problems, calulating the Fourier Transform becomes an issue. Current Compressed Sensing implementations and CLEAN use the non-uniform FFT approximation, which leads to a similar architecture. In this work, we discuss three alternatives to the non-uniform FFT. We created a new algorithm which uses the direct Fourier Transform and Coordinate Descent. It does not need the approximation and naturally extends to wide field of view measurements of MeerKAT. Our algorithm leverages the starlet transform and only needs to calculate the transform for non-zero bases. This leads to a reconstruction algorithm, which scales with the number of non-zero components.
+
+We compare our Coordinate Descent algorithm to CLEAN on simulated MeerKAT data. WE show the superior reconstruction quality and extrapolate the runtime costs of our approach to a real-world MeerKAT observation. Sadly, our algorithm could not improve the runtime costs compared to CLEAN. Coordinate Descent has interesting properties for distribution, but in the current state our algorithm is too expensive to be competitive.
+
+We postulate that there is no single a
