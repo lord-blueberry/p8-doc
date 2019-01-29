@@ -16,35 +16,31 @@ We postulate that there is no single step which will get us to to the target of 
 We begin by introducing the basic image reconstruction problem in radio interferometry and show what the current architecture of interferometric reconstruction algorithms, the Major Cycle. Section \ref{meerkat} introduces the difficulties of imaging MeerKAT data. We  move towards competing architectures in section \ref{killmajor}. In the following sections \ref{cd}, \ref{results} and \ref{scale} we introduce our Compressed Sensing Reconstruction, show the reconstruction quality on simulated MeerKAT data and extrapolate the runtime costs on a real world MeerKAT measurement.
 
 \subsection{The basic reconstruction problem in Radio Interferometry}\label{intro:basic}
-Real world radio interferometers have complicated measurement equations. They become even more complicated for large interferometers like MeerKAT. These problems get addressed in section \ref{meerkat}. This section looks at the basic measurement equation of a radio interferometer \eqref{intro:measurement} and discusses the two fundamental challenges for radio interferometry image reconstruction. 
+We start with a simplified measurement equation for Radio Interferometers, \eqref{intro:measurement}. An interferometer measures an incomplete set of Fourier Components $V$ (called Visibilities in Radio Astronomy) from the sky image $I$ at position $x$ and $y$. We want to reconstruct the image $I()$, while the instrument measures $V()$ in a noisy environment. Since the term $e^{2 \pi i (ux+vy)}$ is the Fourier Transform, the image can be calculated from the Visibilities by simply using the inverse Fourier Transform.
 
 \begin{equation}\label{intro:measurement}
 V(u, v) = \int\int I(x, y) e^{2 \pi i (ux+vy)} \: dx \: dy
 \end{equation}
 
+However, the Visibilities are incomplete and noisy. The inverse Fourier Transform does not give us the observed image, but a corrupted "dirty" image. The incomplete Visibility coverage effectively convolves the observed image with a Point Spread Function. It introduces structures in the dirty image which were not observed. A reconstruction algorithm has to decide which structures were truly observed, and which are due to noise and incomplete Visibility coverage. In the framework of Compressed Sensing, this leads us to a minimization problem with the following objective function:
+
 \begin{equation}\label{intro:cs}
-\underset{x}{minimize} \: \left \| V - Fx \right \|_2^2 + \lambda \left \| x \right \|_1
+\underset{x}{minimize} \: \left \| V - Fx \right \|_2^2 + \lambda \left \| P(x) \right \|_1
 \end{equation}
 
+The objective \eqref{intro:cs} is split into two terms, the data and regularization term. The data term forces the reconstructed image to be as close to the measurements as possible, while the regularization term penalises unlikely images. Overall, we try to find the optimal image, which is as close to the Visibilities as possible, but also has the smallest regularization penalty according to some prior function $P()$. The parameter $\lambda$ weights the trade-off between the data and regularization term. The theory of Compressed Sensing states that if our prior function $P()$ models the observed image well, it will be at the minimum of our objective function \eqref{intro:cs}.
 
+In theoretical terms, the reconstruction problem for Interferometers boils down to finding a good prior function $P()$ for Radio Astronomy images, and an efficient optimization algorithm to minimize \eqref{intro:cs}. For large scale reconstructions, the Fourier Transform Matrix $F$ becomes expensive to either compute or keep in memory. $F$ has the size of $M*N$, where $M$ is the number of Visibilities and $N$ the number of pixels. In MeerKAT reconstructions, we have millions of pixels and several billions of Visibilities. The explicit matrix $F$ is too large to be practical. We cannot use the Fast Fourier Transform, because the interferometer measures an incomplete and non-uniformly sampled set of Visibilities.
 
-An interferometer measures Fourier Components $V$ (called Visibilities in Radio Astronomy) from the sky image $I$ at position $x$ and $y$. The term $e^{2 \pi i (ux+vy)}$ represents the two dimensional Fourier Transform. The task is to reconstruct the observed image $I$ from the measured Visibilities $V$. In theory this task is trivial: Since the inverse Fourier Transform exists, we can reconstruct the image $I$ by calculating the inverse Fourier Transform of $V$. However, two properties of the Visibilities make this task challenging in practice:
+The large Fourier Transform matrix is not unique to MeerKAT. 
 
-\begin{enumerate}
-	\item Non-uniform sampling pattern in Visibility space
-	\item Incomplete Visibility coverage. 
-\end{enumerate} 
+There are different ways of dealing with the large Fourier matrix. Depending on what we chose, we arrive at a different architecture.
 
-\textit{Property 1:} We want to reconstruct an image with uniformly spaced pixels. The instrument defines the sampling pattern in Visibility space and does not correspond to the exact pixels of the reconstructed image. This property keeps us from using the Fast Fourier Transform. The naive inverse Fourier Transform can still be calculated, but it has a quadratic runtime and does not scale to the data volume of interferometers. Current reconstruction algorithms use the non-uniform Fast Fourier Transform. The non-uniform FFT approximates the non-uniform Fourier Transform. 
-
-\textit{Property 2:} Interferometers sample only a limited set of Visibilities. It does not have all information for reconstruction. When the inverse Fourier Transform is applied on the Visibilities, the resulting image is corrupted by the incomplete Visibilities. It contains structures which where introduced by the interferometer and were not observed. With only knowing the incomplete set of Visibilities a reconstruction algorithm has to decide which image structures were truly measured, and which are due to the instrument. This forms an ill-posed inverse problem. There are many images that fit the measurements, and a small change in the Visibilities can lead to a very different reconstruction. 
-
-CLEAN represents the instrumental effect with a Point Spread Function (PSF). After the non-uniform FFT produced the 'dirty' image, CLEAN tries to reconstruct observed image with a deconvolving the 'dirty' image with the PSF. Note however that both CLEAN nor the non-uniform FFT are approximations. In real world reconstructions, these two approximations are used in the major cycle architecture to increase the reconstruction accuracy. 
-
-%The CLEAN algorithms approximate the observed image with a deconvolution: The inverse Fourier Transform produces a corrupted image. The observed image was convolved with a known Point Spread Function (PSF), which represents the instrument corruption. Finding a deconvolution reconstructs the observed image. The deconvolution is still an ill-posed problem, there are potentially many possible deconvolutions, and a small change in the input can lead to a very different output. Furthermore the CLEAN algorithms produce a greedy approximation of the deconvolution. 
+The common way of dealing with the matrix $F$ is to use an approximation instead of the full matrix. This leads to an iterative reconstruction architecture, where we cycle between Visibility and image space.
 
 
 \subsection{The Major Cycle Architecture}
+The Major Cycle architecture was created with CLEAN in mind. It uses the non-uniform FFT approximation to cycle between Visibility and image space. First, we describe the Major Cycle and CLEAN in detail, and then describe how current Compressed Sensing reconstructions use the same architecture.
 Major cycle was created with CLEAN in mind. Compressed sensing reconstructions use essentially the same architecture with minor modifications. 
 
 \begin{equation}\label{intro:clean}
