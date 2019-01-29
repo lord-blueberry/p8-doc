@@ -1,18 +1,7 @@
-\section{Eliminating the Major Cycle}\label{killmajor}
-Although Compressed Sensing algorithms produce higher quality reconstructions, the CLEAN algorithm so far has lower runtime costs. Both use a version of the Major Cycle architecture for efficient transformation of Visibilities to image space, and to correct the effects of wide field of view imaging. This project explores different architectures for Compressed Sensing, with the goal to decrease the runtime costs in the context of MeerKAT.
+\section{Alternatives to the Major Cycle}\label{killmajor}
+Many Compressed Sensing reconstructions use the Major Cycle architecture\cite{girard2015sparse, dabbech2018cygnus, mcewen2011compressed, pratley2018fast}  and do not discuss alternatives. Pratley et al\cite{pratley2017robust} optimized the non-uniform FFT in the context of Compressed Sensing reconstructions. Dabbech et al.\cite{dabbech2017wEffect} investigated $w$-term approximations for reducing runtime costs of Compressed Sensing reconstructions.
 
-Many Compressed Sensing reconstructions use the Major Cycle architecture\cite{girard2015sparse, dabbech2018cygnus, mcewen2011compressed, pratley2018fast}  and do not discuss alternatives. Runtime improvements are explored in the context of the Major Cycle. Pratley et al\cite{pratley2017robust} optimized the non-uniform FFT in the context of Compressed Sensing reconstructions. Dabbech et al.\cite{dabbech2017wEffect} investigated $w$-term approximations for reducing runtime costs of Compressed Sensing reconstructions. 
-
-An alternative to the Major Cycle was investigated by Hardy et al.\cite{hardy2013direct}. They replaced the non-uniform FFT with the direct Fourier transform and distributed the problem.
-
-We
-
-We want explore further and discuss. why they don't work.
-In this section, we discuss three possible alternatives to the Major Cycle: Separating the Major Cycle in two Optimization problems, using Spherical Harmonics,
-
-Chosen to do direct fourier transform.
-
-
+Although Compressed Sensing algorithms produce higher quality reconstructions, the CLEAN algorithm so far has lower runtime costs. Both use a version of the Major Cycle architecture for efficient transformation of Visibilities to image space, and to correct the effects of wide field of view imaging. This project explores three different ways of calculating the Fourier transform which leads to three different architectures. In this section we discuss the merits of each alternative in the context of reducing the cost for MeerKAT reconstructions.
 
 \subsection{Projection on a uniform grid}
 In each iteration, the Major Cycle reduces the error from both, the non-uniform FFT approximation, and from incomplete measurements. Here, we discuss the potentials and problems of separating the problem into two optimization objectives \eqref{killmajor:sep:major} \eqref{killmajor:sep:deconv} and solve each after the other. This architecture first uses the optimal projection on a uniformly sampled grid, which is several times smaller than the original Visibility measurements.
@@ -41,8 +30,8 @@ Sadly, there is little published research in this area for Radio Astronomy image
 Although there seems untapped potential for new, cheaper reconstruction algorithms with Spherical Harmonics, practical limitations may explain the lack of research in this area. The Fourier relationship, Calibration, the effect of the ionosphere, everything discussed in section \ref{meerkat} is based on a plane wave arriving at the instrument\cite{thompson1986interferometry, smirnov2011revisiting}. Spherical Harmonics are not. They are derived from a different property of the signal. The plane wave formalism may not translate to Spherical Harmonics. We may need to re-invent self-calibration, ionosphere distortion and more for Spherical Harmonic reconstructions.
 
 
-\subsection{Direct Fourier Transform on a large scale}
-The direct Fourier Transform does not use the non-uniform FFT approximation. It uses the full $F$ matrix in \eqref{intro:cs}. It naturally extends to wide field of view imaging, and can handle the $w$-term without any approximation algorithms. Using the direct Fourier Transform simplifies the architecture of the reconstruction. The drawback is either a large memory requirement for caching, or high runtime costs for continually calculating the transform matrix. For MeerKAT reconstructions where we reconstruct millions of pixels from several billions of Visibilities, the matrix becomes too large for any practical application.
+\subsection{Direct Fourier Transform}
+Hardy et al.\cite{hardy2013direct} replaced the non-uniform FFT with the direct Fourier Transform. It leads to a simplified architecture which naturally handles the $w$-term, but the whole Fourier matrix $F$ has to be kept in memory. Using the direct Fourier Transform simplifies the architecture of the reconstruction. The drawback is either a large memory requirement for caching, or high runtime costs for continually calculating the transform matrix. For MeerKAT reconstructions where we reconstruct millions of pixels from several billions of Visibilities, the matrix becomes too large for any practical application.
 
 However, the full Fourier matrix is not needed. Remember that CLEAN assumes the image is sparse, meaning only a few pixels are non-zero. In practice, even with extended emissions in the image, large regions of pixels are zero. They do not contribute to the reconstruction. Other Compressed Sensing reconstructions showed that the reconstructed image can be more sparsely represented in an over-complete wavelet basis. Girard et al.\cite{girard2015sparse} used the over-complete starlet transform, and Dabbech et al.\cite{dabbech2018cygnus} represent the image in several Daubechies frames. In a sparse reconstruction space, we only need to calculate the direct Fourier Transform for non-zero components of our basis, reducing the memory and runtime costs of the direct Fourier Transform.
 
