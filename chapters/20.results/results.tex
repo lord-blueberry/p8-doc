@@ -93,9 +93,7 @@ The second region in figure \ref{results:mixed:cut1:contour} is more complex. It
 	\label{results:mixed:cut1:contour}
 \end{figure}
 
-Compared to CLEAN, Coordinate Descent with the modified starlet regularization reconstructed the image with a more accurate total flux, and located the point sources below the accuracy of the instrument. The quality of the point source reconstruction varies. The figure \ref{results:mixed:points} shows four different point sources of the image \ref{results:mixed:cd} in detail. 
-
-The left image shows a good reconstruction.
+Compared to CLEAN, Coordinate Descent with the modified starlet regularization reconstructed the image with a more accurate total flux, and located the point sources below the accuracy of the instrument. The quality of the point source reconstruction varies within the image \ref{results:mixed:cd}. The figure \ref{results:mixed:points} shows four different point sources of in detail. From left to right, the reconstruction quality of each example decreases.
 
 \begin{figure}[h]
 	\centering
@@ -114,6 +112,13 @@ The left image shows a good reconstruction.
 	\caption{Different point source reconstructions of Coordinate Descent.}
 	\label{results:mixed:points}
 \end{figure}
+
+The left image shows shows a reconstruction where the flux is concentrated into a single pixel, and has low intensity emission around. Our modified starlet reconstruction should produce point sources similar to it. The second image from the left looks similar at first glance, but contains a lower intensity "trail". The third and fourth image even contain a fake point source in close proximity.
+
+Our modified starlet has likely a role in these artefacts. In section \ref{cd:starlets:modification}, we described how our modified starlet does not have negative sections. Intuitively, the original starlet penalizes two point sources in close proximity, and forces the emission to be represented with a wider starlet. Since we removed the negative sections, our algorithm can use as many point sources next to each other without any penalty. This would explain the "trail" of single pixel emissions in the second, third and fourth images.
+
+The original starlet wavelet forces the second, third and fourth image of figure \ref{results:mixed:points} to be similar to the first.
+
 
 
 More complex source. We see a super resolution and again more accurate flux. Point sources on the other hand, do become problematic. We see one point souce split up in two very narrow peak. When we look at other point sources of figure \ref{results:mixed:points}, we see mixed results. Some point sources are reconstructed as we would wish, with one high peak in the center, locating the point source, and a small starlet artifact which is the low intensity "glow" around it. The first point source is what we would wish for. We show a few failure modes of point source reconstruction. A lower intensity "trail" in the second image and a split into two point sources of images three and four.
