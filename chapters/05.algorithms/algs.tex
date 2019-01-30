@@ -136,9 +136,7 @@ For reconstruction, we modify the starlet wavelet and set all negative sections 
 
 
 \subsection{Coordinate Descent Implementation}
-In this section, we put together the starlet transform and the Coordinate Descent to form our algorithm. 
-
-First, we discuss the objective function for a single starlet layer and why we still need the non-uniform FFT at least for pre-calculation. Then we move on to our Coordinate Descent implementation, which uses two separate loops and define what one iteration means for us
+In this section, we put together the starlet transform and the Coordinate Descent to form our algorithm. We use two separate loops of Coordinate Descent minimization. First, let us look at the objective function \eqref{cd:starlet:layer} for a single starlet layer and discuss why we still need the non-uniform FFT for pre-calculation. 
 
 Our target is to use as few columns from $F$ as possible. As we have seen in equation \eqref{cd:starlet:decomposition}, each starlet is a series of convolutions. We can also do the convolution in Fourier space, and we only need to calculate the columns of $F$ for non-zero starlets instead of non-zero pixels. This leads us to the following objective \eqref{cd:starlet:layer} for a single layer $i$.
 
@@ -147,8 +145,6 @@ Our target is to use as few columns from $F$ as possible. As we have seen in equ
 \end{equation}
 
 The drawback is that we need to calculate all the convolutions for the starlets at layer $i$ in the non-uniformly sampled Fourier space. We used the non-uniform FFT approximation to calculate all $S_i$. This introduces an approximation again. In the future, one can find the optimal $S_i$ in the non-uniform Fourier space by solving an optimization problem similar to objective \eqref{killmajor:sep:major}. The starlet is constant for a given observation, which means we can pre-calculate all $S_i$ before the optimization. 
-
-We also use the non-uniform FFT for the heuristic. We transform the Visibilities to image, and calculate the starlet decomposition shown in equation \eqref{cd:starlet:decomposition}. 
 
 
 \subsubsection{Iteration Scheme and Heuristics}
@@ -182,27 +178,5 @@ The starlet transform allows for a myriad of heuristics with Coordinate Descent.
 
 
 
-
-
-The last question is how many columns we need of the Fourier Transform matrix $F$. Note that the relationship from starlet component $\alpha_i$ to image is a series of convolutions. We just need the Fourier transform for pixels, which are in the center of the non-zero starlet. Since a convolution in image space is a multiplication in the Fourier domain, we can 
-If we know the non-zero starlet components $\alpha_i$, 
-
-
-Proof of concept implementation. There are many ways to improve the efficiency and the convergence speed. It is here to show  the general if it is possible of the approach and if we can truly only calculate a subset of $F^{-1}$ columns.
-
-The objective function \eqref{cd:starlet} minimizes the starlet components $\alpha$. This objective leads again to a parabola in the one dimensional case, and we can analytically find the optimum for a single component when all others are fixed. 
-
-
-
-There are still a few problems to solve, like how to handle the matrix product $F^{-1}D$, 
-With the active set heuristic, we iterate over a limited number of starlet components at a time. 
-
-The question remains, how the matrix product $F^{-1}D$ can be calculated efficiently. Since starlet transform is just made up of a couple of convolutions, we do not have to calculate the product $F^{-1}D$ explicitly. Convolutions in image space are multiplications in Fourier space. 
-So for any starlet layer $w_i$ or $c_J$, we can pre-calculate a transform vector. 
-$w_2 = F^{-1}V * (\hat{S_0}\hat{S_1} - \hat{S_0}\hat{S_1}\hat{S_2})$
-
-How many layers are needed. starlets rise in pixels with $2^J$. Meaning if we want starlets over the whole image, the number of starlets rise logarithmically to the image dimensions.
-
-How to iterate over the image in detail.
 
 
