@@ -5,71 +5,19 @@ We discussed three alternatives: Optimal Projection on a uniform Grid, using Sph
 
 Projecting on a uniform grid is way of potentially reducing the problem to a more manageable size. In this architecture, the first step is to use the optimal projection on a uniform grid. Later processing steps like reconstruction can be done on the uniform grid. However, self-calibration requires a transformation from uniform sampled grid back to the original measurements. In this task, we cannot ignore the original Visibilities in later processing. Unless one finds a way to project the calibration problem on a uniform grid too, self-calibration destroys the main advantage of the approach.
 
-Spherical Harmonics are a new way to represent the Radio Interferometric Measurement Equation. We analysed published research in this area\cite{carozzi2015imaging, mcewen2008simulating} and see potential for a new reconstruction architecture, which may reduce the overall runtime costs. However, the current formalism\cite{smirnov2011revisiting} is based on the plane wave. How a real-world imaging algorithm with spherical harmonics deals with calibration and ionosphere distortion may be fundamentally different to current CLEAN and Compressed Sensing reconstructions. At this point, it is unclear if or how many problems have to be re-investigated by moving to Spherical Harmonics.
-
-
-
-At the current time, there is no clear advantage to replacing the non-uniform FFT.
-Push on distributed co
+Spherical Harmonics are a new way to represent the Radio Interferometric Measurement Equation. We analysed published research in this area\cite{carozzi2015imaging, mcewen2008simulating} and see potential for a new reconstruction architecture, which may reduce the overall runtime costs. However, the current formalism\cite{smirnov2011revisiting} is based on the plane wave. How a real-world imaging algorithm with spherical harmonics deals with calibration and ionosphere distortion may be fundamentally different to current CLEAN and Compressed Sensing reconstructions. At this point, it is unclear if or how many imaging problems have to be re-investigated by moving to Spherical Harmonics.
 
 
 
 
 
+There is no clear alternative to the non-uniform FFT approximation. It seems runtime efficient compared to the alternatives. MeerKAT only increases its data volume. Future imaging algorithms have to move to distributed computing eventually. State-of-the-art CLEAN can distribute some steps of the reconstruction. But not completely, and limited. Research is focussed on getting the non-uniform FFT, CLEAN and Compressed Sensing approaches to distribute. It is an inherently iterative reconstruction algorithm.
 
+Here, the direct Fourier Transform can become interesting. It does not need an iterative approximation scheme, and may prove to be useful for distributed computing. If we can get the runtime costs to be more competitive.
 
-
-
-
-
-
-The MeerKAT interferometer poses a reconstruction problem on a large scale. Future expansions will lead to an even higher data volume. Compressed Sensing can increase the effective resolution of the instrument. But comes with a higher runtime costs. How to create a large scale Compressed Sensing reconstruction is still an open problem.
-
-
-
-In this project, we created a new architecture for Compressed Sensing reconstructions. Instead of using the non-uniform FFT approximation, we directly use the relevant columns of the Fourier transform matrix. We showed that the likely-relevant columns can be retrieved with a heuristic, and we can reconstruct images without ever calculating the whole Fourier matrix. This architecture naturally extends to the wide field of view measurement equation and does not need any approximations. 
-
-We exploited the starlet for a greedy heuristic, locating the likely-relevant columns of the Fourier transform matrix. The same heuristic can be used with other regularizations. It locates the likely location of Gaussian-like objects at different scales. As such the same heuristic could be used for a Gaussian mixture model. 
-
-
-
-We postulate that maybe we can reduce the overall runtime costs with a different architecture. We have looked at three alternatives to the common Major Cylce architecture: Projecting on a uniform grid, using Spherical Harmonics, and using the Direct Fourier Transform. We investigated the latter in more detail.. We created an algorithm using the direct Fourier Transform and improved upon current scalability. Created an algorithm which simplifies the whole pipeline, but overall could not reduce the runtime costs.
-
-
-
-
-
-There is likely not a single step, a single algorithm, which leads to a scalable solution. Although our approach with the direct Fourier Transform did improve upon the runtime, we still can introduce approximations. Indeed, adding approximations and working with a reduced measurement set may be necessary for MeerKAT reconstructions. It is an over-determined problem. In a noiseless environment, we would be able to solve for the reconstructed image. But still inherently incomplete.
-
-
-
- Compressed Sensing approaches exist, they use the major cycle, but they all are slower to compute than CLEAN, for which the major cycle was developed. 
-
-It uses the non-uniform FFT to approximate the Fourier transformation of non-uniformly sampled Visibilities.
-
-This project set out to explore different architectures for Compressed Sensing Reconstructions. A different way of getting from Visibilities to image. 
-
-Three different possibilities, with calculating the non-uniform FFT once, using spherical harmonics, or calculating only columns of the Fourier transform matrix
-
-For the former, we created a novel approach which does not need the major cycle. We need a transformation, where we can both estimate which components are likely to be non-zero, and which use few non-zero components to represent an image.
-
-This project used starlets, which were developed for astronomical images. Their solution is not sparse enough to scale to MeerKAT problems.
-
-This leaves two other ways, splitting the major cycle falls off if we consider self-calibration
-
-
-
-Spherical harmonics are the last way,
-Compressed Sensing algorithms have used it to gain another improvement in reconstruction quality. At this point, there is no Compressed Sensing algorithm which used the sphere for speed up.
-
-here I see a possibility. The downside is it leads to a new measurement equation. It did not have as much time to formalize corrupting effects like antenna beam pattern, ionosphere and so on.
-
-There is yet an
-
-
-
+Bayesian statistics.
  
-Still an open question
+Still an open question, we do not have any break-through 
 
 
 
