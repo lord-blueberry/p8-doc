@@ -92,6 +92,9 @@ However, if we can decrease the memory and runtime costs with the right approxim
 
 
 
+
+
+
 We created a proof-of-concept algorithm using the direct Fourier Transform instead of the non-uniform FFT. We created a Compressed Sensing reconstruction with Coordinate Descent which only needs a subset of the Fourier matrix. We leveraged the starlet transform for predicting likely non-zero bases, and for a iteration ordering of Coordinate Descent. At this point, it is unclear if the heuristic will eventually converge to the true optimum in theory. In practice, we showed super-resolution performance of Coordinate Descent on simulated MeerKAT data together with accurate total flux modelling compared to CLEAN.
 
 This is a similar result to other Major Cycle Compressed Sensing algorithms, which have also shown superior reconstruction quality compared to CLEAN on real-world observations\cite{dabbech2018cygnus}\cite{girard2015sparse}. Similar to CLEAN, current Compressed Sensing approaches use the non-uniform FFT to cycle between Visibility and image space. But compared to CLEAN, they need more cycles to converge, which is one reason why Compressed Sensing reconstructions have higher runtime costs. 

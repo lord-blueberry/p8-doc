@@ -136,7 +136,9 @@ For reconstruction, we modify the starlet wavelet and set all negative sections 
 
 
 \subsection{Coordinate Descent Implementation}
-In this section, we put together the starlet transform and the Coordinate Descent algorithm to our solution. 
+In this section, we put together the starlet transform and the Coordinate Descent to form our algorithm. 
+
+First, we discuss the objective function for a single starlet layer and why we still need the non-uniform FFT at least for pre-calculation. Then we move on to our Coordinate Descent implementation, which uses two separate loops and define what one iteration means for us
 
 Our target is to use as few columns from $F$ as possible. As we have seen in equation \eqref{cd:starlet:decomposition}, each starlet is a series of convolutions. We can also do the convolution in Fourier space, and we only need to calculate the columns of $F$ for non-zero starlets instead of non-zero pixels. This leads us to the following objective \eqref{cd:starlet:layer} for a single layer $i$.
 
@@ -148,19 +150,33 @@ The drawback is that we need to calculate all the convolutions for the starlets 
 
 We also use the non-uniform FFT for the heuristic. We transform the Visibilities to image, and calculate the starlet decomposition shown in equation \eqref{cd:starlet:decomposition}. 
 
-Our algorithm is split in two separate Coordinate Descent loops. The first loop iterates over the starlet components of a single layer. It is where we use the starlet transform as a heuristic for likely non-zero components. The second Coordinate Descent loop iterates over all non-zero components. In this step with the non-negative starlet, a lot of bases drop to zero and we arrive at a more sparse solution.
 
-\subsubsection{Iteration Scheme}
+\subsubsection{Iteration Scheme and Heuristics}
+Our algorithm is split in two separate Coordinate Descent loops. The first "adding" loop, iterates over the starlet components of a single layer. Here  we use the starlet transform as a heuristic and add likely non-zero components. The second, "sparsifying" loop iterates over all non-zero components of all layers. Together they form one full iteration of our proof-of-concept algorithm.
+\begin{lstlisting} 
+def one_full_iteration(V_residual, alpha, J, lambda):
+	#adding loop
+	for j in reverse(range(0, J)):
+		a = alpha[j]
+		active_set = starlet_decomposition(non_uniform_fft(V_residual), lambda)
+		a = coordinate_descent(V_residual, active_set, lambda, 10)
+		
+	#sparsifying loop
+	non_zero = sum(abs(alpha))
+	for i in range(0, 10):
+		for j in range(0, J):
+			a = alpha[j]
+			active_set = a[non_zero > 0]
+			a = coordinate_descent(V_residual, active_set, lambda, 1)
+\end{lstlisting}\label{cd:full}
 
-We discuss the objective function and how we only need the columns of $F$ with a non-zero starlet component. Then, we show the heuristic , we discuss how The objective function \eqref{cd:starlet} reconstructs the image in the starlet space $\alpha$. The $D$ matrix represents all our starlet basis functions and the image can be reconstructed with $x =D\alpha$. 
+The adding loop minimizes the objective \eqref{cd:starlet:layer}. We first use the starlet transform for estimating likely non-zero components. We then use Coordinate Descent and iterate over the likely non-zero components. In theory, the Coordinate Descent iterations in the adding loop are not necessary. The sparsifying loop will converge to the same solution. In practice, the Coordinate Descent iterations help to reduce the non-zero components we add. When we look again at image \ref{cd:heuristic:starlet}, which shows the likely location of point sources, we see that the individual locations are not independent. Coordinate Descent iterations here help to reduce the number of non-zero starlets that get minimized in the sparsifying loop.
 
-\begin{equation}\label{cd:starlet}
-\underset{\alpha}{minimize} \: \left \| V - FD\alpha \right \|_2^2 + \lambda \left \| \alpha \right \|_1 \\
-\end{equation}
+The adding loop minimized each layer separately. The task for the sparsifying loop is to minimize $alpha_i$ for all layers. In this implementation, we look at all $\alpha_i$ for each non-zero location in $\alpha$. If the adding loop set a point source at a certain pixel location, the sparsifying loop checks if a wider starlet at the same location minimizes the objective.
 
- Currently, the product $FD\alpha$ requires Fourier columns for every non-zero pixel. This can be improved. 
+Non-zero starlet
 
-
+The starlet transform allows for a myriad of heuristics with Coordinate Descent. In the adding loop, we sort the active set heuristic.We leveraged another fact of the starlet transform 
 
 
 
