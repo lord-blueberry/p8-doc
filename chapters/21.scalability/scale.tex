@@ -77,34 +77,19 @@ Indeed, the runtime of our Coordinate Descent algorithm could be improved by usi
 
 
 \subsection{Approximations as key for going large scale}
-We set out to reduce the runtime costs of compressed Sensing reconstructions by replacing the non-uniform FFT approximation. Ironically we ended up with an algorithm which not only has higher runtime costs, the costs may even be reduced by moving back to the Major Cycle architecture.
+We set out to reduce the runtime costs of compressed Sensing reconstructions by replacing the non-uniform FFT approximation. Ironically we ended up with an algorithm which not only has higher runtime costs, the costs may even be reduced by moving back to the Major Cycle architecture. 
 
-That does not mean the new architecture cannot beat CLEAN or the Major Cycle. Our algorithm scales independently of the image size. The cost effectiveness of the two architectures boils down to the ratio between Visibilities and pixels. For MeerKAT reconstructions, the ratio is skewed towards Visibilities, and the Major Cycle is more cost effective. But if we increase the number of pixels in the reconstruction, we increase the cost-effectiveness of our direct Fourier transform architecture
+The question arises, whether the direct Fourier Transform has a future for MeerKAT reconstructions or not. From the current results we can summarize that the Major Cycle architecture with the non-uniform FFT is a good approximation of the Fourier Transform with no clear alternative. The emphasis is on the approximation. We do not need an exact transform. The Visibilities are inherently noisy, and even with the optimal reconstruction there will be residual noise in the image above the level of floating point accuracies. An optimal Fourier Transform for MeerKAT takes the inherent inaccuracy into account.
 
-Increasing the number of pixels is only useful to a limit. Decreasing the number of Visibilities however, might yield better results: The large number of Visibilities are virtually guaranteed to have redundant information. A portion of the total runtime is spent on Visibilities, which do not contain any new information for the image. One improvement may be to sub-sample the Visibilities and reconstruct an approximate image from a fraction of the dataset. In this environment, our new architecture may become viable for reducing runtime costs. Indeed, the direct Fourier transform may not be cost effective partly because it does not use approximations. Our architecture calculates the Fourier transform up to the limit of floating-point precision. The Major Cycle on the other hand, uses the non-uniform FFT approximation and stops at the noise limit of the measurements. For our new architecture, introducing back approximations may be the key to reduce runtime costs.
+The direct Fourier Transform, as it is implemented in our algorithm, wastes resources with a precise transformation. In the context of MeerKAT, it has to re-introduce approximations to be competitive. Our Coordinate Descent approach leveraged the fact that not all columns of $F$ are necessary for reconstruction. The next step is to see if the number of rows can be reduced too.
 
-The direct Fourier Transform simplifies a lot but is too precise. 
+A MeerKAT reconstruction has magnitudes fewer pixels than Visibilities. Not all samples contribute the same amount of information to a reconstruction.If we can remove the redundant information before reconstruction, we can reduce the overall costs and increase the ratio of samples per pixel. Our Coordinate Descent algorithm scales independently of image size, the fewer samples we have per pixel, the more cost effective our algorithm becomes compared to CLEAN.
 
-In the future MeerKAT is scheduled to be expanded, posing the reconstruction problem on an even larger scale. Sooner or later, the reconstruction has to be done over a distributed computing infrastructure. In the Major Cycle, single steps like the $w$-correction lend themselves to distributed computing. But designing a Major Cycle algorithm which is highly distributable is an open problem. The simplified architecture of our direct Fourier transform together with Coordinate Descent may have an edge in distributed computing. Coordinate Descent can converge, even when the descent steps are distributed. As it exists in this project, the memory and runtime costs of our approach are too high to be relevant for MeerKAT reconstructions. 
-
-However, if we can decrease the memory and runtime costs with the right approximations, while keeping the distribution properties of Coordinate Descent intact, our approach may become interesting for distributed image reconstructions. 
+As it is, our proof-of-concept algorithm with the direct Fourier Transform is too expensive when compared to CLEAN. It wastes resources on a too precise transformation. By re-introducing approximations, we can further decrease the runtime costs of the direct Fourier Transform. Whether we can find an approximation, which is at least as accurate as the non-uniform FFT and has lower runtime costs remains to be investigated in the future.
 
 
 
 
-
-
-
-We created a proof-of-concept algorithm using the direct Fourier Transform instead of the non-uniform FFT. We created a Compressed Sensing reconstruction with Coordinate Descent which only needs a subset of the Fourier matrix. We leveraged the starlet transform for predicting likely non-zero bases, and for a iteration ordering of Coordinate Descent. At this point, it is unclear if the heuristic will eventually converge to the true optimum in theory. In practice, we showed super-resolution performance of Coordinate Descent on simulated MeerKAT data together with accurate total flux modelling compared to CLEAN.
-
-This is a similar result to other Major Cycle Compressed Sensing algorithms, which have also shown superior reconstruction quality compared to CLEAN on real-world observations\cite{dabbech2018cygnus}\cite{girard2015sparse}. Similar to CLEAN, current Compressed Sensing approaches use the non-uniform FFT to cycle between Visibility and image space. But compared to CLEAN, they need more cycles to converge, which is one reason why Compressed Sensing reconstructions have higher runtime costs. 
-
-In this project, we postulated that one may reduce the runtime cost of Compressed Sensing approaches by replacing the non-uniform FFT approximation. We discussed three alternatives: Optimal Projection on a uniform Grid, using Spherical Harmonics and the direct Fourier Transform. We created a proof-of-concept reconstruction using the direct Fourier Transform and Coordinate Descent. We leveraged the starlet transform and created an algorithm which scales with the number of non-zero basis functions. 
-
- 
-
-
-The main goal of this project was to find a new architecture which reduces the runtime cost of Compressed Sensing algorithms for large scale reconstructions. In the context of MeerKAT, the estimated runtime costs of CLEAN were still half of the best case estimate of our Coordinate Descent algorithm. Ironically, the runtime costs of Coordinate Descent can be improved by using the Major Cycle architecture instead of the direct Fourier transform and potentially reduce its memory requirement as well.
 
 
 
