@@ -51,19 +51,17 @@ Afterwards, the whole process is reversed. The image gets copied back into the s
 If we choose uses as many stacks as Visibilities, we end up with an exact $w$-corrections. In practice, many Visibilities have a similar $w$-term. $w$-stacking approximates the correction and allows the Major Cycle to distribute the forward- and backwards non-uniform FFT to a certain extend.
 
 \subsection{Basic Calibration and Self-Calibration}
-The Visibilities measured by a Radio interferometer require calibration before an image can be reconstructed. Calibration corrects the amplitude and phase of the measured Visibilities for instrumental differences and direction independent effects. For small field of view instruments, this includes distortions from the ionosphere and other sources. The basic calibration scheme used a second observation where the true image was known, and solved for the missing calibration parameters $C$, shown in equation \eqref{meerkat:calibration}.
+The Visibilities measured by a Radio interferometer require calibration before an image can be reconstructed. Calibration corrects the amplitude and phase of the measured Visibilities for instrumental differences and direction independent effects. The basic calibration scheme uses a second observation where the true image was known, and solved for the missing calibration parameters $C$, shown in equation \eqref{meerkat:calibration}. $V_2$ are the Visibilities from the calibration observation, and $x_2$ is the known image. The resulting calibration parameters are then used in the observation of interest. 
 
 \begin{equation}\label{meerkat:calibration}
 \underset{C}{minimize} \: \left \| CV_2 - F(x_2 \star PSF) \right \|_2^2
 \end{equation}
 
-$V_2$ are the Visibilities from the calibration observation, and $x_2$ is the known image. The resulting calibration parameters are then used in the observation of interest. The number of calibration parameters depends on the instrument and the observation, but is a fraction of the total number of Visibilities. Again, wide field of view tends to increase the number of necessary calibration parameters. Furthermore the true calibration drifts with time. Note that the equation \eqref{meerkat:calibration} is essentially the reverse operation of image reconstruction. In this task, we want to find the calibration parameters from a known image.
+Accurate calibration is necessary for a high-fidelity image reconstruction. For small field of view observations, the number of calibration parameters is relatively small and if the observation spans a short period of time, sufficiently accurate. For observations over a longer time period, the calibration parameters drift significantly, and wide field of view increases the number of necessary parameters. 
 
-This has led rise to the self-calibration scheme, were the observed image is solved for together with the calibration parameters $C$. We iteratively reconstruct the image with the current calibration, and then improve the calibration from the current image.
+The equation \eqref{meerkat:calibration} is essentially the reverse operation of image reconstruction. If we know at least parts of the observed image, we can improve the calibration parameters. This has let to the self-calibration scheme where only an initial calibration is done with a secondary observation, and the imaging algorithm is expected to improve upon the calibration parameters. In self-calibration mode, the imaging algorithm creates a reconstruction from initial calibration. The reconstruction is used to improve the calibration, which in turn gets used for the next reconstruction. The imaging algorithm iteratively solves for both, the observed image $x$ and the calibration parameters $C$.
 
-This has led to much better calibration and is very important for MeerKAT.
-
-Self-Calibration pushes the calibration problem to the reconstruction algorithm.
+For wide field of view, observations over a long time period, self-calibration leads to a more accurate reconstruction than otherwise possible. As we will see in the next section, self-calibration has implication on the Fourier Transform of the reconstruction algorithm and therefore on the overall architecture.
 
 
 
