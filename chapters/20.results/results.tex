@@ -25,7 +25,7 @@ The first simulated observation contains two non-zero pixels, i.e. point sources
 
 The figure \ref{results:points} shows the CLEAN and the Coordinate Descent reconstruction. CLEAN reconstructs the image \ref{results:points:tclean} at the accuracy limit of the instrument. It essentially reconstructs a blurred version of the observed image, where the blurring represents the accuracy of the instrument. With compressed sensing, we aim to reconstruct the de-blurred image, increasing the effective accuracy of the instrument. 
 
-Coordinate Descent in image \ref{results:points:cd} shows a super-resolved reconstruction of the two point sources. It reconstructs two narrow peaks surrounded,by a low-intensity Gaussian emission. Also, Coordinate Descent manages to capture the total flux more accurately than CLEAN.  The total flux of image \ref{results:points:cd} results in 3.92 Jansky/beam, compared to CLEAN which overshoots the number by a factor of 1400. The total flux of the CLEAN reconstruction \ref{results:points:tclean} overshoots the 3.9 figure by a factor of 1400. This gets obvious when we compare the intensity profile of CLEAN, Coordinate Descent and the ground truth in figure \ref{results:points:contour}.
+Coordinate Descent in image \ref{results:points:cd} shows a super-resolved reconstruction of the two point sources. It reconstructs two narrow peaks surrounded,by a low-intensity Gaussian emission. Also, Coordinate Descent manages to capture the total flux more accurately than CLEAN.  The total flux of image \ref{results:points:cd} results in 3.92 Jansky/beam. CLEAN on the other hand overshoots the correct total flux by a factor of 1400. The total flux. It gets obvious when we compare the intensity profile of CLEAN, Coordinate Descent and the ground truth in figure \ref{results:points:contour}.
 
 \begin{figure}[h]
 	\centering
@@ -34,7 +34,7 @@ Coordinate Descent in image \ref{results:points:cd} shows a super-resolved recon
 	\label{results:points:contour}
 \end{figure}
 
-CLEAN essentially places a Gaussian function with correct peak intensity at the point source location, but it does not respect the total flux of the image. Coordinate Descent keeps the total flux in mind. The pixels in each area of the point sources sum up to the correct values of 2.5 and 1.4 respectively. However, note that Coordinate Descent in figure \ref{results:points:contour} seems to have both point sources shifted by approximately a pixel. It looks suspiciously like an off-by one error. Sadly in the time frame of this project, no error was found or an explanation for this behaviour.
+CLEAN essentially places a Gaussian function with correct peak intensity at the point source location, but it does not respect the total flux of the image. However, note that Coordinate Descent in figure \ref{results:points:contour} seems to have both point sources shifted by approximately a pixel. It looks suspiciously like an off-by one error. Sadly in the time frame of this project, no error was found or an explanation for this behaviour.
 
 %Possible 
 
