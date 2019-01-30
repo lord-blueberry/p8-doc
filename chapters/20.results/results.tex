@@ -117,26 +117,7 @@ The left image shows shows a reconstruction where the flux is concentrated into 
 
 Our modified starlet has likely a role in these artefacts. In section \ref{cd:starlets:modification}, we described how our modified starlet does not have negative sections. Intuitively, the original starlet penalizes two point sources in close proximity, and forces the emission to be represented with a wider starlet. Since we removed the negative sections, our algorithm can use as many point sources next to each other without any penalty. This would explain the "trail" of single pixel emissions in the second, third and fourth images.
 
-The original starlet wavelet forces the second, third and fourth image of figure \ref{results:mixed:points} to be similar to the first.
+The original starlet wavelet forces the second, third and fourth image of figure \ref{results:mixed:points} to be similar to the first, but at the cost of sparsity. Our modified starlet can represent the image \ref{results:mixed:cd} with 244 non-zero bases, while the original starlet leads to over 2000. It has to correct for the negative image regions it produces.
 
-
-
-More complex source. We see a super resolution and again more accurate flux. Point sources on the other hand, do become problematic. We see one point souce split up in two very narrow peak. When we look at other point sources of figure \ref{results:mixed:points}, we see mixed results. Some point sources are reconstructed as we would wish, with one high peak in the center, locating the point source, and a small starlet artifact which is the low intensity "glow" around it. The first point source is what we would wish for. We show a few failure modes of point source reconstruction. A lower intensity "trail" in the second image and a split into two point sources of images three and four.
-
-
-
-problem of an error, since Coordinate Descent should have converged on the two point sources.
-
-Two things could be made to improve it: This project uses the same $\lambda$ for all starlet layers. Girard et al.\cite{girard2015sparse} used a different $\lambda$ for each layer. 
-
-different way of handling positivity. 
-
-The trail issue of point sources can be an artifact of how positivity is handled in our algorithm. 
-
-Starlet reconstruction with negative parts, but leads to a solution with far more non-zero components, [since it has to counter-act the negativity]. The reconstruction \ref{results:mixed:cd} is the result of 244 non-zero, strictly non-negative starlets. Letting the starlet have its negative 'dip' results in a reconstruction with more than ten times the components. 
-
-
-244 non-zero starlets, 
-
-show the areas
+Our modified starlet leads to a more sparse solution, but may introduce artefacts in reconstructing point sources. In our proof-of-concept-implementation, we used the same $\lambda$ regularization for each layer. Girard et al.\cite{girard2015sparse} used a different $\lambda$ for every layer. It may help reduce the artefacts of our modified starlet, while keeping the sparse representation it provides.
 

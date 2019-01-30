@@ -77,7 +77,7 @@ Indeed, the runtime of our Coordinate Descent algorithm could be improved by usi
 
 
 \subsection{Approximations as key for going large scale}
-We set out to reduce the runtime costs of compressed Sensing reconstructions by replacing the non-uniform FFT approximation. Ironically, we ended up with an algorithm which is not only has higher runtime costs, the runtime costs may even be reduced by moving back to the Major Cycle architecture.
+We set out to reduce the runtime costs of compressed Sensing reconstructions by replacing the non-uniform FFT approximation. Ironically we ended up with an algorithm which not only has higher runtime costs, the costs may even be reduced by moving back to the Major Cycle architecture.
 
 That does not mean the new architecture cannot beat CLEAN or the Major Cycle. Our algorithm scales independently of the image size. The cost effectiveness of the two architectures boils down to the ratio between Visibilities and pixels. For MeerKAT reconstructions, the ratio is skewed towards Visibilities, and the Major Cycle is more cost effective. But if we increase the number of pixels in the reconstruction, we increase the cost-effectiveness of our direct Fourier transform architecture
 
