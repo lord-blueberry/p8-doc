@@ -1,17 +1,13 @@
 \section{Alternatives to the non-uniform FFT}\label{killmajor}
+The MeerKAT creates wide field of View observations. For accurate image reconstruction, the algorithm also has to optimize the calibration parameters $C$ together with the observed image $x$. This leads us to the following optimization objective \eqref{killmajor:objective} for MeerKAT imaging. $F_{wof}$ represents the wide field of view Fourier Transform with three dimensional Visibilities and two dimensional image. 
 
-We search for an alternative to the non-uniform FFT with $w$-stacking. The problem is shown in equation \eqref{killmajor:objective}. It has two difficulties. We search for the wide field of view Fourier Transform $F_{wof}$, which has three Fourier dimensions and two image dimensions. Furthermore, we also solve the for both the calibration parameters $C$ and the image $x$.
 \begin{equation}\label{killmajor:objective}
 \underset{C, x}{minimize} \: \left \| CV - F_{wof}x \right \|_2^2 + \lambda \left \| P(x) \right \|_1
 \end{equation}
 
-Major Cycle uses $w$-stacking to approximate $F_{wof}$. Current Compressed Sensing approaches use the $w$-stacking algorithm in a similar manner.
-State-of-the-art algorithms use the non-uniform FFT with $w$-stacking to 
+State of the art CLEAN algorithms use the Major Cycle architecture for image reconstruction. They use the $w$-stacking algorithm to approximate $F_{wof}$ and cycle between Visibility and image space. Current Compressed Sensing approaches use the $w$-stacking algorithm in a similar manner\cite{girard2015sparse, dabbech2018cygnus, mcewen2011compressed, pratley2018fast}, but need more cycles to converge to an image. This is one reason for the overall higher runtime costs of Compressed Sensing. Various research focuses on improving the reconstructions in the context of the non-uniform FFT and $w$-stacking. Pratley et al\cite{pratley2017robust} optimized the accuracy of the non-uniform FFT for Compressed Sensing reconstructions. Dabbech et al.\cite{dabbech2017wEffect} investigated $w$-term approximations for reducing runtime costs. 
 
-
-Many Compressed Sensing reconstructions use the non-uniform FFT\cite{girard2015sparse, dabbech2018cygnus, mcewen2011compressed, pratley2018fast}  and do not discuss alternatives. Pratley et al\cite{pratley2017robust} optimized the non-uniform FFT in the context of Compressed Sensing reconstructions. Dabbech et al.\cite{dabbech2017wEffect} investigated $w$-term approximations for reducing runtime costs of Compressed Sensing reconstructions.
-
-This project explores three different ways of calculating the Fourier transform which leads to three different architectures. In this section we discuss the merits of each alternative in the context of reducing the cost for MeerKAT reconstructions.
+Alternatives to the non-uniform FFT are rarely discussed in Radio Astronomy. We found only Hardy\cite{hardy2013direct} which investigated the direct Fourier Transform for Compressed Sensing reconstructions. In this project, we investigate if we can use an alternative to the non-uniform FFT and reduce the runtime costs of Compressed Sensing. We discuss three alternatives: Optimal projection on a uniform grid, Spherical Harmonics and the direct Fourier Transform.
 
 \subsection{Optimal projection on a uniform grid}
 The $w$-stacking algorithm continually cycles between non-uniform Visibility space and uniform image space. Over several cycles a reconstruction algorithm finds the optimal projection on the uniform grid together with the observed image. Here we discuss the potential of searching for the optimal projection first and reconstruct the image in a second step.
@@ -28,7 +24,10 @@ The main advantage for this architecture is that it reduces the problem to a uni
 
 In practice, there is a second difficulty with the optimal projection: The $PSF$ of objective \eqref{killmajor:sep:deconv} is difficult to represent accurately on a uniform grid. It varies for each pixel, the $PSF$ at the center of the dirty image is not identical to the $PSF$ for edge pixels. For the most accurate result, we would need a $PSF$ for each pixel. The naive way to calculate a $PSF$ for a pixel is to set all amplitudes of our Visibilities to 1, shift the phase to the desired pixel, and calculate the Fourier Transform. The naive way to calculate a $PSF$ for each pixel leads to a quadratic runtime.
 
-CLEAN gets away with a constant $PSF$\footnote{CLEAN implementations in Radio Astronomy typically use a constant $PSF$. This is not necessary, one can also implement CLEAN with a varying $PSF$.}, because of the Major Cycle architecture. In each cycle, it reduces the error it introduced by the constant $PSF$ of the previous cycle, leading to a more accurate reconstruction. When we project on a uniformly sampled grid, we need several $PSF$s for a comparable accuracy to the Major Cycle, and this number dictates whether we can reduce the runtime costs. The question, how many $PSF$s are necessary, seems currently unknown in the Radio Astronomy community, as it becomes irrelevant in the Major Cycle architecture. 
+CLEAN gets away with a constant $PSF$\footnote{CLEAN implementations in Radio Astronomy typically use a constant $PSF$. This is not necessary, one can also implement CLEAN with a varying $PSF$.}, because of the Major Cycle architecture. In each cycle, it reduces the error it introduced by the constant $PSF$ of the previous cycle, leading to a more accurate reconstruction. When we project on a uniformly sampled grid, we need several $PSF$s for a comparable accuracy to the Major Cycle, and this number dictates whether we can reduce the runtime costs. The question, how many $PSF$s are necessary, seems currently unknown in the Radio Astronomy community, as it becomes irrelevant in the Major Cycle architecture.
+
+
+
 
 
 
