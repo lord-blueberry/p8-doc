@@ -17,7 +17,6 @@ The $w$-stacking algorithm continually cycles between non-uniform Visibility spa
 \underset{x}{minimize} \:& \left \| I_{dirty} - x \star PSF \right \|_2^2 + \lambda \left \| P(x) \right \|_1 \label{killmajor:sep:deconv}
 \end{alignat}
 
-
 The first objective \eqref{killmajor:sep:major} solves for the optimal projection on a uniform grid. It uses the $w$-stacking algorithm, represented as $\tilde{F}_{wof}$, which approximates the wide field of view Fourier transform. After we found the optimal projection, we do not need the original Measurements for further processing. The objective \eqref{killmajor:sep:deconv} only needs the dirty image and the Point Spread Function to find the observed image according to some prior $P()$. In this setting, Compressed Sensing reconstructions and CLEAN need the same amount of $w$-stacking cycles.  \eqref{killmajor:sep:major}. 
 
 The main advantage for this architecture is that it reduces the problem to a uniformly-sampled grid, and ignore the original Visibilities in later steps. However, note that \eqref{killmajor:sep:major} and \eqref{killmajor:sep:deconv} do not solve for calibration parameters. $C$ is defined in the non-uniformly sampled space. Unless we find a way to project the calibration problem on a uniform grid too, we cannot ignore the original Visibilities and the main advantage of this setting vanishes. 
