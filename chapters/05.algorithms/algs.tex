@@ -1,12 +1,5 @@
 \section{Compressed Sensing with Coordinate Descent\\ and the direct Fourier Transform}\label{cd}
-In this architecture, we use the direct Fourier Transform matrix $F$ instead of the non-uniform FFT approximation. We show the principle of our approach at a simplified Coordinate Descent example. 
-
-
-We simplify the reconstruction problem and ignore the $w$-term and calibration until we extrapolate the runtime costs. The direct Fourier Transform naturally extends to wide field of view and calibration problems. It works identical for both wide field of view and small field of view. 
-
-Let us minimize the objective function \eqref{cd:clean}.
-
-
+Until we extrapolate the runtime costs of the direct Fourier Transform in section \ref{scale}, we ignore both the $w$-term and calibration for simplicity. The direct Fourier Transform works identical for wide field of view observations. Self-calibration and Coordinate Descent both require a transformation from image to Visibility space. By using Coordinate Descent, we do not need to handle self-calibration explicitly. We show the principle of our approach at a simplified Coordinate Descent example, which leads us to the following objective function \eqref{cd:clean}.
 
 \begin{equation}\label{cd:clean}
 \underset{x}{minimize} \: \left \| V - Fx \right \|_2^2 + \lambda \left \| x \right \|_1 \\
