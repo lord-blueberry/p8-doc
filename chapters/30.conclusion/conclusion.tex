@@ -7,7 +7,7 @@ The second alternative is using Spherical Harmonics instead of the Fourier Trans
 
 The last alternative, the direct Fourier Transform uses the explicit matrix instead of any approximation algorithm. So far, this approach did not scale to MeerKATs data volume. In this project, we leveraged the starlet transform and created an algorithm which only needs subset of the matrix's columns. With Coordinate Descent, we created an algorithm that scales with the number of non-zero basis functions instead of pixels in the image. Our approach can further be improved by accounting for the redundancy in MeerKAT measurements and it has interesting properties for large scale distribution. Sadly, our improvements were not enough to scale to MeerKATs data volume. 
 
-In this project we have not found a clear alternative to the non-uniform FFT for large scale reconstructions. The non-uniform FFT leads to algorithms with lower runtime costs, but limited potential for distribution. Creating a cost effective, distributable reconstruction algorithm is still an open problem. 
+In this project we have not found a clear alternative to the non-uniform FFT for large scale reconstructions. The non-uniform FFT leads to algorithms with lower runtime costs, but limited potential for distribution. In recent years researches have focussed on distributable Compressed Sensing algorithms\cite{dabbech2018cygnus, pratley2018fast} with the non-uniform FFT. Creating a cost effective, distributable Compressed Sensing reconstruction algorithm is still an open problem. 
 
 
 
