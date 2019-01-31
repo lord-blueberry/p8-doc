@@ -24,14 +24,9 @@ The main advantage for this architecture is that it reduces the problem to a uni
 
 In practice, there is a second difficulty with the optimal projection: The $PSF$ of objective \eqref{killmajor:sep:deconv} is difficult to represent accurately on a uniform grid. It varies for each pixel, the $PSF$ at the center of the dirty image is not identical to the $PSF$ for edge pixels. For the most accurate result, we would need a $PSF$ for each pixel. The naive way to calculate a $PSF$ for a pixel is to set all amplitudes of our Visibilities to 1, shift the phase to the desired pixel, and calculate the Fourier Transform. The naive way to calculate a $PSF$ for each pixel leads to a quadratic runtime.
 
-CLEAN gets away with a constant $PSF$\footnote{CLEAN implementations in Radio Astronomy typically use a constant $PSF$. This is not necessary, one can also implement CLEAN with a varying $PSF$.}, because of the Major Cycle architecture. In each cycle, it reduces the error it introduced by the constant $PSF$ of the previous cycle, leading to a more accurate reconstruction. When we project on a uniformly sampled grid, we need several $PSF$s for a comparable accuracy to the Major Cycle, and this number dictates whether we can reduce the runtime costs. The question, how many $PSF$s are necessary, seems currently unknown in the Radio Astronomy community, as it becomes irrelevant in the Major Cycle architecture.
+CLEAN gets away with a constant $PSF$\footnote{CLEAN implementations in Radio Astronomy typically use a constant $PSF$. This is not necessary, one can also implement CLEAN with a varying $PSF$.}, because of the Major Cycle architecture. In each cycle, it reduces the error it introduced by the constant $PSF$ of the previous cycle, leading to a more accurate reconstruction. When we project on a uniformly sampled grid, we need several $PSF$s for a comparable accuracy to the Major Cycle, and this number dictates whether we can reduce the runtime costs. 
 
-
-
-
-
-
-Solving for the Calibration parameters $C$ of our reconstruction problem \eqref{killmajor:objective} destroys the main advantage of the projection. 
+The question, whether projecting on a uniform grid is a viable alternative, depends on how efficiently the $PSF$ can be estimated, and if the calibration parameters can be mapped on a uniform grid. The optimal projection approach is not a viable before we find a way to map the calibration parameters.
 
 
 \subsection{Spherical Harmonics}
