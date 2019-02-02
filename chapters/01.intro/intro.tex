@@ -53,22 +53,18 @@ In a Major Cycle, the Visibilities get transformed into image space, CLEAN decon
 	\label{intro:major}
 \end{figure}
 
-In each Major Cycle of figure \ref{intro:major}, the residual Visibilities get transformed by the non-uniform FFT, CLEAN approximates the deconvolution, and the new residual image gets transformed back to Visibilities. Over several Major Cycles the error from the non-uniform FFT and from the CLEAN deconvolutions get minimized. In a sense, the Major Cycle is a simple optimization algorithm for two different errors. This lets CLEAN approximate the deconvolution with a constant $PSF$. The $PSF$ for Radio interferometer reconstructions varies over the image. With the Major Cycle, CLEAN can reduce the error the constant $PSF$ introduced of the previous cycle, and lead to an overall more accurate reconstruction.
+In each Major Cycle of figure \ref{intro:major}, the residual Visibilities get transformed by the non-uniform FFT, CLEAN approximates the deconvolution, and the new residual image gets transformed back to Visibilities. Over several Major Cycles the error from the non-uniform FFT and from the CLEAN deconvolutions get minimized. In a sense, the Major Cycle is a simple optimization algorithm for two different errors. This lets CLEAN approximate the deconvolution with a constant $PSF$. The $PSF$ for Radio interferometer reconstructions varies over the image. With the Major Cycle, CLEAN can reduce the error of the constant $PSF$ introduced of the previous cycle, and lead to an overall more accurate reconstruction.
 
-The non-uniform FFT is only an approximation of the Fourier Transform. 
-
-Compressed Sensing algorithms which use the non-uniform FFT also continually cycle between Visibilities and image space. As in the Major Cycle architecture, Compressed Sensing algorithms continually improve the non-uniform FFT approximation.
-
-As we will see in section \ref{meerkat}, wide field of view imaging also works identical any algorithm using the non-uniform FFT.
-
-Compressed Sensing generally need more cycles to converge to a reconstruction. We try to replace the non-uniform FFT with a different approach, but we need to account for all the wide field of view problems that were fixed with the non-uniform FFT.
+State-of-the art Compressed Sensing algorithms also use the non-uniform FFT and inherit similar advantages from the Major Cycle. The error of the Fourier approximation gets continually reduced over several cycles. Although Compressed Sensing algorithms do not use a deconvolution, and do not benefit in that regard.
 
 
 
+As we will see in the next section \ref{meerkat}, Compressed Sensing can also reduce the error of the non-uniform FFT approximation by cycling between Visibilities and image. Although state-of-the-art algorithms do use a deconvolution
 
-Current Compressed Sensing reconstructions also use the non-uniform FFT and cycle between Visibility and image space\cite{girard2015sparse,dabbech2018cygnus}, but do not use a deconvolution. Instead, they use the image to calculate the regularization penalty. But the effects are similar. Compressed Sensing minimizes the error from the non-uniform FFT approximation and the error from incomplete measurements over several cycles of non-uniform FFT approximations.  For our intents and purposes, Compressed Sensing reconstructions with the non-uniform FFT use the Major Cycle architecture. In this project, we try to find a new architecture optimized for Compressed Sensing algorithms.
+
 
  
+
 
 
 
