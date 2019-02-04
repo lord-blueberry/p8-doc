@@ -52,10 +52,7 @@ In a Major Cycle, the Visibilities get transformed into image space, CLEAN decon
 
 In each Major Cycle of figure \ref{intro:major}, the residual Visibilities get transformed by the non-uniform FFT, CLEAN approximates the deconvolution, and the new residual image gets transformed back to Visibilities. Over several Major Cycles the error from the non-uniform FFT and from the CLEAN deconvolutions get minimized. In a sense, the Major Cycle is a simple optimization algorithm for two different errors. This lets CLEAN approximate the deconvolution with a constant $PSF$. The $PSF$ for Radio interferometer reconstructions varies over the image. With the Major Cycle, CLEAN can reduce the error of the constant $PSF$ introduced of the previous cycle, and lead to an overall more accurate reconstruction.
 
-
-
-State-of-the art Compressed Sensing algorithms also use the non-uniform FFT and inherit similar advantages from the Major Cycle. The error of the Fourier approximation gets continually reduced over several cycles. More complex measurement equations have been incorporated with the non-uniform FFT in mind. In the next section \ref{meerkat} we have a look at how they are incorporated for the non-uniform FFT.
-
+State-of-the art Compressed Sensing algorithms also use the non-uniform FFT and inherit similar advantages from the Major Cycle. The error of the Fourier approximation gets continually reduced over several cycles. More complex measurement equations have been incorporated with the non-uniform FFT in mind, and work similar for both CLEAN and Compressed Sensing based algorithms. 
 
 
  
