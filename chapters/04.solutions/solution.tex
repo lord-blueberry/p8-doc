@@ -28,8 +28,8 @@ CLEAN gets away with a constant $PSF$\footnote{CLEAN implementations in Radio As
 The question, whether projecting on a uniform grid is a viable alternative, depends on how efficiently the $PSF$ can be estimated, and if the calibration parameters can be mapped on a uniform grid. The optimal projection approach is not a viable before we find a way to map the calibration parameters.
 
 
-\subsection{Spherical Harmonics and the Helmholtz Equation.}
-Spherical Harmonics are a different way to represent the measurements of an interferometer. Carozzi\cite{carozzi2015imaging} derived a measurement equation based on the fact that the Visibilities fulfils the Helmholtz equation. In practical terms, Carozzi showed we drop $F_{wof}$ in our reconstruction problem \eqref{killmajor:objective} and derive a formalism, which he termed the Spherical Wave Harmonics Transform. 
+\subsection{Spherical Wave Harmonics}
+Spherical Wave Harmonics are a different way to represent the measurements of an interferometer. Carozzi\cite{carozzi2015imaging} derived a measurement equation based on the fact that the Visibilities fulfils the Helmholtz equation. In practical terms, Carozzi showed we drop $F_{wof}$ in our reconstruction problem \eqref{killmajor:objective} and derive a formalism, which he termed the Spherical Wave Harmonics Transform. 
 
 The new formalism naturally represent wide field of view interferometers and do not have a third dimension. This opens up new designs for Compressed Sensing reconstructions. For example, we can reconstruct the image by in-painting the missing Spherical Wave Harmonics. Because they naturally represent curved surfaces, we can in-paint in a two dimensional space instead of three.
 
