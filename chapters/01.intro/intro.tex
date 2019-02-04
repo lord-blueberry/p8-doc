@@ -1,22 +1,13 @@
 \section{Compressed Sensing Image Reconstruction for MeerKAT} \label{intro}
 Image reconstruction problems arise in a variety of fields. Real-world imaging instruments measure noisy, corrupted data. Reconstruction algorithms are tasked with removing the corruption and finding the observed image. The theory of Compressed Sensing\cite{candes2006robust, donoho2006compressed} gives a framework for analysis and design of reconstruction algorithms, and we apply it to the large scale reconstruction problem of the MeerKAT Radio Interferometer.
 
-The new MeerKAT Interferometer does not measure pixels of the image directly. Instead, it measures a noisy, incomplete set of Fourier Components, which can take up several hundred gigabytes of disk space. Multiple images fit the measurements, and the reconstruction algorithm has to find the observed image from a large set of candidates. At this scale is pushed towards distributed computing.
+The new MeerKAT Interferometer does not measure pixels of the image directly. Instead, it measures a noisy, incomplete set of Fourier Components, which can take up several hundred gigabytes of disk space. Multiple images fit the measurements, and the reconstruction algorithm has to find the observed image from a large set of candidates. This data volume forces different parts, like the Fourier Transform, to be distributed on multiple machines. The current research is focussed on distributing the image reconstruction algorithm.
 
-
-An interferometer  Multiple images fit the measurements. A reconstruction algorithm has to find the observed image from all possible candidates.
-
-The new MeerKAT instrument presents the reconstruction problem on a large scale. The Fourier Components alone can take up several hundred gigabytes. 
-This forces the reconstruction algorithm into the area of distributed computing. The current state-of-the art algorithm for MeerKAT is based on CLEAN\cite{rich2008multi, rau2011multi} and has so far been  Recent work has managed to distribute parts of the algorithm. But creating a highly distributable reconstruction algorithm is still an open problem.
-
-Recently, new algorithms based on Compressed Sensing created super-resolved images of real-world observations\cite{girard2015sparse, dabbech2018cygnus}. They have the potential to increase the effective accuracy of the instrument. However they come with higher runtime costs than CLEAN. For large scale reconstructions, the lower runtime costs of CLEAN is one of the main reason why it is still the go-to algorithm.
+Recently, new algorithms based on Compressed Sensing created super-resolved images of real-world observations \cite{girard2015sparse, dabbech2018cygnus}. They have the potential to increase the effective accuracy of the instrument. However they come with higher runtime costs compared to the state-of-the-art algorithm CLEAN\cite{rich2008multi, rau2011multi, offringa2014wsclean}. For large scale reconstructions, the lower runtime costs of CLEAN is one of the main reason why it is still the go-to algorithm.
 
 CLEAN and current Compressed Sensing algorithms use the non-uniform FFT approximation\cite{kunisnonequispaced, pratley2017robust} to cycle between measurements and image space. Compressed Sensing algorithms need more cycles to converge to an image, which is one source of the higher runtime costs. In this project we investigate three alternatives to the non-uniform FFT for Radio Interferometers. We created a proof-of-concept algorithm which does not need the non-uniform FFT during optimization. Instead, we use the direct Fourier Transform which potentially leads to a distributable Compressed Sensing algorithm. Sadly, our new approach cannot reduce the runtime costs of large scale reconstructions.
 
-In this project, we have not found an alternative to the non-uniform FFT. 
-Creating both a cost-effective and distributable Compressed Sensing algorithm is still an open problem. 
-Nevertheless, we shown an algorithm which may pave the way for future improvements.
-Our algorithm has the opposite problem. It can be improved further. 
+We show our algorithm and the up and downs of alternatives to the non-uniform FFT.
 
 The rest of this article is structured as the following: We begin by introducing the basic image reconstruction problem in radio interferometry. We show the Major Cycle architecture for reconstruction algorithms, which is derived from the non-uniform FFT.  Section \ref{meerkat} introduces the difficulties of imaging MeerKAT data. We  move towards competing architectures in section \ref{killmajor}. In the following sections \ref{cd}, \ref{results} and \ref{scale} we introduce our Compressed Sensing algorithm, show the reconstruction quality on simulated MeerKAT data and extrapolate the runtime costs on a real world MeerKAT measurement.
 
