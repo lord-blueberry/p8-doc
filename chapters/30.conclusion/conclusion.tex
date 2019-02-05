@@ -1,15 +1,31 @@
 \section{Compressed Sensing reconstructions in the MeerKAT era}
-In this project, we postulated that one may reduce the runtime cost of Compressed Sensing reconstructions by replacing the non-uniform FFT approximation. We searched for alternatives that would reduce the runtime costs of Compressed Sensing for large scale MeerKAT reconstructions. Three alternatives were discussed: Optimal Projection on a uniform Grid, using Spherical Wave Harmonics and the direct Fourier Transform.
+Compressed Sensing and CLEAN based algorithms both use the non-uniform FFT to cycle between Visibility and image space. In this environment, Compressed Sensing needs more cycles to converge than CLEAN. This leads to iterative Compressed Sensing algorithms, which becomes difficult to distribute for the large scale MeerKAT problems. We postulated that one may reduce the runtime cost of Compressed Sensing reconstructions by replacing the non-uniform FFT approximation. Three alternatives were discussed: Optimal Projection on a uniform Grid, using Spherical Wave Harmonics and the direct Fourier Transform.
 
 The optimal projection on a uniform grid is way of reducing the problem to a more manageable size. The grid size is usually a fraction of the original non-uniform measurements for MeerKAT reconstructions. The first step is to search for the optimal projection of Visibilities on a uniform grid. We then reconstruct the image with uniformly sampled Visibilities and do not need the original measurements. However, self-calibration requires a transformation from uniform sampled grid back to the original measurements. Unless one finds a way to project the calibration problem on a uniform grid too, self-calibration destroys the main advantage of this approach.
 
 The second alternative is using Spherical Wave Harmonics instead of the Fourier Transform. It is a new way to represent the Radio Interferometric Measurement Equation and has only recently gained attention again. We analysed published research in this area\cite{carozzi2015imaging, mcewen2008simulating} and see potential for a new reconstruction architecture, which may reduce the overall runtime costs. At this point, it is unclear if or how many imaging problems have to be re-investigated by moving to Spherical Wave Harmonics. The Fourier Transform, self-calibration and the current formalism for Radio Interferometric Measurement equation is based on the plane wave\cite{smirnov2011revisiting}. Spherical Wave Harmonics are not. A real-world reconstruction algorithm with Spherical Wave Harmonics may have to deal with imaging problems in a fundamentally different way.
 
-The last alternative, the direct Fourier Transform uses the explicit matrix instead of any approximation algorithm. So far, this approach did not scale to MeerKATs data volume. In this project, we leveraged the starlet transform and created an algorithm which only needs subset of the matrix's columns. With Coordinate Descent, we created an algorithm that scales with the number of non-zero basis functions instead of pixels in the image. Our approach can further be improved by accounting for the redundancy in MeerKAT measurements and it has interesting properties for large scale distribution. 
+The last alternative, the direct Fourier Transform uses the explicit matrix instead of an approximation algorithm. Previous attempts\cite{hardy2013direct} lead to an impractically large matrix for MeerKAT reconstructions, but showed interesting properties for distributed computing. In this project, we improved the runtime costs and memory requirement of the direct Fourier Transform. We used Coordinate Descent together with the starlet transform and created an algorithm which only calculates the direct Fourier Transform for non-zero basis functions. Sadly, our improvements alone were not enough to scale the direct Fourier Transform to MeerKAT's data volume. Compared to the non-uniform FFT, our algorithm leads to higher runtime costs for the same measurements. 
 
-Sadly, our improvements were not enough to scale to MeerKATs data volume. 
 
-In this project we have not found a clear alternative to the non-uniform FFT for large scale reconstructions. The non-uniform FFT leads to algorithms with lower runtime costs, but limited potential for distribution. In recent years researches have focussed on distributable Compressed Sensing algorithms\cite{dabbech2018cygnus, pratley2018fast} with the non-uniform FFT. Creating a cost effective, distributable Compressed Sensing reconstruction algorithm is still an open problem. 
+The direct Fourier Transform needs to re-introduce approximations.
+ 
+Different Fourier approximations can use different properties of the measurements.
+
+Our approach used 
+Question of redundant information.
+How to exploit the properties of MeerKAT data and arrive at a more cost-effective reconstruction. Our approach can further be improved by accounting for the redundancy in MeerKAT measurements.
+
+non-uniform FFT is a local optimum.unknown it is a global optimum as well.
+
+
+In this project we have not found a clear alternative to the non-uniform FFT for large scale reconstructions. Non-uniform FFT is readily available and well-researched in the radio astronomy community. Iterative algorithm.The non-uniform FFT leads to algorithms with lower runtime costs, but limited potential for distribution. Creating a cost effective, distributable Compressed Sensing reconstruction algorithm is still an open problem. 
+In recent years researches have focussed on distributable Compressed Sensing algorithms\cite{dabbech2018cygnus, pratley2018fast} with the non-uniform FFT.
+Distributing the non-uniform FFT is possible\cite{kunisnonequispaced}. But the underlying iterative nature will still be there.
+
+
+
+
 
 
 
