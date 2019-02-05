@@ -13,12 +13,11 @@ With an expansion of the MeerKAT instrument already planned, the problem sizes w
 
 To our knowledge, it is unknown how much redundant information is measured by Radio Interferometers, and how this affects the runtime costs of reconstruction algorithms. The non-uniform FFT is a general purpose approximation and does not account for redundant information and the runtime costs are unlikely to change significantly by removing the redundant information from the Visibilities. The direct Fourier Transform on the other hand may benefit significantly, and might result in an efficient alternative to the non-uniform FFT when we account for the redundant information inherent in the measurements.
 
+With the theory of Compressed Sensing, we can design algorithms that leverage the redundant information. To our knowledge, the Radio Astronomy community has not yet investigated the potential benefits of accounting for redundant information. State-of-the-art Compressed Sensing algorithms use the $w$-stacking algorithm and include all redundant information in the reconstruction.
 
-The theory of Compressed Sensing is primed for exploiting redundant information. To our knowledge, the Radio Astronomy community does not investigate how Compressed Sensing algorithms could leverage the inherent redundancy in MeerKAT observations. State-of-the-art Compressed Sensing algorithms use the $w$-stacking algorithm and include all redundant information in the reconstruction. 
+Accounting for redundant information may be a way to reduce the problem size of future MeerKAT observations. But as we have seen in this project, single change in isolation likely leads to higher runtime costs. In the case of the direct Fourier Transform, it needs further approximations on top of the improvements developed in this project before it may even be tractable for MeerKAT reconstructions. Accounting for redundant information alone is unlikely to improve the runtime costs of Compressed Sensing reconstructions. 
 
-There are many potential ways of improving Compressed Sensing reconstruction by replacing the non-uniform FFT. But as we have seen in this project, any alternative to the non-uniform FFT likely needs more approximations on top. In the case of the direct Fourier Transform, it needs further approximations on top of accounting for redundancy before it may even be tractable for MeerKAT reconstructions. 
-
-Proof of concept algorithm before it is mature enought to beat algorithms based on the non-uniform FFT.
+The hope is that it does lead to a future 
 
 
 
