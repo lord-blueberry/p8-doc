@@ -1,4 +1,4 @@
-\section{Compressed Sensing reconstructions in the MeerKAT era}
+\section{Compressed Sensing Reconstructions in the MeerKAT era}
 Compressed Sensing and CLEAN based algorithms both use the non-uniform FFT to cycle between Visibility and image space. In this environment, Compressed Sensing needs more cycles to converge than CLEAN. This leads to iterative Compressed Sensing algorithms, which becomes difficult to distribute for the large scale MeerKAT problems. We postulated that one may reduce the runtime cost of Compressed Sensing reconstructions by replacing the non-uniform FFT approximation. Three alternatives were discussed: Optimal Projection on a uniform Grid, using Spherical Wave Harmonics and the direct Fourier Transform.
 
 The optimal projection on a uniform grid is way of reducing the problem to a more manageable size. The grid size is usually a fraction of the original non-uniform measurements for MeerKAT reconstructions. The first step is to search for the optimal projection of Visibilities on a uniform grid. We then reconstruct the image with uniformly sampled Visibilities and do not need the original measurements. However, self-calibration requires a transformation from uniform sampled grid back to the original measurements. Unless one finds a way to project the calibration problem on a uniform grid too, self-calibration destroys the main advantage of this approach.
@@ -8,43 +8,15 @@ The second alternative is using Spherical Wave Harmonics instead of the Fourier 
 The last alternative, the direct Fourier Transform, uses the explicit matrix instead of an approximation algorithm. Previous attempts\cite{hardy2013direct} lead to an impractically large matrix for MeerKAT reconstructions, but showed potential for distributed computing. In this project, we improved the runtime costs and memory requirement of the direct Fourier Transform. We used Coordinate Descent together with the starlet transform and created an algorithm which only calculates the direct Fourier Transform for non-zero basis functions. Sadly, our improvements alone were not enough to scale the direct Fourier Transform to MeerKATs data volume. Compared to the non-uniform FFT based algorithms, our approach leads to higher runtime costs for the same measurements. 
 
 In this project we have not found a clear alternative to the non-uniform FFT. It is readily available\cite{kunisnonequispaced, offringa2014wsclean} and currently seems to be the most efficient approximation of the Fourier Transform.
-Approximation seems to be the key for MeerKAT data. How we handle the Fourier Transform is central to the problem.
- The problem sizes will only increase in the near future. Exact operations like the direct Fourier Transform become intractable with increasing problem sizes.
+ Current research is focussed on distributing Compressed Sensing algorithms\cite{dabbech2018cygnus, pratley2018fast}. The iterative nature of the non-uniform FFT becomes difficult. It can be distributed\cite{kunisnonequispaced}, but the iterative nature always leads to synchronization points. The question of distribution is still open.
 
-How we introduce approximations might be the key for 
+MeerKAT is already planned for an expansion. The problem sizes will only increase in the near future. Problem sizes will only increase in the near future. With increasing problem sizes exact operations like the direct Fourier Transform become intractable. The key for going large scale is to handle approximations for MeerKAT.
 
+In this case, the non-uniform FFT may not be the optimal solution. MeerKAT measures redundant information. For the non-uniform FFT, handling redundancy does not directly improve the runtime. For alternatives to the non-uniform FFT, like the direct Fourier Transform benefits form removing redundant information. But as we have seen in this project, simply replacing the non-uniform FFT is not enough. We need novel ways of introducing efficient approximations. Here we see the potential of a new reconstruction algorithm which uses Compressed Sensing and does not use the non-uniform FFT.
 
-The main problem of our current implementation is the exact transform. It may be improved further by accounting for 
+This part is not really investigated in the Radio Astronomy Community. The non-uniform FFT is the staple, and alterantives are at least rarely published.
 
-Approximations as key. Reduce the problem size and the runtime costs. 
-
-
-It leads to iterative reconstruction algorithms, which current research is focussed on distributing\cite{dabbech2018cygnus, pratley2018fast}.
-Limited success. The non-uniform FFT is still the biggest block which needs distributed computing.
-
-
-
-Different way of handling the Fourier Transform may lead to different approximations. The non-uniform FFT does not benefit from handling redundant information.
-The direct Fourier Transform suffers because it calculates the exact transform.
-Different Fourier approximations can use different properties of the measurements.
-There is potential for improvements. Different ways of Fourier approximation may exploit different properties. MeerKAT data is redundant. The non-uniform FFT does not benefit by accounting for redundancy. The direct Fourier Transform on the other hand may be improved to the point of becoming competitive. A different approximation may lead to an overall cheaper reconstruction algorithm.
-
-The Fourier approximation cannot be looked at without a reconstruction algorithm. In combinations, we may find an optimum which both is cheap and easy to distribute.
-
-It is not really investigated in the radio astronomy community. Most use the non-uniform FFT and do not discuss alternatives. 
-
-The question of distribution is still open. Current research is focussed on distributing Compressed Sensing algorithms\cite{dabbech2018cygnus, pratley2018fast}. The iterative nature of the non-uniform FFT becomes difficult. It can be distributed\cite{kunisnonequispaced}, but the iterative nature always leads to synchronization points. The compressed Sensing reconstruction is distributed, but the non-uniform FFT is not.
- 
-
-
-
-
- for large scale reconstructions. Non-uniform FFT Iterative algorithm.The non-uniform FFT leads to algorithms with lower runtime costs, but limited potential for distribution. Creating a cost effective, distributable Compressed Sensing reconstruction algorithm is still an open problem. 
-In recent years researches have focussed on distributable Compressed Sensing algorithms\cite{dabbech2018cygnus, pratley2018fast} with the non-uniform FFT.
-Distributing the non-uniform FFT is possible\cite{kunisnonequispaced}. But the underlying iterative nature will still be there.
-
-
-
+The Fourier approximation cannot be looked at without a reconstruction algorithm. In combinations, we may find an optimum which both is cheap and easy to distribute. This is the golden algorithm. The problem is that we only see potential for many different directions. At this point, there are many ways to potentially improve, but no overall goal.
 
 
 
