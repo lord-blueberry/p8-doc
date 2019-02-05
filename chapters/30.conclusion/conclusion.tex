@@ -11,18 +11,36 @@ In this project we have not found a clear alternative to the non-uniform FFT. It
 
 With an expansion of the MeerKAT instrument already planned, the problem sizes will only increase in the near future. This may force reconstruction algorithms to increasingly rely on approximations instead of exact operations. Indeed, the path to a scalable, distributable reconstruction algorithm may lie in specialized approximations for MeerKAT. The large number of Visibilities are bound to contain redundant information. By increasing the data volume, one also increases the amount of redundant information. A given reconstruction algorithm may waste resources on measurements, which contribute little to the final reconstruction.
 
-To our knowledge, it is unknown how much redundant information is measured by Radio Interferometers, and how this affects the runtime costs of reconstruction algorithms. The non-uniform FFT is a general purpose approximation and does not account for redundant information. We might arrive at a more efficient Fourier approximation by accounting for redundant information. The question whether the non-uniform FFT can be beat depends on how redundant the information really is.
-But as we have seen in this project, simply replacing the non-uniform FFT can lead to higher runtime costs. 
-A single change in isolation is unlikely to improve upon the non-uniform FFT. It takes disadvantages with it that have to be accounted for before it becomes viable.
+To our knowledge, it is unknown how much redundant information is measured by Radio Interferometers, and how this affects the runtime costs of reconstruction algorithms. The non-uniform FFT is a general purpose approximation and does not account for redundant information. The runtime costs are unlikely to change significantly by removing the redundant information from the Visibilities. The direct Fourier Transform on the other hand benefits significantly. We might arrive at a more efficient Fourier approximation by accounting for redundant information inherent in the measurements. The question, whether the non-uniform FFT can be beat, also depends on how much redundancy the measurements truly have.
 
-
-
-The difficulty lies in the fact that the Fourier approximation cannot be isolated from the reconstruction algorithm. CLEAN only makes sense with the non-uniform FFT approximation. A given reconstruction algorithm benefits from certain Fourier approximations.
-
-
-
+There are many promising ways to improve upon the non-uniform FFT for MeerKAT reconstructions. Redundancy, Spherical Wave Harmonics and Projections on a uniform grid all have potential. The problem is that we currently do not have any clear direction in which we can improve upon the non-uniform FFT. As we have seen in this project, any single change in isolation is likely to increase the runtime costs of the reconstruction. This makes it difficult to investigate any single alternative to the non-uniform FFT. The benefits of each alternative can likely only be exploited by certain reconstruction algorithms.
 
 Other ways of approximating the Fourier Transform have potential to improve Compressed Sensing reconstructions fundamentally. But as it is, there is no clear path to get to a better reconstruction algorithm. 
+
+
+The runtime of CLEAN benefits from the non-uniform FFT approximation. Coordinate Descent can use the direct Fourier Transform to reduce the overall runtime. 
+
+
+
+
+
+
+But as we have seen in this project, simply replacing the non-uniform FFT is likely leads to higher runtime costs. In the case of the direct Fourier Transform, it needs further approximations on top of accounting for redundancy to before it may become viable for large scale reconstructions. 
+
+A single change in isolation likely leads to higher runtime costs. 
+
+
+ It is unlikely to improve upon the non-uniform FFT, but we may change the approximations, or the reconstruction algorithm and possibly arrive at a more efficient algorithm. 
+The difficulty lies in the fact that the Fourier approximation cannot be isolated from the reconstruction algorithm.  A given reconstruction algorithm benefits from certain Fourier approximations.
+
+A single change in isolation is unlikely to . It takes disadvantages with it that have to be accounted for before it becomes viable.
+
+
+
+
+
+
+
 
 
 
