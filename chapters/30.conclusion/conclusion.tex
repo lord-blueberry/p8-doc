@@ -15,7 +15,7 @@ To our knowledge, the effect of redundant information is largely unexplored in t
 
 Our current estimation is that redundant information neither benefits, nor obstructs the non-uniform FFT. State-of-the-art CLEAN and Compressed Sensing based algorithms use $w$-stacking to transform all Visibilities regardless of information content. Since $w$-stacking scales linearly with the number of Visibilities, removing redundant information likely does not benefit its runtime costs. The direct Fourier Transform on the other hand may be further improved by removing the redundant information. Alternatives to the non-uniform FFT may become viable when we account for redundancy.
 
-Future for MeerKAT reconstructions depends on reducing the problem size. Accounting for redundant information is a possible way.
+Current research in the Radio Astronomy community is focussed on distributing the reconstruction problem. A different approach may be to reduce the problem size first before distribution. A single measurement of the MeerKAT Interferometer may only contribute little to the final image. Our project showed that, not all pixels are relevant for the reconstruction. With the theory of Compressed Sensing, we can design algorithms that reduce MeerKATs reconstruction problem to a more manageable size.
 
 
 
