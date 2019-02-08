@@ -9,7 +9,7 @@ State of the art CLEAN algorithms use the Major Cycle architecture for image rec
 
 Alternatives to the non-uniform FFT are rarely discussed in Radio Astronomy. We found only Hardy\cite{hardy2013direct} which investigated the direct Fourier Transform for Compressed Sensing reconstructions. In this project, we investigate if we can use an alternative to the non-uniform FFT and reduce the runtime costs of Compressed Sensing. We discuss three alternatives: Optimal projection on a uniform grid, Spherical Harmonics and the direct Fourier Transform.
 
-\subsection{Optimal projection on a uniform grid}
+\subsection{Optimal Projection on a Uniform Grid}
 The $w$-stacking algorithm continually cycles between non-uniform Visibility space and uniform image space. Over several cycles a reconstruction algorithm finds the optimal projection on the uniform grid together with the observed image. Here we discuss the potential of searching for the optimal projection first and reconstruct the image in a second step.
 
 \begin{alignat}{1}

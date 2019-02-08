@@ -1,10 +1,10 @@
-\section{Runtime cost comparison on a real-world MeerKAT reconstruction}\label{scale}
+\section{Runtime Cost Comparison on a real-world MeerKAT Reconstruction}\label{scale}
 Current Compressed Sensing reconstructions produce images at a higher quality than CLEAN. However, CLEAN is significantly cheaper to compute. MeerKAT's large scale reconstruction problems, CLEAN is still the go-to algorithm. In this project, we developed for a new architecture, which uses the relevant columns of the Fourier Transform Matrix directly. We developed a Coordinate Descent algorithm with this architecture and demonstrated in section \ref{results} super-resolution performance on simulated data. The question, if we can lower the runtime costs with our new architecture, is still open. 
 
 In this section, we compare the costs of Coordinate Descent with WSCLEAN, which is the reconstruction algorithm of choice for MeerKAT reconstructions. We create cost functions for each algorithm, which estimate the number of operations depending on the input size. WSCLEAN was executed on a real-world MeerKAT dataset shown in image \ref{scale:wsclean}. Our proof-of-concept implementation was not able to handle the large amount of data. Instead, we extrapolate the best-case costs of our approach and compare them to WSCLEAN on the MeerKAT dataset.
 
 
-\subsection{Cost function of an idealized Coordinate Descent}
+\subsection{Cost Function of an idealized Coordinate Descent}
 The runtime cost of Coordinate Descent depends on the number of Visibilities $M$ and the number of non-zero starlets $S$. The number and location of the $S$ non-zero starlets are generally not known. However, we created a heuristic which finds likely non-zero starlet components. In a realistic setting, the heuristic will have found more than $S$ likely non-zero starlets. For the idealized version of Coordinate Descent, we assume an oracle performance heuristic: It finds the location and number of the $S$ non-zero starlet components in constant time. Coordinate Descent therefore has to calculate the value of $S$  components. In total, the idealized Coordinate Descent algorithm uses four steps: creating $J$ starlet levels with the non-uniform FFT, creating the columns of $F^{-1}$, calculating the minima for each single component, and calculating the starlet layers:
 
 \begin{alignat*}{1}
@@ -28,7 +28,7 @@ Note that the runtime of Coordinate Descent is independent of the number of pixe
 
 Also note the term iterating over the $S$ non-zero starlets, $ I_{CD} * [S * 4M +\ldots]$. As it turns out, this is the Achilles heel of the algorithm. MeerKAT observations contain a very large amount of Visibilities $M$.
 
-\subsection{Cost function of WSCLEAN}
+\subsection{Cost Function of WSCLEAN}
 The WSCLEAN algorithm uses the Major Cycle architecture. It uses the non-uniform FFT with $w$-stacking. The runtime costs of a single Major Cycle depends on the non-uniform FFT with $w$-stacking and the number of CLEAN deconvolutions. $N$ denotes the number of pixels.
 
 \begin{alignat*}{1}
@@ -77,7 +77,7 @@ The issue with Coordinate Descent's runtime complexity lies in the term $I_{CD} 
 Indeed, the runtime of our Coordinate Descent algorithm could be improved by using the non-uniform FFT, essentially replacing $M$ with $N$ and we arrive at the term $I_{CD} * [S * 4N +\ldots]$. In this case Coordinate Descent can afford more iterations and more non-zero components for the same runtime costs. Furthermore $N$ lies on a uniformly sampled grid. We may be able to use the non-uniform FFT instead of caching columns of $F$, and reduce the memory requirement at the same time.
 
 
-\subsection{Approximations as key for going large scale}
+\subsection{Approximations as Key for going Large Scale}
 We set out to reduce the runtime costs of compressed Sensing reconstructions by replacing the non-uniform FFT approximation. Ironically we ended up with an algorithm which not only has higher runtime costs, but the costs may even be reduced by moving back to the non-uniform FFT.In its current form the direct Fourier Transform is not feasible for large scale MeerKAT reconstructions.
 
 The direct Fourier Transform does not use any approximations. It calculates the transform up to the limit of floating-point accuracy. The non-uniform FFT on the other hand approximates the transform up to the accuracy limit of the measurements\cite{pratley2017robust}. We do not need a more accuracy for image reconstruction. The direct Fourier Transform wastes computing resources on accuracy, which does not improve the reconstruction quality. The runtime costs of direct Fourier Transform can be improved by re-introducing approximations. For a start, each entry does not need the full floating-point precision. This change alone potentially reduces both memory requirement and runtime costs. 

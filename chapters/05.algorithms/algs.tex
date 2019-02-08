@@ -124,7 +124,7 @@ This is how we  leverage the starlet transform for our Coordinate Descent algori
 In this work, we do not use the wavelet shown in image \ref{cd:starlets:wavelet}. Instead, we modified the starlet to an extend where it arguably is not a wavelet any more. Still, the starlet transform with the correct wavelet as a heuristic, but reconstructed the image with a modified starlet to satisfy the non-negativity constraint. 
 
 
-\subsubsection{Non-negative Starlet Modification}\label{cd:starlets:modification}
+\subsubsection{Non-negative Starlet modification}\label{cd:starlets:modification}
 Reconstruction algorithms for Radio Astronomy typically constrain the image to be non-negative\cite{mcewen2011compressed}. We can constrain the starlet components $\alpha_i$ to be non-negative, but the starlet wavelet has negative sections. Which leads to negative areas in the layers $w_0$, and negative pixel values in the reconstructed image $x$.
 
 The simple fix is to either set all negative pixels of $x$ to zero, or to set negative values of $w_i$ to zero. Both lead to slightly different artefacts in the $x$, and both do not lead to significantly better results.
