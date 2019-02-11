@@ -36,7 +36,7 @@ State-of-the-art reconstructions deal with the large $F$ by using the non-unifor
 In Radio Astronomy, state-of-the-art reconstruction algorithms use the non-uniform FFT to approximate the Fourier Transform. They use the approximation to continually cycle between Visibility and image space during reconstruction. CLEAN calls this the Major Cycle, which is used for virtually every CLEAN reconstruction of Radio Interferometers. 
 
 \begin{equation}\label{intro:clean}
-\underset{x}{minimize} \: \left \|  I_{Dirty} - x \star PSF \right \|_2^2 + \lambda \left \| x \right \|_1 \quad, \quad I_{Dirty} = \hat{F}^{-1} V
+\underset{x}{minimize} \: \left \|  I_{Dirty} - x \star PSF \right \|_2^2 + \lambda \left \| x \right \|_1 \quad, \quad I_{Dirty} = \tilde{F}^{-1} V
 \end{equation}
 
 %The CLEAN algorithm can work outside the Major Cycle and the non-uniform FFT. But for the large Fourier Matrix $F$ of interferometers, the non-uniform FFT generally leads to lower runtime costs.
