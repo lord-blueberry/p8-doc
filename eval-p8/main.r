@@ -290,7 +290,7 @@ png("./mixed/mixed_cut_tclean2.png",
     width = 5.0,
     height = 5.0,
     units = "in",
-    res = 400)
+    res = 401)
 colorbreaks <- seq(min(cut.tclean), max(cut.tclean), length.out=200)
 print(WriteMap2(cut.tclean, at=colorbreaks, scales, xunits="arc minutes"))
 dev.off()
