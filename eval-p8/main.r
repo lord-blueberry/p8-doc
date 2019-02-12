@@ -286,6 +286,24 @@ cut.model_copy[cut.model_copy > 0.7] = 0.7
 colorbreaks <- seq(min(cut.model_copy), max(cut.model_copy), length.out=200)
 print(WriteMap2(cut.model_copy, at=colorbreaks, scales, xunits="arc minutes"))
 dev.off()
+png("./mixed/mixed_cut_tclean2.png",
+    width = 5.0,
+    height = 5.0,
+    units = "in",
+    res = 400)
+colorbreaks <- seq(min(cut.tclean), max(cut.tclean), length.out=200)
+print(WriteMap2(cut.tclean, at=colorbreaks, scales, xunits="arc minutes"))
+dev.off()
+png("./mixed/mixed_cut_cd2.png",
+    width = 5.0,
+    height = 5.0,
+    units = "in",
+    res = 400)
+cut.cd_copy <- cut.cd
+cut.cd_copy[cut.cd_copy > 0.7] = 0.7
+colorbreaks <- seq(min(cut.cd_copy), max(cut.cd_copy), length.out=200)
+print(WriteMap2(cut.cd_copy, at=colorbreaks, scales, xunits="arc minutes"))
+dev.off()
 
 
 
